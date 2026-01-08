@@ -12,9 +12,14 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.openqa.selenium.WebDriver;
 
+import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.MesesFormatados;
-import interacao_pagina_web.AcoesGeraisPaginaWeb;
+import dadosGerais.ParametrosArquivoCenso;
+import interacao_externa.AcoesArquivoExcel;
+import interacao_externa.AcoesGeraisPaginaWeb;
 import modelosDados.EntidadeLeito;
+import tratamentoDeArquivos.Arquivo;
+import tratamentoDeArquivos.Pasta;
 
 /*
  * Nota: o censo dos leitos são monitorados 3 vezes ao dia, sendo que apenas o censo executado às 10:00 da manhã necessita da execução de consolidação dos leitos, arquivo 0 (zero).
@@ -44,6 +49,10 @@ public class CensoLeitos {
 	private String PastaPrintFormatada;
 	private int mesCompetencia;
 	private int anoCompetencia;
+	private String pastaDestinoArquivos;
+	private String pastaDownloads;
+	private int execucaoCompleta;
+	private MesesFormatados meses;	
 
 	public String executarCenso(WebDriver driver)
 	{	
@@ -61,11 +70,12 @@ public class CensoLeitos {
 		anoCompetencia = data.getYear();
 		
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
-		MesesFormatados meses = new MesesFormatados();
+		meses = new MesesFormatados();
 		
-		String pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados do censo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
-		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
-		int execucaoCompleta = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina completa com a execução da macro.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados do censo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
+		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
+		execucaoCompleta = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina completa com a execução da macro.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		System.out.println(execucaoCompleta);
 		
 		if(execucaoCompleta == 0)
 		{
@@ -82,9 +92,17 @@ public class CensoLeitos {
 		
 		//definindo entidades para o censo de leitos
 		ArrayList<EntidadeLeito> entidades = lerEntidades(pastaDestinoArquivos + "\\entidades.csv");
+				
+		System.out.println(IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
+		System.out.println(IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador());
 		
+		paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
 		
-		paginaWeb.clicarMenuUL(driver, "site", "example", opcoes);
+		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+		baixarArquivosCenso(driver, paginaWeb, entidades);
+		
+		buscarMotivoBloqueio(driver, paginaWeb, entidades);
 		
 		return "";	
 	}
@@ -94,7 +112,7 @@ public class CensoLeitos {
 		ArrayList<EntidadeLeito> entidades = new ArrayList();
 		
         try (Reader reader = new FileReader(nomeArquivo);
-             CSVParser csvParser = new CSVParser(reader, CSVFormat.Builder.create(CSVFormat.DEFAULT).setHeader().setSkipHeaderRecord(true).build())) {
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").setHeader().setSkipHeaderRecord(true).build())) {
 
             // Itera sobre cada linha do arquivo CSV
             for (CSVRecord registro : csvParser) {
@@ -111,6 +129,91 @@ public class CensoLeitos {
             e.printStackTrace();
             return null;
         }
+	}
+	
+	private String baixarArquivosCenso(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, ArrayList<EntidadeLeito> entidades) 
+	{
+		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
+		String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
+		
+		for(EntidadeLeito entidade : entidades)
+		{
+			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador(), entidade.getNomeSIRESP());
+			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_LEITOS_BOTAO_DOWNLOAD.getTextoIdentificador());
+			
+			String arquivoMaisRecente;
+			
+			do
+			{
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+				
+				System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
+			}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith("xls"));
+			
+			Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
+			arquivo.renomear(entidade.getNomePasta() + " " + arquivoMaisRecente);
+			
+			ultimoRecente = arquivo.getNomeDoArquivo();
+			
+			entidade.setArquivoBaixado(arquivo.getCaminhoCompleto());
+		}
+		
+		return "";
+	}
+	
+	private String buscarMotivoBloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, ArrayList<EntidadeLeito> entidades) 
+	{
+		
+		for(EntidadeLeito entidade : entidades)
+		{
+			AcoesArquivoExcel arquivoExcelEntidade = new AcoesArquivoExcel(entidade.getArquivoBaixado());
+			
+			if(arquivoExcelEntidade.isAberto())
+			{
+				for(int contLinha = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO.getIndice(); contLinha < arquivoExcelEntidade.getPrimeiraLinhaVazia(); contLinha++)
+				{
+					if(arquivoExcelEntidade.getValorDaCeula(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_BLOQUEADO.getIndice()).equals(ParametrosArquivoCenso.TEXTO_CONFIRMA_BLOQUEIO.getDescricao()))
+					{
+						//preenchendo os filtros para buscar o motivo do bloqueio
+						String especialidade = arquivoExcelEntidade.getValorDaCeula(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_ESPECIALIDADE.getIndice());
+						String descricaoLeito = arquivoExcelEntidade.getValorDaCeula(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_DESCRICAO_LEITO.getIndice());
+						String descricaoEnfermaria = arquivoExcelEntidade.getValorDaCeula(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_DESCRICAO_ENFERMARIA.getIndice());
+						String status = arquivoExcelEntidade.getValorDaCeula(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_STATUS.getIndice());
+						String sexo = arquivoExcelEntidade.getValorDaCeula(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_SEXO.getIndice());
+						
+						paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_ESPECIALIDADE.getTextoIdentificador(), especialidade);
+						paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_STATUS.getTextoIdentificador(), status);
+						paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_SEXO.getTextoIdentificador(), sexo);
+						
+						paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_DESCRICAO.getTextoIdentificador(), "");
+						paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_DESCRICAO.getTextoIdentificador(), descricaoLeito);
+						
+						paginaWeb.clicarBotaoSubmit(driver, especialidade);
+						
+						//é necessário verificar a tabela resultante, visto que o mesmo leito pode aparecer mais de uma vez, diferenciando-os pela coluna enfermaria
+						
+						ArrayList<ArrayList<String>> tabelaCenso = paginaWeb.obterTable(driver, IdentificadoresPaginaWebSIRESP.ID_TABELA_CENSO.getTextoIdentificador());
+						
+						for(ArrayList<String> linha : tabelaCenso)
+						{
+							if(linha.get(IdentificadoresPaginaWebSIRESP.NUM_COLUNA_TABELA_CENSO_DESCRICAO_ENFERMARIA.getIndice()).equals(descricaoEnfermaria))
+							{
+								//clicar no botão de bloqueio
+							}
+						}
+						
+					}
+				}
+			}
+		}
+		
+		return "";
 	}
 	
 }

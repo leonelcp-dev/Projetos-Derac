@@ -5,7 +5,7 @@ import org.openqa.selenium.bidi.network.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import interacao_pagina_web.AcoesGeraisPaginaWeb;
+import interacao_externa.AcoesGeraisPaginaWeb;
 import modulos.CensoLeitos;
 
 /**
