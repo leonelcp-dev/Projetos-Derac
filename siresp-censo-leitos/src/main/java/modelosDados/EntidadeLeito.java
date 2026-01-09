@@ -4,7 +4,8 @@ public class EntidadeLeito {
 
 	private String nomePasta;
 	private String nomeSIRESP;
-	private String arquivoBaixado;
+	private String arquivoBaixadoXLS;
+	private String arquivoBaixadoXLSX;
 	
 	public EntidadeLeito(String nomePasta, String nomeSIRESP) {
 		this.nomePasta = nomePasta;
@@ -24,12 +25,20 @@ public class EntidadeLeito {
 		this.nomeSIRESP = nomeSIRESP;
 	}
 
-	public String getArquivoBaixado() {
-		return arquivoBaixado;
+	public String getArquivoBaixadoXLS() {
+		return arquivoBaixadoXLS;
 	}
 
-	public void setArquivoBaixado(String arquivoBaixado) {
-		this.arquivoBaixado = arquivoBaixado;
+	public void setArquivoBaixadoXLS(String arquivoBaixado) {
+		this.arquivoBaixadoXLS = arquivoBaixado;
+	}
+
+	public String getArquivoBaixadoXLSX() {
+		return arquivoBaixadoXLSX;
+	}
+
+	public void setArquivoBaixadoXLSX(String arquivoBaixadoXLSX) {
+		this.arquivoBaixadoXLSX = arquivoBaixadoXLSX;
 	}
 	
 }

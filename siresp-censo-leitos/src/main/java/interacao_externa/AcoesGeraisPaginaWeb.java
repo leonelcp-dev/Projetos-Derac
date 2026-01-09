@@ -65,6 +65,42 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public String obterValorSelecionadoDoSelect(WebDriver driverPagina, String id)
+	{
+		String valor;
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.id(id));
+	
+			Select select = new Select(item);
+			valor = select.getFirstSelectedOption().getText();
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return "";
+		}
+				
+		return valor;
+	}
+	
+	public boolean limparInputText(WebDriver driverPagina, String id)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.id(id));
+	
+			item.clear();
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 	public boolean preencherInputText(WebDriver driverPagina, String id, String texto)
 	{
 
@@ -82,11 +118,31 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
-	public boolean clicarBotaoSubmit(WebDriver driverPagina, String id)
+	public String obterTextoInputText(WebDriver driverPagina, String id)
 	{
+		String valor;
 		try
 		{		
-			WebElement botao = driverPagina.findElement(By.name(id));
+			WebElement item = driverPagina.findElement(By.id(id));
+	
+			valor = item.getAttribute("value");
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return "";
+		}
+				
+		return valor;
+	}
+	public boolean clicarBotaoSubmit(WebDriver driverPagina, String id, String idOrName)
+	{
+		try
+		{	
+			WebElement botao = null;
+			if(idOrName.equals("name"))
+				botao = driverPagina.findElement(By.name(id));
+			else if(idOrName.equals("id"))
+				botao = driverPagina.findElement(By.id(id));
 	
 			botao.click();
 			
@@ -124,12 +180,29 @@ public class AcoesGeraisPaginaWeb {
             }
 
 			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			System.out.println("Chegou aqui");
+			return null;
+		}
+		
+		return tabela;
+	}
+	
+	public List<WebElement> obterSubmits(WebDriver driverPagina, String className)
+	{
+		List<WebElement> submits;
+		
+		try
+		{		
+			submits = driverPagina.findElements(By.className(className));
+
 		}catch(Error e) {
 			System.out.println(e.toString());
 			return null;
 		}
 		
-		return tabela;
+		return submits;
 	}
 	
 }
