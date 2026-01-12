@@ -332,4 +332,90 @@ public class AcoesArquivoExcel {
 		
 		return celula.getStringCellValue();
 	}
+	
+
+	public void copiarFormatoEntreLinhas(int indiceLinhaOrigem, int indiceLinhaDestino) 
+	{
+       try 
+       {
+            // Linha origem (com formatação)
+            Row linhaOrigem = planilhaAtiva.getRow(indiceLinhaOrigem); // Ex.: linha 2 (índice 1)
+            // Linha destino (onde aplicar formatação)
+            Row linhaDestino = planilhaAtiva.getRow(indiceLinhaDestino); // Ex.: linha 6 (índice 5)
+            if (linhaDestino == null) {
+                linhaDestino = planilhaAtiva.createRow(indiceLinhaDestino);
+            }
+
+            for (int i = 0; i < linhaOrigem.getLastCellNum(); i++) {
+                Cell celOrigem = linhaOrigem.getCell(i);
+                if (celOrigem == null) continue;
+
+                // Cria célula destino
+                Cell celDestino = linhaDestino.getCell(i);
+                if (celDestino == null) {
+                    celDestino = linhaDestino.createCell(i);
+                }
+
+                // Copia estilo
+                CellStyle estiloOrigem = celOrigem.getCellStyle();
+                CellStyle novoEstilo = arquivoXLSX.createCellStyle();
+                novoEstilo.cloneStyleFrom(estiloOrigem);
+                celDestino.setCellStyle(novoEstilo);
+
+                // Opcional: copiar valor também
+                // celDestino.setCellValue(celOrigem.toString());
+            }
+
+            // Salvar arquivo
+            try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+                arquivoXLSX.write(fos);
+            }
+
+            System.out.println("Formatação copiada com sucesso!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+	
+
+	public void copiarFormulasDaLinhaAnterior(int linhaComFormula, ArrayList<Integer> colunas){
+
+        try  
+        {
+            Row linhaOrigem = planilhaAtiva.getRow(linhaComFormula);
+            Row linhaDestino = planilhaAtiva.getRow(linhaComFormula + 1);
+            
+            for(int coluna : colunas)
+            {
+            	Cell celulaOrigem = linhaOrigem.getCell(coluna);
+
+	            if (linhaDestino == null) linhaDestino = planilhaAtiva.createRow(linhaComFormula + 1);
+	            
+	            Cell celulaDestino = linhaDestino.getCell(coluna);
+	            if (celulaDestino == null) celulaDestino = linhaDestino.createCell(coluna);
+	
+	            if (celulaOrigem != null && celulaOrigem.getCellType() == CellType.FORMULA) {
+	                // Copia a fórmula textual
+	                celulaDestino.setCellFormula(celulaOrigem.getCellFormula());
+	            } 
+	            
+	            // (Opcional) Copiar estilo da célula
+	            CellStyle style = arquivoXLSX.createCellStyle();
+	            style.cloneStyleFrom(celulaOrigem.getCellStyle());
+	            celulaDestino.setCellStyle(style);
+	
+	            // (Opcional) Avaliar fórmulas
+	            FormulaEvaluator evaluator = arquivoXLSX.getCreationHelper().createFormulaEvaluator();
+	            evaluator.evaluateFormulaCell(celulaDestino);
+	
+	            try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+	                arquivoXLSX.write(fos);
+	            }
+            }
+        }catch(IOException e)
+        {
+        	e.printStackTrace();
+        }
+
+	}
 }

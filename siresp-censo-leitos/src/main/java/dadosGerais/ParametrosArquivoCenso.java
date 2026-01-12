@@ -29,7 +29,10 @@ public enum ParametrosArquivoCenso {
 	INDICE_COLUNA_CONCATENA_2(24, "Concatena 2"),
 	INDICE_COLUNA_TIPO_DE_LEITO_2(25, "Tipo de Leito 2"),
 	TEXTO_CONFIRMA_BLOQUEIO(-1, "SIM"),
-	LINHA_INICIAL_ARQUIVO(8,"Ajustado de acordo com o Java, no arquivo é a linha 9");
+	LINHA_INICIAL_ARQUIVO_SIRESP(12,"Ajustado de acordo com o Java, no arquivo é a linha 9"),
+	LINHA_INICIAL_ARQUIVO_CENSO(1, "Ajustado de acordo com o Java, no arquivo é a linha 2"),
+	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO(14, "Ajustado de acordo com o Java, no arquivo é a coluna 15"),
+	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO(0, "Ajustado de acordo com o Java, no arquivo é a linha 1");
 
 	private int indice;
 	private String descricao;

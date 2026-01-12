@@ -56,4 +56,18 @@ public class Pasta {
 		return arquivo;
 	}
 	
+	public ArrayList<String> listaArquivos(String extensao)
+	{
+		File[] arquivos = pasta.listFiles();
+		ArrayList<String> listaArquivos = new ArrayList();
+		
+		for(File arquivo : arquivos)
+		{
+			if(arquivo.getName().endsWith(extensao))
+				listaArquivos.add(arquivo.getName());
+		}
+		
+		return listaArquivos;
+	}
+	
 }
