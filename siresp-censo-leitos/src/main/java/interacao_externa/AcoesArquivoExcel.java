@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
@@ -306,6 +307,13 @@ public class AcoesArquivoExcel {
 		
 		primeiraLinhaVazia = planilhaAtiva.getLastRowNum();
 	}
+	
+	public void abrirPlanilha(String nome)
+	{
+		planilhaAtiva = arquivoXLSX.getSheet(nome);
+		
+		primeiraLinhaVazia = planilhaAtiva.getLastRowNum();
+	}
 
 	public String getNomeDoAquivo() {
 		return nomeDoAquivo;
@@ -323,7 +331,7 @@ public class AcoesArquivoExcel {
 		this.primeiraLinhaVazia = primeiraLinhaVazia;
 	}
 	
-	public String getValorDaCeula(int Linha, int Coluna)
+	public String getValorDaCelulaString(int Linha, int Coluna)
 	{
 		Row linha = planilhaAtiva.getRow(Linha);
 		Cell celula = linha.getCell(Coluna);
@@ -331,6 +339,26 @@ public class AcoesArquivoExcel {
 			return "";
 		
 		return celula.getStringCellValue();
+	}
+	
+	public int getValorDaCelulaInt(int Linha, int Coluna)
+	{
+		Row linha = planilhaAtiva.getRow(Linha);
+		Cell celula = linha.getCell(Coluna);
+		if(celula == null)
+			return -1;
+		
+		return (int)celula.getNumericCellValue();
+	}
+	
+	public LocalDate getValorDaCelulaDate(int Linha, int Coluna)
+	{
+		Row linha = planilhaAtiva.getRow(Linha);
+		Cell celula = linha.getCell(Coluna);
+		if(celula == null || celula.getLocalDateTimeCellValue() == null)
+			return null;
+		
+		return celula.getLocalDateTimeCellValue().toLocalDate();
 	}
 	
 
@@ -418,4 +446,6 @@ public class AcoesArquivoExcel {
         }
 
 	}
+	
+	
 }
