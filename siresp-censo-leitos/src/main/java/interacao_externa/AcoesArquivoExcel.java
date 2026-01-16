@@ -16,7 +16,13 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+
+import javax.swing.text.DateFormatter;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.*;
@@ -262,8 +268,32 @@ public class AcoesArquivoExcel {
         		setCellValue(wb.getSheetAt(planilha), celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
 
             // 4) Salvar (sobrescrevendo o mesmo arquivo)
-            try (FileOutputStream fos = new FileOutputStream(caminho.toFile())) {
+            try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
                 wb.write(fos);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+	
+	public void gravarDadosEmCelula(String nomePlanilha, ArrayList<CelulaExcel> celulas) 
+	{
+        Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+
+        // Abrir, alterar e salvar (try-with-resources fecha tudo corretamente)
+        try {
+
+        	for(CelulaExcel celula : celulas)
+        	{
+        		System.out.println("Nome da planilha: " + nomePlanilha + ", Linha: " + celula.getLinha() + ", Coluna: " + celula.getColuna() + ", Valor: " + celula.getValor());
+        		setCellValue(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
+                setFormat(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor(), celula.getTipo());
+        	}
+
+            // 4) Salvar (sobrescrevendo o mesmo arquivo)
+            try (FileOutputStream fos = new FileOutputStream(caminho.toFile())) {
+                arquivoXLSX.write(fos);
             }
 
         } catch (IOException e) {
@@ -287,11 +317,36 @@ public class AcoesArquivoExcel {
             cell.setBlank();
             return;
         }
+        
         if (value instanceof String s) cell.setCellValue(s);
         else if (value instanceof Number n) cell.setCellValue(n.doubleValue());
         else if (value instanceof Boolean b) cell.setCellValue(b);
-        else if (value instanceof java.util.Date d) cell.setCellValue(d);
+        else if (value instanceof LocalDate d) cell.setCellValue(d);
+        else if (value instanceof LocalDateTime d) cell.setCellValue(d);
         else cell.setCellValue(String.valueOf(value)); // fallback como texto
+    }
+    
+    private void setFormat(Sheet sheet, int rowIdx, int colIdx, Object value, String tipo) {
+        Cell cell = ensureCell(sheet, rowIdx, colIdx);
+        if (value == null) {
+            cell.setBlank();
+            return;
+        }
+        
+        if (tipo.equals("Date"))
+        {
+        	DataFormat df = arquivoXLSX.createDataFormat();
+			CellStyle dateStyle = cell.getCellStyle();
+			dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
+			cell.setCellStyle(dateStyle);
+        }
+        else if(tipo.equals("String"))
+        {
+
+			CellStyle general = cell.getCellStyle();
+			general.setDataFormat((short) 0); // General
+			cell.setCellStyle(general);
+        }
     }
 
     private static void autoSizeAllColumns(Sheet sheet) {
@@ -331,6 +386,25 @@ public class AcoesArquivoExcel {
 		this.primeiraLinhaVazia = primeiraLinhaVazia;
 	}
 	
+
+	public boolean ehCelulaVazia(int Linha, int Coluna) {
+		Row linha = planilhaAtiva.getRow(Linha);
+		Cell celula = linha.getCell(Coluna);
+		
+	    if (celula == null) return true;
+	
+	    if (celula.getCellType() == CellType.BLANK) {
+	        return true;
+	    }
+	
+	    if (celula.getCellType() == CellType.STRING) {
+	        return celula.getStringCellValue().trim().isEmpty();
+	    }
+	
+	    return false;
+	}
+
+	
 	public String getValorDaCelulaString(int Linha, int Coluna)
 	{
 		Row linha = planilhaAtiva.getRow(Linha);
@@ -355,10 +429,23 @@ public class AcoesArquivoExcel {
 	{
 		Row linha = planilhaAtiva.getRow(Linha);
 		Cell celula = linha.getCell(Coluna);
-		if(celula == null || celula.getLocalDateTimeCellValue() == null)
-			return null;
+		LocalDate data = null;
+				
+		try
+		{
 		
-		return celula.getLocalDateTimeCellValue().toLocalDate();
+			if(celula == null || celula.getLocalDateTimeCellValue() == null)
+				return null;
+
+			data = celula.getLocalDateTimeCellValue().toLocalDate();
+		}catch(Exception e)
+		{
+			String textoCelula = celula.getStringCellValue();
+			System.out.println(textoCelula);
+			data = LocalDate.parse(textoCelula.substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		}
+		
+		return data;
 	}
 	
 
@@ -373,6 +460,8 @@ public class AcoesArquivoExcel {
             if (linhaDestino == null) {
                 linhaDestino = planilhaAtiva.createRow(indiceLinhaDestino);
             }
+            
+            linhaDestino.setHeightInPoints(19.5f);
 
             for (int i = 0; i < linhaOrigem.getLastCellNum(); i++) {
                 Cell celOrigem = linhaOrigem.getCell(i);
@@ -399,7 +488,7 @@ public class AcoesArquivoExcel {
                 arquivoXLSX.write(fos);
             }
 
-            System.out.println("Formatação copiada com sucesso!");
+            //System.out.println("Formatação copiada com sucesso!");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -413,6 +502,8 @@ public class AcoesArquivoExcel {
             Row linhaOrigem = planilhaAtiva.getRow(linhaComFormula);
             Row linhaDestino = planilhaAtiva.getRow(linhaComFormula + 1);
             
+            arquivoXLSX.setForceFormulaRecalculation(true);
+            
             for(int coluna : colunas)
             {
             	Cell celulaOrigem = linhaOrigem.getCell(coluna);
@@ -424,7 +515,7 @@ public class AcoesArquivoExcel {
 	
 	            if (celulaOrigem != null && celulaOrigem.getCellType() == CellType.FORMULA) {
 	                // Copia a fórmula textual
-	                celulaDestino.setCellFormula(celulaOrigem.getCellFormula());
+	                celulaDestino.setCellFormula(celulaOrigem.getCellFormula().replaceAll("([A-Z]+)(" + (linhaComFormula + 1) + ")", "$1" + (linhaComFormula + 2)));
 	            } 
 	            
 	            // (Opcional) Copiar estilo da célula
@@ -446,6 +537,39 @@ public class AcoesArquivoExcel {
         }
 
 	}
+	
+	public boolean ehCelulaComString(int linha, int coluna)
+	{
+		Cell cell = ensureCell(planilhaAtiva, linha, coluna);
+        
+		
+		if (cell != null && cell.getCellType() == CellType.STRING) {
+		    return true;
+		}
+
+		return false;
+	}
+	
+/*
+ * public void copiarFormulasDaLinhaAnterior(int linhaComFormula,
+ * ArrayList<Integer> colunas){
+ * 
+ * 
+ * CellCopyPolicy policy = new CellCopyPolicy.Builder() .cellFormula(true) //
+ * copia fórmula .cellStyle(true) // copia estilo .cellValue(true) // copia
+ * valor se não for fórmula .condenseRows(false) .mergeHyperlink(true) .build();
+ * 
+ * 
+ * try { Row linhaOrigem = planilhaAtiva.getRow(linhaComFormula); Row
+ * linhaDestino = planilhaAtiva.getRow(linhaComFormula + 1);
+ * 
+ * for(int coluna : colunas) { linhaDestino.getCell(coluna)
+ * 
+ * try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+ * arquivoXLSX.write(fos); } } }catch(IOException e) { e.printStackTrace(); }
+ * 
+ * }
+ */
 	
 	
 }

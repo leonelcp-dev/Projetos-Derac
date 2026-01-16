@@ -34,12 +34,12 @@ public enum ParametrosArquivoCenso {
 	INDICE_COLUNA_CONCATENA_2(24, 24, "Concatena 2", "Formula", ""),
 	INDICE_COLUNA_TIPO_DE_LEITO_2(25, 25, "Tipo de Leito 2", "Formula", ""),
 	TEXTO_CONFIRMA_BLOQUEIO(26, -1, "SIM", "", ""),
-	LINHA_INICIAL_ARQUIVO_SIRESP(27, 12,"Ajustado de acordo com o Java, no arquivo é a linha 9", "", ""),
+	LINHA_INICIAL_ARQUIVO_SIRESP(27, 8,"Ajustado de acordo com o Java, no arquivo é a linha 9", "", ""),
 	LINHA_INICIAL_ARQUIVO_CENSO(28, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
-	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO(29, 14, "Ajustado de acordo com o Java, no arquivo é a coluna 15", "", ""),
-	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO(30, 0, "Ajustado de acordo com o Java, no arquivo é a linha 1", "", ""),
-	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(31, 8, "Ajustado de acordo com o Java, no arquivo é a coluna 7", "", ""),
-	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(32, 1, "Ajustado de acordo com o Java, no arquivo é a linha 0", "", ""),
+//	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO(29, 14, "Ajustado de acordo com o Java, no arquivo é a coluna 15", "", ""),
+//	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO(30, 0, "Ajustado de acordo com o Java, no arquivo é a linha 1", "", ""),
+	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(31, 8, "Ajustado de acordo com o Java, no arquivo é a coluna 9", "", ""),
+	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(32, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
 	NOME_PLANILHA_CENSO(33, 0, "CENSOS", "", "");
 
 	private int idUnico;

@@ -25,6 +25,7 @@ import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoCenso;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
+import interacao_externa.ConversaoHMTL_XLSX;
 import modelosDados.CelulaExcel;
 import modelosDados.EntidadeLeito;
 import modelosDados.LinhaCensoLeitos;
@@ -122,7 +123,8 @@ public class CensoLeitos {
 		
 		transferirArquivos(entidades);
 		
-		consolidarArquivoZero(entidades);
+		if(rotinaCompleta.equals("Sim"))
+			consolidarArquivoZero(entidades);
 		
 		return "";	
 	}
@@ -196,9 +198,22 @@ public class CensoLeitos {
 		
 		for(EntidadeLeito entidade : entidades)
 		{
-			AcoesArquivoExcel arquivoExcelEntidade = new AcoesArquivoExcel(entidade.getCaminhoCompletoArquivoBaixadoXLS());
-			arquivoExcelEntidade.converterXLS_to_XLSX(entidade.getCaminhoCompletoArquivoBaixadoXLSX());
-			arquivoExcelEntidade.fecharArquivo();
+			AcoesArquivoExcel arquivoExcelEntidade;
+			
+			//AcoesArquivoExcel arquivoExcelEntidade = new AcoesArquivoExcel(entidade.getCaminhoCompletoArquivoBaixadoXLS());
+			//arquivoExcelEntidade.converterXLS_to_XLSX(entidade.getCaminhoCompletoArquivoBaixadoXLSX());
+			//arquivoExcelEntidade.fecharArquivo();
+			
+			ConversaoHMTL_XLSX conversor = new ConversaoHMTL_XLSX();
+			
+			try
+			{
+				conversor.converterArquivo(entidade.getCaminhoCompletoArquivoBaixadoXLS(), entidade.getCaminhoCompletoArquivoBaixadoXLSX());
+			}catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			
 			
 			arquivoExcelEntidade = new AcoesArquivoExcel(entidade.getCaminhoCompletoArquivoBaixadoXLSX());
 			
@@ -343,8 +358,8 @@ public class CensoLeitos {
 							motivoDoBloqueio = "O";
 						}
 						
-						celulas.add(new CelulaExcel(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_MOTIVO_DO_BLOQUEIO.getIndice(), motivoDoBloqueio));
-						celulas.add(new CelulaExcel(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_JUSTIFICATIVA_DO_BLOQUEIO.getIndice(), justificativaDoBloqueio));
+						celulas.add(new CelulaExcel(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_MOTIVO_DO_BLOQUEIO.getIndice(), motivoDoBloqueio, "String"));
+						celulas.add(new CelulaExcel(contLinha, ParametrosArquivoCenso.INDICE_COLUNA_JUSTIFICATIVA_DO_BLOQUEIO.getIndice(), justificativaDoBloqueio, "String"));
 					}
 
 				}
@@ -424,6 +439,7 @@ public class CensoLeitos {
 		
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaEntidade + "\\" + arquivoZero);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoCenso.NOME_PLANILHA_CENSO.getDescricao());
+		
 		ArrayList<LocalDate> datasProcessadas = new ArrayList();
 		
 		int primeiraLinhaVaziaArquivoCenso = arquivoConsolidado.getPrimeiraLinhaVazia();
@@ -434,8 +450,11 @@ public class CensoLeitos {
 		{
 			LocalDate data = arquivoConsolidado.getValorDaCelulaDate(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_DATA_RELATORIO.getIndice());
 			
-			if(!datasProcessadas.contains(data))
+			if(data != null && !datasProcessadas.contains(data))
+			{
+				System.out.println(data.getDayOfMonth() + "/" + data.getMonthValue() + "/" + data.getYear());
 				datasProcessadas.add(data);
+			}
 		}
 		linhaCenso++;
 		
@@ -452,16 +471,9 @@ public class CensoLeitos {
 				
 				LocalDate dataCensoDiario = null;
 				
-				try 
-				{
-					dataCensoDiario = arquivoDiario.getValorDaCelulaDate(ParametrosArquivoCenso.LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO.getIndice(), ParametrosArquivoCenso.COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO.getIndice());
-				}
-				catch(DateTimeParseException e)
-				{
-					dataCensoDiario = arquivoDiario.getValorDaCelulaDate(ParametrosArquivoCenso.LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO.getIndice(), ParametrosArquivoCenso.COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO.getIndice());
-				}
-				
-				
+				dataCensoDiario = arquivoDiario.getValorDaCelulaDate(ParametrosArquivoCenso.LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO.getIndice(), ParametrosArquivoCenso.COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO.getIndice());
+							
+				System.out.println(dataCensoDiario.getDayOfMonth() + "/" + dataCensoDiario.getMonthValue() + "/" + dataCensoDiario.getYear());
 				
 				if(!datasProcessadas.contains(dataCensoDiario))
 				{
@@ -470,31 +482,54 @@ public class CensoLeitos {
 					
 					System.out.println("Início do preenchimento da linha: " + linhaCenso);
 					//preenchendo a linha do diário
-					for(int linhaDiario = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice(); linhaDiario < primeiraLinhaVaziaArquivoDiario; linhaDiario++)
+					for(int linhaDiario = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice(); linhaDiario < primeiraLinhaVaziaArquivoDiario - 1; linhaDiario++)
 					{
 						//preenchendo até a coluna do motivo do bloqueio
-						
+						//arquivoConsolidado.copiarFormatoEntreLinhas(linhaCenso - 1, linhaCenso);
 						System.out.println("Colunas do arquivo diário");
+						
 						ArrayList<CelulaExcel> celulas = new ArrayList();
 						for(int coluna = 0; coluna <= ParametrosArquivoCenso.INDICE_COLUNA_JUSTIFICATIVA_DO_BLOQUEIO.getIndice(); coluna++)
 						{
-							System.out.println(coluna);
+							System.out.println("Censo: " + linhaCenso + ", Diário: " + linhaDiario + ", Coluna: " + coluna);
+							arquivoConsolidado.copiarFormatoEntreLinhas(linhaCenso - 1, linhaCenso);
 							
-							if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("String"))
-								celulas.add(new CelulaExcel(linhaCenso, coluna, arquivoDiario.getValorDaCelulaString(linhaDiario, coluna)));
-							else if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("Int"))
-								celulas.add(new CelulaExcel(linhaCenso, coluna, Integer.toString(arquivoDiario.getValorDaCelulaInt(linhaDiario, coluna))));
-							else if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("Date"))
-								celulas.add(new CelulaExcel(linhaCenso, coluna, arquivoDiario.getValorDaCelulaDate(linhaDiario, coluna).format(DateTimeFormatter.ofPattern(ParametrosArquivoCenso.poIdUnico(coluna).getFormato()))));
+							if(arquivoDiario.ehCelulaVazia(linhaDiario, coluna))
+							{
+								celulas.add(new CelulaExcel(linhaCenso, coluna, "", "String"));
+							}
+							else
+							{
+															
+								if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("String"))
+								{
+									if(arquivoDiario.ehCelulaComString(linhaCenso, coluna))
+									{
+										if(arquivoDiario.getValorDaCelulaString(linhaDiario, coluna).matches("^\\d+$"))
+											celulas.add(new CelulaExcel(linhaCenso, coluna, Integer.parseInt(arquivoDiario.getValorDaCelulaString(linhaDiario, coluna)), "String"));
+										else
+											celulas.add(new CelulaExcel(linhaCenso, coluna, arquivoDiario.getValorDaCelulaString(linhaDiario, coluna), "String"));
+									}
+									else
+										celulas.add(new CelulaExcel(linhaCenso, coluna, Integer.toString(arquivoDiario.getValorDaCelulaInt(linhaDiario, coluna)), "String"));
+								}
+								else if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("Int"))
+									celulas.add(new CelulaExcel(linhaCenso, coluna, Integer.valueOf(arquivoDiario.getValorDaCelulaInt(linhaDiario, coluna)), "String"));
+								else if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("Date"))
+								{
+									celulas.add(new CelulaExcel(linhaCenso, coluna, arquivoDiario.getValorDaCelulaDate(linhaDiario, coluna), "Date"));
+								}
+						
+							}
 						}
-						
+							
 						System.out.println("Demais colunas sem fórmula");
-						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_MUNICIPIO_DE_ORIGEM_DO_PACIENTE.getIndice(), ""));
-						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_ANALISE_DO_DERAC.getIndice(), ""));
-						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_DATA_RELATORIO.getIndice(), dataCensoDiario.format(formatoDataCenso)));
-						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getNomeSIRESP()));
+						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_MUNICIPIO_DE_ORIGEM_DO_PACIENTE.getIndice(), "", "String"));
+						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_ANALISE_DO_DERAC.getIndice(), "", "String"));
+						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_DATA_RELATORIO.getIndice(), dataCensoDiario, "Date"));
+						celulas.add(new CelulaExcel(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getNomeSIRESP(), "String"));
 						
-						arquivoConsolidado.gravarDadosEmCelula(0, celulas);
+						arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoCenso.NOME_PLANILHA_CENSO.getDescricao(), celulas);
 						
 						System.out.println("Colunas com fórmula");
 						arquivoConsolidado.copiarFormulasDaLinhaAnterior(linhaCenso - 1, colunasComFormulasNoArquivoCenso);

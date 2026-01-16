@@ -104,6 +104,12 @@ public class HtmlToXlsx {
             for (Element table : tables) {
                      
                 referencia = converterTable(wb, doc, sheet, table, referencia.linha, colIndex, itemDeBusca);
+                referencia.linha++;
+                
+                criarNovaLinha(wb, sheet, referencia.linha);
+                referencia.linha++;
+                
+                
                 autoSizeColumnsSafe(sheet);
             }
 
@@ -122,7 +128,10 @@ public class HtmlToXlsx {
 
     // ====== Núcleo: constrói uma sheet a partir de uma <table> ======
 
-    
+    private void criarNovaLinha(XSSFWorkbook wb, XSSFSheet sheet, int numLinha)
+    {
+    	sheet.createRow(numLinha);
+    }
    
     private Referencia buildSheetFromTable(XSSFWorkbook wb, Node node, XSSFSheet sheet, Element table, int rowIndex, int colIndex, String itemDeBusca, boolean criarLinha, int iteracao, int nivel) {
         // Cache de estilos para não criar estilos duplicados (limit ~64k)
@@ -255,7 +264,7 @@ public class HtmlToXlsx {
 				                
 				                
 				               
-				                CellValueType type = detectType(rawText.trim());
+
 				                
 				                
 				                printIteracao(iteracao, "Antes: " + rawText);
@@ -268,7 +277,12 @@ public class HtmlToXlsx {
 				                                
 				                if(!tdComTable)
 				                {
-				                	applyValue(wb, excelCell, rawText, type);
+					                CellValueType type = detectType(rawText.trim());
+					                
+					                if(type == CellValueType.DATE)
+					                	rawText = rawText.replace("-","/");
+					                
+				                	applyValue(wb, excelCell, rawText.trim(), type);
 				                
 				
 					                // Estilo
@@ -598,11 +612,20 @@ public class HtmlToXlsx {
         if (s.matches("^\\d{2}/\\d{2}/\\d{4}$") || s.matches("^\\d{2}-\\d{2}-\\d{4}$")) {
             return CellValueType.DATE;
         }
+        
+     // Data comum BR/ISO
+        if (s.matches("^\\d{2}/\\d{2}/\\d{4}\\s\\d{2}:\\d{2}$") || s.matches("^\\d{2}-\\d{2}-\\d{4}\\s\\d{2}:\\d{2}$")) {
+            return CellValueType.DATE;
+        }
 
         return CellValueType.STRING;
     }
 
     private void applyValue(XSSFWorkbook wb, XSSFCell cell, String raw, CellValueType type) {
+    	
+    	System.out.println("Valor inserido: " + raw);
+    	//cell.setCellValue(raw);
+    	
         switch (type) {
             case NUMBER: {
             	System.out.println("Number: " + raw);
@@ -618,6 +641,7 @@ public class HtmlToXlsx {
                 cell.setCellValue(val);
             }
             case DATE: {
+            	raw = raw.replace('-', '/');
             	
             	System.out.println("Data: " + raw);
             	
