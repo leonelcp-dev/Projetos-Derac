@@ -503,7 +503,7 @@ public class CensoLeitos {
 															
 								if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("String"))
 								{
-									if(arquivoDiario.ehCelulaComString(linhaCenso, coluna))
+									if(arquivoDiario.ehCelulaComString(linhaDiario, coluna))
 									{
 										if(arquivoDiario.getValorDaCelulaString(linhaDiario, coluna).matches("^\\d+$"))
 											celulas.add(new CelulaExcel(linhaCenso, coluna, Integer.parseInt(arquivoDiario.getValorDaCelulaString(linhaDiario, coluna)), "String"));
