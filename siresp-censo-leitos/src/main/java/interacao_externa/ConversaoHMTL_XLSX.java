@@ -101,8 +101,11 @@ public class ConversaoHMTL_XLSX {
                 referencia = converterTable(wb, doc, sheet, table, referencia.linha, colIndex, itemDeBusca);
                 referencia.linha++;
                 
-                criarNovaLinha(wb, sheet, referencia.linha);
-                referencia.linha++;
+                if(!table.equals(tables.get(tables.size()-1)))
+                {
+	                criarNovaLinha(wb, sheet, referencia.linha);
+	                referencia.linha++;
+                }
                 
                 
                 autoSizeColumnsSafe(sheet);

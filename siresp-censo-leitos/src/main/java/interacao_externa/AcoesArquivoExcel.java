@@ -39,8 +39,9 @@ public class AcoesArquivoExcel {
 	private Sheet planilhaAtiva;
 	private int primeiraLinhaVazia;
 	private FileInputStream arquivoLeitura;
+	private ArrayList<CellStyle> estilosDasColunas;
 	
-	public AcoesArquivoExcel(String nomeDoArquivo)
+	public AcoesArquivoExcel(String nomeDoArquivo, int linhaBaseFormatacao)
 	{
 		this.setNomeDoAquivo(nomeDoArquivo);
 		System.out.println(nomeDoArquivo);
@@ -51,13 +52,13 @@ public class AcoesArquivoExcel {
 			{
 				arquivoLeitura = new FileInputStream(nomeDoArquivo);
 	            arquivoXLS = new HSSFWorkbook(arquivoLeitura); 
-	            abrirPlanilha(0);
+	            abrirPlanilha(0, linhaBaseFormatacao);
 			}
 			else
 			{
 				arquivoLeitura = new FileInputStream(nomeDoArquivo);
 	            arquivoXLSX = new XSSFWorkbook(arquivoLeitura); 
-	            abrirPlanilha(0);
+	            abrirPlanilha(0, linhaBaseFormatacao);
 			}
 				
         } catch (Exception e) {
@@ -261,15 +262,14 @@ public class AcoesArquivoExcel {
         Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
 
         // Abrir, alterar e salvar (try-with-resources fecha tudo corretamente)
-        try (FileInputStream fis = new FileInputStream(caminho.toFile());
-             Workbook wb = new XSSFWorkbook(fis)) {
+        try {
 
         	for(CelulaExcel celula : celulas)
-        		setCellValue(wb.getSheetAt(planilha), celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
+        		setCellValue(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
 
             // 4) Salvar (sobrescrevendo o mesmo arquivo)
             try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
-                wb.write(fos);
+            	arquivoXLSX.write(fos);
             }
 
         } catch (IOException e) {
@@ -277,18 +277,28 @@ public class AcoesArquivoExcel {
         }
     }
 	
-	public void gravarDadosEmCelula(String nomePlanilha, ArrayList<CelulaExcel> celulas) 
+	public void gravarDadosEmCelula(String nomePlanilha, ArrayList<CelulaExcel> celulas, boolean copiarFormato, boolean copiarFormulas, int linhaInicial, ArrayList<Integer> celulasComFormulas) 
 	{
         Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
 
+        int linhaCelulaAnterior = linhaInicial;
+        
         // Abrir, alterar e salvar (try-with-resources fecha tudo corretamente)
         try {
 
         	for(CelulaExcel celula : celulas)
         	{
-        		System.out.println("Nome da planilha: " + nomePlanilha + ", Linha: " + celula.getLinha() + ", Coluna: " + celula.getColuna() + ", Valor: " + celula.getValor());
+        		if(linhaCelulaAnterior != celula.getLinha())
+        		{
+        			copiarFormato(linhaInicial, celula.getLinha());
+        			copiarFormulas(linhaInicial, celula.getLinha(), celulasComFormulas);
+        		}
+        		
+        		//System.out.println("Nome da planilha: " + nomePlanilha + ", Linha: " + celula.getLinha() + ", Coluna: " + celula.getColuna() + ", Valor: " + celula.getValor());
         		setCellValue(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
                 setFormat(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor(), celula.getTipo());
+                
+                linhaCelulaAnterior = celula.getLinha();
         	}
 
             // 4) Salvar (sobrescrevendo o mesmo arquivo)
@@ -356,14 +366,14 @@ public class AcoesArquivoExcel {
     }
 
 	
-	public void abrirPlanilha(int planilha)
+	public void abrirPlanilha(int planilha, int linhaBaseFormatacao)
 	{
 		planilhaAtiva = arquivoXLSX.getSheetAt(planilha);
 		
 		primeiraLinhaVazia = planilhaAtiva.getLastRowNum();
 	}
 	
-	public void abrirPlanilha(String nome)
+	public void abrirPlanilha(String nome, int linhaBaseFormatacao)
 	{
 		planilhaAtiva = arquivoXLSX.getSheet(nome);
 		
@@ -441,7 +451,7 @@ public class AcoesArquivoExcel {
 		}catch(Exception e)
 		{
 			String textoCelula = celula.getStringCellValue();
-			System.out.println(textoCelula);
+			//System.out.println(textoCelula);
 			data = LocalDate.parse(textoCelula.substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		}
 		
@@ -494,7 +504,97 @@ public class AcoesArquivoExcel {
         }
     }
 	
+	public void copiarFormato(int indiceLinhaOrigem, int indiceLinhaDestino) 
+	{
+       try 
+       {
+            // Linha origem (com formatação)
+            Row linhaOrigem = planilhaAtiva.getRow(indiceLinhaOrigem); // Ex.: linha 2 (índice 1)
+            // Linha destino (onde aplicar formatação)
+            Row linhaDestino = planilhaAtiva.getRow(indiceLinhaDestino); // Ex.: linha 6 (índice 5)
+            if (linhaDestino == null) {
+                linhaDestino = planilhaAtiva.createRow(indiceLinhaDestino);
+            }
+            
+            linhaDestino.setHeightInPoints(19.5f);
 
+            for (int i = 0; i < linhaOrigem.getLastCellNum(); i++) {
+                Cell celOrigem = linhaOrigem.getCell(i);
+                if (celOrigem == null) continue;
+
+                // Cria célula destino
+                Cell celDestino = linhaDestino.getCell(i);
+                if (celDestino == null) {
+                    celDestino = linhaDestino.createCell(i);
+                }
+
+                // Copia estilo
+                //CellStyle estiloOrigem = celOrigem.getCellStyle();
+                //CellStyle novoEstilo = arquivoXLSX.createCellStyle();
+               // novoEstilo.cloneStyleFrom(estiloOrigem);
+                celDestino.setCellStyle(celOrigem.getCellStyle());
+
+                // Opcional: copiar valor também
+                // celDestino.setCellValue(celOrigem.toString());
+            }
+
+//            // Salvar arquivo
+//            try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+//                arquivoXLSX.write(fos);
+//            }
+
+            //System.out.println("Formatação copiada com sucesso!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+	
+
+	public void copiarFormulas(int linhaComFormula, int linhaOndeAplicarAFormula, ArrayList<Integer> colunas){
+
+        try  
+        {
+            Row linhaOrigem = planilhaAtiva.getRow(linhaComFormula);
+            Row linhaDestino = planilhaAtiva.getRow(linhaOndeAplicarAFormula);
+            
+            arquivoXLSX.setForceFormulaRecalculation(true);
+            
+            for(int coluna : colunas)
+            {
+            	Cell celulaOrigem = linhaOrigem.getCell(coluna);
+
+	            if (linhaDestino == null) linhaDestino = planilhaAtiva.createRow(linhaOndeAplicarAFormula);
+	            
+	            Cell celulaDestino = linhaDestino.getCell(coluna);
+	            if (celulaDestino == null) celulaDestino = linhaDestino.createCell(coluna);
+	
+	            if (celulaOrigem != null && celulaOrigem.getCellType() == CellType.FORMULA) {
+	                // Copia a fórmula textual
+	                celulaDestino.setCellFormula(celulaOrigem.getCellFormula().replaceAll("([A-Z]+)(" + (linhaComFormula + 1) + ")", "$1" + (linhaOndeAplicarAFormula + 1)));
+	            } 
+	            
+	            // (Opcional) Copiar estilo da célula
+//	            CellStyle style = celulaOrigem.getCellStyle();
+//
+//	            
+//	            style.cloneStyleFrom(celulaOrigem.getCellStyle());
+	            celulaDestino.setCellStyle(celulaOrigem.getCellStyle());
+	
+	            // (Opcional) Avaliar fórmulas
+	            FormulaEvaluator evaluator = arquivoXLSX.getCreationHelper().createFormulaEvaluator();
+	            evaluator.evaluateFormulaCell(celulaDestino);
+	
+//	            try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+//	                arquivoXLSX.write(fos);
+//	            }
+            }
+        }catch(Exception e)
+        {
+        	e.printStackTrace();
+        }
+
+	}
+	
 	public void copiarFormulasDaLinhaAnterior(int linhaComFormula, ArrayList<Integer> colunas){
 
         try  
@@ -519,9 +619,9 @@ public class AcoesArquivoExcel {
 	            } 
 	            
 	            // (Opcional) Copiar estilo da célula
-	            CellStyle style = arquivoXLSX.createCellStyle();
-	            style.cloneStyleFrom(celulaOrigem.getCellStyle());
-	            celulaDestino.setCellStyle(style);
+//	            CellStyle style = arquivoXLSX.createCellStyle();
+//	            style.cloneStyleFrom(celulaOrigem.getCellStyle());
+	            celulaDestino.setCellStyle(celulaOrigem.getCellStyle());
 	
 	            // (Opcional) Avaliar fórmulas
 	            FormulaEvaluator evaluator = arquivoXLSX.getCreationHelper().createFormulaEvaluator();
