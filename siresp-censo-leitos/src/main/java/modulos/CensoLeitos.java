@@ -176,7 +176,7 @@ public class CensoLeitos {
 				arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
 				
 				System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
-			}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith("xls"));
+			}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoCenso.EXTENSAO_ARQUIVO_CENSO.getDescricao()));
 			
 			Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
 			arquivo.renomear(entidade.getNomePasta() + " " + arquivoMaisRecente);
@@ -484,6 +484,7 @@ public class CensoLeitos {
 							
 				if(!datasProcessadas.contains(dataCensoDiario))
 				{
+					datasProcessadas.add(dataCensoDiario);
 					
 					//System.out.println("Início do preenchimento da linha: " + linhaCenso + " Primeira linha vazia do arquivo diário: " + primeiraLinhaVaziaArquivoDiario);
 					//preenchendo a linha do diário

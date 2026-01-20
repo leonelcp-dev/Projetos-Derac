@@ -46,6 +46,7 @@ public class Arquivo {
 			return false;
 		}
 	
+		arquivo = Paths.get(caminho + "\\" + novoNome);
 		this.nomeDoArquivo = novoNome;
 		return true;
 	}

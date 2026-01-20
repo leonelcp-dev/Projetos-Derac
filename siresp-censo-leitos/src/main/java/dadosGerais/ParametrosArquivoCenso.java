@@ -40,7 +40,8 @@ public enum ParametrosArquivoCenso {
 //	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_SEM_FORMATACAO(30, 0, "Ajustado de acordo com o Java, no arquivo é a linha 1", "", ""),
 	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(31, 8, "Ajustado de acordo com o Java, no arquivo é a coluna 9", "", ""),
 	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(32, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
-	NOME_PLANILHA_CENSO(33, 0, "CENSOS", "", "");
+	NOME_PLANILHA_CENSO(33, 0, "CENSOS", "", ""),
+	EXTENSAO_ARQUIVO_CENSO(34, 0, "xls", "", "");
 
 	private int idUnico;
 	private int indice;
