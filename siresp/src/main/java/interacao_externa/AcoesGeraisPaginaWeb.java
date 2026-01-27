@@ -60,7 +60,7 @@ public class AcoesGeraisPaginaWeb {
 			}
 			
 			return true;
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -96,7 +96,25 @@ public class AcoesGeraisPaginaWeb {
 			Select select = new Select(item);
 			select.selectByValue(valueASelecionar);
 			
-		}catch(Error e) {
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+	public boolean removerSelecaoItemSelectPeloValue(WebDriver driverPagina, String id, String valueASelecionar)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.id(id));
+	
+			Select select = new Select(item);
+			select.deselectByValue(valueASelecionar);
+			
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -190,7 +208,31 @@ public class AcoesGeraisPaginaWeb {
 		}catch(Exception e) {
 			System.out.println(e.toString());
 			
-			aguardarElementosSobrepostos(driverPagina, id);
+			aguardarElementosSobrepostos(driverPagina, id, "");
+			
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean clicarBotaoSubmitComValue(WebDriver driverPagina, String id, String idOrName, String value)
+	{
+		WebElement botao = null;
+		try
+		{	
+			
+			if(idOrName.equals("name"))
+				botao = driverPagina.findElement(By.name(id));
+			else if(idOrName.equals("id"))
+				botao = driverPagina.findElement(By.id(id));
+	
+			botao.click();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			
+			aguardarElementosSobrepostos(driverPagina, id, value);
 			
 			return false;
 		}
@@ -353,7 +395,7 @@ public class AcoesGeraisPaginaWeb {
 		return visivel;
 	}
 	
-	private void aguardarElementosSobrepostos(WebDriver driverPagina, String id)
+	private void aguardarElementosSobrepostos(WebDriver driverPagina, String id, String value)
 	{
 
 		/* Opção 1 */
@@ -380,12 +422,21 @@ public class AcoesGeraisPaginaWeb {
 		));
 		
 		// 2) desça até o botão
-		WebElement btn = driverPagina.findElement(By.id(id));
-		((JavascriptExecutor) driverPagina).executeScript(
-		    "arguments[0].scrollIntoView({block: 'center'});", btn);
 		
-		// 3) clique via JS (ignora sobreposição física)
-		((JavascriptExecutor) driverPagina).executeScript("arguments[0].click();", btn);
+		List<WebElement> elements = driverPagina.findElements(By.id(id));
+		
+		for(WebElement btn : elements)
+		{
+			System.out.println("botão: " + btn.getAccessibleName() + "|" + btn.getAttribute("value"));
+			if(btn.getAttribute("value").equals(value))
+			{
+				((JavascriptExecutor) driverPagina).executeScript(
+				    "arguments[0].scrollIntoView({block: 'center'});", btn);
+				
+				// 3) clique via JS (ignora sobreposição física)
+				((JavascriptExecutor) driverPagina).executeScript("arguments[0].click();", btn);
+			}
+		}
 
 
 

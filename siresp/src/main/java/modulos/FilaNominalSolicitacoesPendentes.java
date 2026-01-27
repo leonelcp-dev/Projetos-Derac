@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -125,7 +126,7 @@ public class FilaNominalSolicitacoesPendentes {
 					e.printStackTrace();
 				}
 				
-				baixarArquivos(driver, paginaWeb, entidade);
+				baixarArquivosAgrupados(driver, paginaWeb, entidade);
 				
 			}
 			else
@@ -178,7 +179,7 @@ public class FilaNominalSolicitacoesPendentes {
 					e.printStackTrace();
 				}
 				
-				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_ACEITAR_SELECIONADOS.getTextoIdentificador(), "id");
+				paginaWeb.clicarBotaoSubmitComValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_ACEITAR_SELECIONADOS.getTextoIdentificador(), "id", IdentificadoresPaginaWebSIRESP.VALUE_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_ACEITAR_SELECIONADOS.getTextoIdentificador());
 				
 				do
 				{
@@ -191,6 +192,42 @@ public class FilaNominalSolicitacoesPendentes {
 				}while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 				
 				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_DOWNLOAD.getTextoIdentificador(), "id");
+				
+				String arquivoMaisRecente;
+				
+				do
+				{
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+					
+					System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
+				}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()));
+			
+				String nomeExame = opcao.getText().replaceAll("[<>:\"/\\\\|?*\\x00-\\x1F]", "_");
+				
+				Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
+				arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao() + " - " + tiposDeBusca[i].toUpperCase() + " " + nomeExame + " " + arquivoMaisRecente);
+				
+				transferirArquivos(entidade, tiposDeBusca[i], arquivo);
+				
+				ultimoRecente = arquivo.getNomeDoArquivo();
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LINK_SELECIONE.getTextoIdentificador());
+				
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_LIMPAR_SELECAO.getTextoIdentificador(), "id");
+				
+				paginaWeb.removerSelecaoItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), opcao.getValue());
 			}
 			
 //			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_AGENDAMENTOS_BOTAO_DOWNLOAD.getTextoIdentificador(), "id");
@@ -220,6 +257,229 @@ public class FilaNominalSolicitacoesPendentes {
 		
 
 		return "";
+	}
+	
+	private String baixarArquivosAgrupados(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade) 
+	{
+
+		
+		String[] tiposDeBusca = new String[2];
+		tiposDeBusca[0] = "Consulta";
+		tiposDeBusca[1] = "Exame";
+		
+		for(int i = 0; i < tiposDeBusca.length; i++)
+		{
+			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_FILTRO_TIPO_CONSULTA_EXAME.getTextoIdentificador(), tiposDeBusca[i]);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LINK_SELECIONE.getTextoIdentificador());
+			
+			ArrayList<ElementoSelecao> opcoes = paginaWeb.obterItensDeUmSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador());
+			
+			int encontrados = 0;
+			
+			for(char letra = 'A'; letra <= 'Z'; letra++)
+			{
+				
+				ArrayList<String> valoresSelecionados = new ArrayList<String>();
+				
+				for(ElementoSelecao opcao : opcoes)
+				{
+					if(opcao.getText().charAt(0) == letra)
+					{	
+						paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), opcao.getValue());
+						valoresSelecionados.add(opcao.getValue());
+					}
+				}
+				
+				encontrados = valoresSelecionados.size();
+				if(valoresSelecionados.size() > 0)
+				{
+					String houveErro = baixarSelecionados(driver, paginaWeb, entidade, valoresSelecionados, "Letra " + letra, tiposDeBusca[i]);
+					
+					if(!houveErro.equals(""))
+					{
+						int meio = (int)(valoresSelecionados.size()/2);
+						baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, 0, meio, tiposDeBusca[i]);
+						baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, meio + 1, valoresSelecionados.size() - 1, tiposDeBusca[i]);
+					}
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LINK_SELECIONE.getTextoIdentificador());
+					
+					paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_LIMPAR_SELECAO.getTextoIdentificador(), "id");
+					
+					for(String value : valoresSelecionados)
+						paginaWeb.removerSelecaoItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), value);
+				}
+				
+			}
+			
+			if(encontrados == 0)
+			{
+				paginaWeb.clicarBotaoSubmitComValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_FECHAR_SELECAO_ESPECIALIDADES.getTextoIdentificador(), "id", IdentificadoresPaginaWebSIRESP.VALUE_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_FECHAR_SELECAO_ESPECIALIDADES.getTextoIdentificador());
+			}
+			
+//			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_AGENDAMENTOS_BOTAO_DOWNLOAD.getTextoIdentificador(), "id");
+//			
+//			String arquivoMaisRecente;
+//			
+//			do
+//			{
+//				try {
+//					Thread.sleep(5000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+//				
+//				System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
+//			}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()));
+//			
+//			Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
+//			arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao() + " - " + tiposDeBusca[i].toUpperCase() + " " + arquivoMaisRecente);
+//			
+//			transferirArquivos(entidade, tiposDeBusca[i], arquivo);
+//			
+//			ultimoRecente = arquivo.getNomeDoArquivo();
+		}
+		
+
+		return "";
+	}
+	
+	private void baixarArquivosAgrupadosRecursivo(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade, ArrayList<String> valores, char letra, int primeiro, int ultimo, String tipoDeBusca)
+	{
+		String[] tiposDeBusca = new String[2];
+		tiposDeBusca[0] = "Consulta";
+		tiposDeBusca[1] = "Exame";
+		
+		String grupo;
+		
+		if(primeiro == 0)
+			grupo = "" + letra;
+		else
+			grupo = valores.get(primeiro);
+		
+		if(ultimo == valores.size() - 1)
+			grupo += " até final de " + letra;
+		else
+			grupo += " até " + valores.get(ultimo);
+		
+		System.out.println("Recursivo: " + grupo);
+		
+		ArrayList<ElementoSelecao> opcoes = paginaWeb.obterItensDeUmSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador());
+		
+		paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LINK_SELECIONE.getTextoIdentificador());
+		
+		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_LIMPAR_SELECAO.getTextoIdentificador(), "id");
+		
+		for(String value : valores)
+			paginaWeb.removerSelecaoItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), value);
+		
+		ArrayList<String> valoresSelecionados = new ArrayList<String>();
+		
+		for(int i = primeiro; i <= ultimo; i++)
+		{
+			paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), valores.get(i));
+			valoresSelecionados.add(valores.get(i));
+		}
+				
+		if(valoresSelecionados.size() > 0)
+		{
+			String houveErro = baixarSelecionados(driver, paginaWeb, entidade, valoresSelecionados, grupo, tipoDeBusca);
+				
+			if(!houveErro.equals(""))
+			{
+				int meio = primeiro + (int)((ultimo - primeiro)/2);
+				baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, primeiro, meio, tipoDeBusca);
+				baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, meio + 1, ultimo, tipoDeBusca);
+			}
+
+		}
+	}
+	
+	private String baixarSelecionados(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade, ArrayList<String> valoresSelecionados, String Grupo, String tipoDeBusca)
+	{
+		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
+		String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
+		String erro = "";
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_MOVER_SELECIONADOS_PARA_DIREITA.getTextoIdentificador(), "id");
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		paginaWeb.clicarBotaoSubmitComValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_ACEITAR_SELECIONADOS.getTextoIdentificador(), "id", IdentificadoresPaginaWebSIRESP.VALUE_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_ACEITAR_SELECIONADOS.getTextoIdentificador());
+		
+		do
+		{
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+		
+		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_BOTAO_DOWNLOAD.getTextoIdentificador(), "id");
+		
+		String arquivoMaisRecente;
+		
+		do
+		{
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+			
+			boolean existe = !driver.findElements(By.xpath("//button[text()='Go back']")).isEmpty();
+			
+			if(existe)
+			{
+				WebElement button = driver.findElement(By.xpath("//button[text()='Go back']"));
+				button.click();
+				return "Erro no Download";
+			}
+			
+			System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
+		}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()));
+	
+		String nomeExame = Grupo.replaceAll("[<>:\"/\\\\|?*\\x00-\\x1F]", "_");
+		
+		Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
+		arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao() + " - " + tipoDeBusca.toUpperCase() + " " + nomeExame + " " + arquivoMaisRecente);
+		
+		transferirArquivos(entidade, tipoDeBusca, arquivo);
+		
+		ultimoRecente = arquivo.getNomeDoArquivo();
+		
+		return erro;
+		
 	}
 	
 	private String transferirArquivos(EntidadeCDRNaoRegulada entidade, String tipoDeBusca, Arquivo arquivo)
