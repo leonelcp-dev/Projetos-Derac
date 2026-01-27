@@ -264,48 +264,85 @@ public class FilaNominalSolicitacoesPendentes {
 
 		
 		String[] tiposDeBusca = new String[2];
-		tiposDeBusca[0] = "Consulta";
-		tiposDeBusca[1] = "Exame";
+		tiposDeBusca[1] = "Consulta";
+		tiposDeBusca[0] = "Exame";
 		
 		for(int i = 0; i < tiposDeBusca.length; i++)
 		{
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_FILTRO_TIPO_CONSULTA_EXAME.getTextoIdentificador(), tiposDeBusca[i]);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			do
+			{
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+			
 			paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LINK_SELECIONE.getTextoIdentificador());
 			
 			ArrayList<ElementoSelecao> opcoes = paginaWeb.obterItensDeUmSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador());
 			
 			int encontrados = 0;
 			
-			for(char letra = 'A'; letra <= 'Z'; letra++)
+			for(char letra = 'A' - 1; letra <= 'Z'; letra++)
 			{
+				String grupo;
 				
 				ArrayList<String> valoresSelecionados = new ArrayList<String>();
+				ArrayList<String> textosSelecionados = new ArrayList<String>();
 				
-				for(ElementoSelecao opcao : opcoes)
+				if(letra < 'A')
 				{
-					if(opcao.getText().charAt(0) == letra)
-					{	
-						paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), opcao.getValue());
-						valoresSelecionados.add(opcao.getValue());
+					for(ElementoSelecao opcao : opcoes)
+					{
+						if(opcao.getText().charAt(0) < 'A')
+						{	
+							paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), opcao.getValue());
+							valoresSelecionados.add(opcao.getValue());
+							textosSelecionados.add(opcao.getText());
+							
+						}
 					}
+					grupo = "Antes de A";
 				}
+				else
+				{
+					for(ElementoSelecao opcao : opcoes)
+					{
+						if(opcao.getText().charAt(0) == letra)
+						{	
+							paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_LISTAGEM_ESCOLHER_ESPECIALIDADE.getTextoIdentificador(), opcao.getValue());
+							valoresSelecionados.add(opcao.getValue());
+							textosSelecionados.add(opcao.getText());
+						}
+					}
+					grupo = "Letra " + letra;
+				}
+					
 				
 				encontrados = valoresSelecionados.size();
 				if(valoresSelecionados.size() > 0)
 				{
-					String houveErro = baixarSelecionados(driver, paginaWeb, entidade, valoresSelecionados, "Letra " + letra, tiposDeBusca[i]);
+					String houveErro = baixarSelecionados(driver, paginaWeb, entidade, valoresSelecionados, grupo, tiposDeBusca[i]);
 					
 					if(!houveErro.equals(""))
 					{
-						int meio = (int)(valoresSelecionados.size()/2);
-						baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, 0, meio, tiposDeBusca[i]);
-						baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, meio + 1, valoresSelecionados.size() - 1, tiposDeBusca[i]);
+						if(valoresSelecionados.size() <= 1)
+						{
+							do
+							{
+								houveErro = baixarSelecionados(driver, paginaWeb, entidade, valoresSelecionados, grupo, tiposDeBusca[i]);
+							}while(!houveErro.equals(""));
+						}
+						else
+						{
+							int meio = (int)(valoresSelecionados.size()/2);
+							baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, textosSelecionados, letra, 0, meio, tiposDeBusca[i]);
+							baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, textosSelecionados, letra, meio + 1, valoresSelecionados.size() - 1, tiposDeBusca[i]);
+						}
 					}
 					
 					try {
@@ -358,7 +395,7 @@ public class FilaNominalSolicitacoesPendentes {
 		return "";
 	}
 	
-	private void baixarArquivosAgrupadosRecursivo(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade, ArrayList<String> valores, char letra, int primeiro, int ultimo, String tipoDeBusca)
+	private void baixarArquivosAgrupadosRecursivo(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade, ArrayList<String> valores, ArrayList<String> textos, char letra, int primeiro, int ultimo, String tipoDeBusca)
 	{
 		String[] tiposDeBusca = new String[2];
 		tiposDeBusca[0] = "Consulta";
@@ -369,12 +406,12 @@ public class FilaNominalSolicitacoesPendentes {
 		if(primeiro == 0)
 			grupo = "" + letra;
 		else
-			grupo = valores.get(primeiro);
+			grupo = textos.get(primeiro);
 		
 		if(ultimo == valores.size() - 1)
 			grupo += " até final de " + letra;
 		else
-			grupo += " até " + valores.get(ultimo);
+			grupo += " até " + textos.get(ultimo);
 		
 		System.out.println("Recursivo: " + grupo);
 		
@@ -401,9 +438,22 @@ public class FilaNominalSolicitacoesPendentes {
 				
 			if(!houveErro.equals(""))
 			{
-				int meio = primeiro + (int)((ultimo - primeiro)/2);
-				baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, primeiro, meio, tipoDeBusca);
-				baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valoresSelecionados, letra, meio + 1, ultimo, tipoDeBusca);
+				if(valoresSelecionados.size() <= 1)
+				{	
+					int contador = 1;
+					do
+					{
+						System.out.println("Tentativa " + contador + ": " + valoresSelecionados.get(0));
+						contador++;
+						houveErro = baixarSelecionados(driver, paginaWeb, entidade, valoresSelecionados, grupo, tipoDeBusca);
+					}while(!houveErro.equals(""));
+				}
+				else
+				{
+					int meio = primeiro + (int)((ultimo - primeiro)/2);
+					baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valores, textos, letra, primeiro, meio, tipoDeBusca);
+					baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valores, textos, letra, meio + 1, ultimo, tipoDeBusca);
+				}
 			}
 
 		}
@@ -457,11 +507,13 @@ public class FilaNominalSolicitacoesPendentes {
 			}
 			arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
 			
-			boolean existe = !driver.findElements(By.xpath("//button[text()='Go back']")).isEmpty();
+
+			
+			boolean existe = !driver.findElements(By.xpath("//button[contains(translate(@aria-label, '\u00A0', ' '), 'Go back')]")).isEmpty();
 			
 			if(existe)
 			{
-				WebElement button = driver.findElement(By.xpath("//button[text()='Go back']"));
+				WebElement button = driver.findElement(By.xpath("//button[contains(translate(@aria-label, '\u00A0', ' '), 'Go back')]"));
 				button.click();
 				return "Erro no Download";
 			}
