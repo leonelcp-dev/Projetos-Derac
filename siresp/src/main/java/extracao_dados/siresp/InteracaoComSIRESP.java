@@ -9,6 +9,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import interacao_externa.AcoesGeraisPaginaWeb;
 import modulos.AbrirGoogleChrome;
+import modulos.Absenteismo;
 import modulos.CensoLeitos;
 import modulos.FilaNominalAgendamentosPendentes;
 import modulos.FilaNominalCDRNaoRegulada;
@@ -54,19 +55,19 @@ public class InteracaoComSIRESP
 			}
         }
     	
-		System.setProperty("webdriver.chrome.driver", "C:\\Users\\PMC514991-2\\Documents\\chromedriver-win64\\chromedriver.exe"); 
+		System.setProperty("webdriver.chrome.driver", "C:\\chromedriver-win64\\chromedriver.exe"); 
 		ChromeOptions options = new ChromeOptions(); 
 		options.addArguments("user-data-dir=C:\\chrome-temp"); 
 		options.addArguments("profile-directory=Default"); // ou "Profile 1" 
 		options.setExperimentalOption("debuggerAddress", "127.0.0.1:9222");
-		     		
+
     	WebDriver driver = new ChromeDriver(options);
-        	
+
         driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
        
         System.out.println("Page Title: " + driver.getTitle());
         
-        String[] opcoes = {"Censo diário de Leitos", "Filas Nominais CDR (Não Regulada)", "Filas Nominais Regulada (Agendamentos)", "Filas Nominais Regulada (Solicitacoes)"}; 
+        String[] opcoes = {"Censo diário de Leitos", "Filas Nominais CDR (Não Regulada)", "Filas Nominais Regulada (Agendamentos)", "Filas Nominais Regulada (Solicitacoes)", "Absenteísmo"}; 
         int escolha = JOptionPane.showOptionDialog( null, "Escolha uma opção:", "Caixa de Seleção", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0] );
         
         if(escolha == 0)
@@ -88,6 +89,11 @@ public class InteracaoComSIRESP
         {
         	FilaNominalSolicitacoesPendentes filaNominalRegulada = new FilaNominalSolicitacoesPendentes();
         	filaNominalRegulada.baixarFilaAgendamentosPendentes(driver);
+        }
+        else if(escolha == 4)
+        {
+        	Absenteismo absenteismo = new Absenteismo();
+        	absenteismo.verificarAbsenteismo(driver);
         }
         
         driver.quit();

@@ -26,6 +26,7 @@ import dadosGerais.ParametrosArquivoCenso;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.ConversaoHMTL_XLSX;
+import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import modelosDados.CelulaExcel;
 import modelosDados.EntidadeLeito;
 import modelosDados.LinhaCensoLeitos;
@@ -113,7 +114,9 @@ public class CensoLeitos {
 		System.out.println(IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
 		System.out.println(IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador());
 		
-		paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+		//paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+		
+		paginaWeb.clicarMenuUL(driver, 1, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
 		
 		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 		

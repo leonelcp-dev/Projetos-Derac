@@ -4,11 +4,13 @@ public class MesFormatado {
 	
 	private String mesNumero;
 	private String mesDescricao;
+	private String mesDescricaoSemAcentuacao;
 	
-	public MesFormatado(String mesNumero, String mesDescricao)
+	public MesFormatado(String mesNumero, String mesDescricao, String mesDescricaoSemAcentuacao)
 	{
 		this.mesNumero = mesNumero;
 		this.mesDescricao = mesDescricao;
+		this.mesDescricaoSemAcentuacao = mesDescricaoSemAcentuacao;
 	}
 	
 	public String getMesNumero() {
@@ -25,6 +27,14 @@ public class MesFormatado {
 	
 	public void setMesDescricao(String mesDescricao) {
 		this.mesDescricao = mesDescricao;
+	}
+
+	public String getMesDescricaoSemAcentuacao() {
+		return mesDescricaoSemAcentuacao;
+	}
+
+	public void setMesDescricaoSemAcentuacao(String mesDescricaoSemAcentuacao) {
+		this.mesDescricaoSemAcentuacao = mesDescricaoSemAcentuacao;
 	}
 
 }

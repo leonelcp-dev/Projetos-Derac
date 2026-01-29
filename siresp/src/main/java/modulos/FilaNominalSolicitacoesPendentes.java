@@ -25,6 +25,7 @@ import dadosGerais.ParametrosArquivoFilasNominais;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.ConversaoHMTL_XLSX;
+import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import modelosDados.CelulaExcel;
 import modelosDados.ElementoSelecao;
 import modelosDados.EntidadeCDRNaoRegulada;
@@ -116,7 +117,10 @@ public class FilaNominalSolicitacoesPendentes {
 				
 				//buscando arquivos e baixando
 				paginaWeb.voltarAoTopoDaPagina(driver);
-				paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+				
+				//paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+				paginaWeb.clicarMenuUL(driver, 1, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
+				
 				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 				
 				try {
@@ -451,7 +455,12 @@ public class FilaNominalSolicitacoesPendentes {
 				else
 				{
 					int meio = primeiro + (int)((ultimo - primeiro)/2);
+					
+					System.out.println("(Recursivo 1) Tamanho: " + valores.size() + " Primeiro: " + primeiro + " meio: " + meio + " ultimo: " + ultimo);
+					 
 					baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valores, textos, letra, primeiro, meio, tipoDeBusca);
+					
+					System.out.println("(Recursivo 2) Tamanho: " + valores.size() + " Primeiro: " + primeiro + " meio: " + meio + " ultimo: " + ultimo);
 					baixarArquivosAgrupadosRecursivo(driver, paginaWeb, entidade, valores, textos, letra, meio + 1, ultimo, tipoDeBusca);
 				}
 			}

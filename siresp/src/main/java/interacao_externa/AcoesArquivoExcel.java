@@ -277,6 +277,26 @@ public class AcoesArquivoExcel {
         }
     }
 	
+	public void gravarDadosEmCelula(String planilha, ArrayList<CelulaExcel> celulas) 
+	{
+        Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+
+        // Abrir, alterar e salvar (try-with-resources fecha tudo corretamente)
+        try {
+
+        	for(CelulaExcel celula : celulas)
+        		setCellValue(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
+
+            // 4) Salvar (sobrescrevendo o mesmo arquivo)
+            try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+            	arquivoXLSX.write(fos);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+	
 	public void gravarDadosEmCelula(String nomePlanilha, ArrayList<CelulaExcel> celulas, boolean copiarFormato, boolean copiarFormulas, int linhaInicial, ArrayList<Integer> celulasComFormulas) 
 	{
         Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
@@ -375,6 +395,7 @@ public class AcoesArquivoExcel {
 	
 	public void abrirPlanilha(String nome, int linhaBaseFormatacao)
 	{
+		System.out.println(nome);
 		planilhaAtiva = arquivoXLSX.getSheet(nome);
 		
 		primeiraLinhaVazia = planilhaAtiva.getLastRowNum();

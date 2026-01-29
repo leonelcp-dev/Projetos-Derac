@@ -27,6 +27,7 @@ import dadosGerais.ParametrosArquivoFilasNominais;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.ConversaoHMTL_XLSX;
+import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import modelosDados.CelulaExcel;
 import modelosDados.ElementoSelecao;
 import modelosDados.EntidadeCDRNaoRegulada;
@@ -67,8 +68,8 @@ public class FilaNominalCDRNaoRegulada {
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
-		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
-		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
+		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
 		
 	
 		//definindo entidades para o censo de leitos
@@ -134,7 +135,9 @@ public class FilaNominalCDRNaoRegulada {
 					paginaWeb.voltarAoTopoDaPagina(driver);
 				
 
-					visivel = paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+					//visivel = paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+				
+					visivel = paginaWeb.clicarMenuUL(driver, 1, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
 				}while(!visivel);
 				
 				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
