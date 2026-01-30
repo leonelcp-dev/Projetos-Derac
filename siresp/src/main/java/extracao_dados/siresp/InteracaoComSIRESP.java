@@ -42,7 +42,7 @@ public class InteracaoComSIRESP
 //    	options.addArguments("--remote-allow-origins=*"); 
     	
     	String[] opcoesChrome = {"Sim", "Não"}; 
-        int escolhaChrome = JOptionPane.showOptionDialog( null, "Google Chrome", "Deseja abrir o Google Chrome no modo de processamento?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoesChrome, opcoesChrome[0] );
+        int escolhaChrome = JOptionPane.showOptionDialog( null, "Deseja abrir o Google Chrome no modo de processamento?", "Google Chrome", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoesChrome, opcoesChrome[0] );
         
         if(escolhaChrome == 0)
         {
@@ -67,7 +67,13 @@ public class InteracaoComSIRESP
        
         System.out.println("Page Title: " + driver.getTitle());
         
-        String[] opcoes = {"Censo diário de Leitos", "Filas Nominais CDR (Não Regulada)", "Filas Nominais Regulada (Agendamentos)", "Filas Nominais Regulada (Solicitacoes)", "Absenteísmo"}; 
+        String[] opcoes = {
+        		"Censo diário de Leitos"
+        		, "Filas Nominais CDR (Não Regulada)"
+        		, "Filas Nominais Regulada (Agendamentos)"
+        		, "Filas Nominais Regulada (Solicitacoes)"
+        		, "Absenteísmo"
+        		}; 
         int escolha = JOptionPane.showOptionDialog( null, "Escolha uma opção:", "Caixa de Seleção", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0] );
         
         if(escolha == 0)

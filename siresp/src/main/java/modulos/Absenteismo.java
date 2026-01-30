@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
@@ -24,6 +25,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.MesesFormatados;
+import dadosGerais.ParametrosArquivoAbsenteismoConsolidado;
+import dadosGerais.ParametrosArquivoAbsenteismoConsultaBaixado;
+import dadosGerais.ParametrosArquivoAbsenteismoExameBaixado;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import interacao_externa.AcoesArquivoExcel;
@@ -31,6 +35,7 @@ import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import interacao_externa.ConversaoHMTL_XLSX;
 import modelosDados.CelulaExcel;
+import modelosDados.CorrelacaoColunasArquivosAbsenteismo;
 import modelosDados.ElementoSelecao;
 import modelosDados.EntidadeAbsenteismo;
 import modelosDados.EntidadeCDRNaoRegulada;
@@ -53,8 +58,12 @@ public class Absenteismo {
 	private DateTimeFormatter formatoDataArquivo;
 	LocalDate dataInicioReferencia;
 	LocalDate dataFinalReferencia;
+	LocalDate dataInicioCompetencia;
+	LocalDate dataFinalCompetencia;
 	String dataFormatadaInicioReferencia;
 	String dataFormatadaFinalReferencia;
+	String dataFormatadaInicioCompetencia;
+	String dataFormatadaFinalCompetencia;
 
 	public String verificarAbsenteismo(WebDriver driver)
 	{			
@@ -80,8 +89,7 @@ public class Absenteismo {
 		mesReferencia = Integer.parseInt(mes);
 		anoReferencia = Integer.parseInt(ano);
 		
-		
-		
+			
 		if(mesReferencia < 10)
 			dataFormatadaInicioReferencia = "01-0" + mes + "-" + ano;
 		else
@@ -105,6 +113,15 @@ public class Absenteismo {
 			anoCompetencia = anoReferencia;
 		}
 		
+		if(mesCompetencia < 10)
+			dataFormatadaInicioCompetencia = "01/0" + mesCompetencia + "/" + anoCompetencia;
+		else
+			dataFormatadaInicioCompetencia = "01/" + mesCompetencia + "/" + anoCompetencia;
+		
+		dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, formatoDataArquivo);
+		
+		dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
+		dataFormatadaFinalCompetencia = dataFinalCompetencia.format(formatoDataArquivo);
 		
 		//definindo entidades para o censo de leitos
 		ArrayList<EntidadeAbsenteismo> entidades = lerEntidades(pastaDestinoArquivos + "\\unidadessolicitantes.csv");
@@ -148,6 +165,7 @@ public class Absenteismo {
 
 		}
 		
+		pastaDestinoArquivos = pastaDestinoArquivos + "\\Absenteísmo\\" + anoCompetencia + "\\";
 		
 		for(EntidadeAbsenteismo entidade : entidades)
 		{
@@ -245,46 +263,133 @@ public class Absenteismo {
 		tiposDeBusca[0] = "Consulta";
 		tiposDeBusca[1] = "Exame";
 		
+		int linhaArquivoConsolidado = ParametrosArquivoAbsenteismoConsolidado.LINHA_INICIAL_ARQUIVO_CONSOLIDADO.getIndice();
 				
 		for(int i = 0; i < tiposDeBusca.length; i++)
 		{
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_TIPO_CONSULTA_EXAME.getTextoIdentificador(), tiposDeBusca[i]);
 			
+			paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador());
+			paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataFormatadaInicioReferencia.replaceAll("-", ""));
+					
+			paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador());
+			paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFormatadaFinalReferencia.replaceAll("-", ""));
 			
-			ArrayList<ElementoSelecao> elementosSelectExecutantes = paginaWeb.obterItensDeUmSelect(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_UNIDADE_EXECUTANTE.getTextoIdentificador());
+			paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_ORDENACAO_RELATORIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO.getTextoIdentificador());
 			
-			for(ElementoSelecao elemento : elementosSelectExecutantes)
+			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+			
+			do
 			{
-				if(!elemento.getText().equals(IdentificadoresPaginaWebSIRESP.TEXTO_ABSENTEISMO_SELECIONE_ITEM_UNIDADE_EXECUTANTE.getTextoIdentificador()))
-				{
-					paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_UNIDADE_EXECUTANTE.getTextoIdentificador(), elemento.getValue());
-					
-					paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador());
-					paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataFormatadaInicioReferencia.replaceAll("-", ""));
-					
-					paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador());
-					paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFormatadaFinalReferencia.replaceAll("-", ""));
-					
-					paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_ORDENACAO_RELATORIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO.getTextoIdentificador());
-					
-					paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
-					
-					do
-					{
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-					
-					if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_MENSAGEM_NENHUM_REGISTRO_ENCONTADO.getTextoIdentificador()))
-						System.out.println("Não baixar:" + entidade.getNomeArquivoAbsenteismo() + " - " + elemento.getText() + " - " + tiposDeBusca);
-					else
-						System.out.println("Baixar:" + entidade.getNomeArquivoAbsenteismo() + " - " + elemento.getText() + " - " + tiposDeBusca);
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+			}while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+			
+			if(!paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_MENSAGEM_NENHUM_REGISTRO_ENCONTADO.getTextoIdentificador()))
+			{
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_BOTAO_DOWNLOAD.getTextoIdentificador(), "name");
+				
+				String arquivoMaisRecente;
+				
+				do
+				{
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+					
+					System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
+				}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoCenso.EXTENSAO_ARQUIVO_CENSO.getDescricao()));
+				
+				Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
+								
+				ultimoRecente = arquivo.getNomeDoArquivo();
+				
+				entidade.setArquivoBaixadoXLS(arquivo.getNomeDoArquivo());
+				entidade.setCaminhoCompletoArquivoBaixadoXLS(arquivo.getCaminhoCompleto());
+				
+				entidade.setArquivoBaixadoXLSX(arquivo.getNomeDoArquivo() + "x");
+				entidade.setCaminhoCompletoArquivoBaixadoXLSX(arquivo.getCaminhoCompleto()+"x");
+				
+				ConversaoHMTL_XLSX conversor = new ConversaoHMTL_XLSX();
+				
+				try
+				{
+					conversor.converterArquivo(entidade.getCaminhoCompletoArquivoBaixadoXLS(), entidade.getCaminhoCompletoArquivoBaixadoXLSX());
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				
+				AcoesArquivoExcel arquivoSIRESP = new AcoesArquivoExcel(entidade.getCaminhoCompletoArquivoBaixadoXLSX(), 0);
+				AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + entidade.getNomeArquivoAbsenteismo(), 0);
+				
+				ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MES_DE_REFERENCIA.getIndice(), dataInicioCompetencia, "Date"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_TEXTO_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TEXTO_MES_DE_REFERENCIA.getIndice(), "*ref. " + meses.getMeses().get(mesReferencia - 1).getMesDescricao() + " " + anoReferencia, "String"));
+				
+				arquivoConsolidado.gravarDadosEmCelula(meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao(), celulas, false, false, i, null);
+				
+				celulas = new ArrayList<CelulaExcel>();
+				
+				int ultimaLinhaArquivoSIRESP = arquivoSIRESP.getPrimeiraLinhaVazia();
+				
+				int primeiraLinhaArquivoSIRESP = 0;
+				if(tiposDeBusca[i].equals("Exame"))
+					primeiraLinhaArquivoSIRESP = ParametrosArquivoAbsenteismoExameBaixado.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice();
+				else if(tiposDeBusca[i].equals("Exame"))
+					primeiraLinhaArquivoSIRESP = ParametrosArquivoAbsenteismoConsultaBaixado.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice();
+				
+				for(int linha = primeiraLinhaArquivoSIRESP; linha <= ultimaLinhaArquivoSIRESP; linha++)
+				{
+					celulas.add(new CelulaExcel(linhaArquivoConsolidado, ParametrosArquivoAbsenteismoConsolidado.INDICE_COLUNA_TIPO.getIndice(), tiposDeBusca[i], ParametrosArquivoAbsenteismoConsolidado.INDICE_COLUNA_TIPO.getTipo()));
+					
+					ArrayList<CorrelacaoColunasArquivosAbsenteismo> colunasConsolidado = new ArrayList<CorrelacaoColunasArquivosAbsenteismo>();
+					
+					for(CorrelacaoColunasArquivosAbsenteismo coluna : colunasConsolidado)
+					{
+						if(arquivoSIRESP.ehCelulaVazia(linha, coluna.getColunaSIRESP()))
+						{
+							celulas.add(new CelulaExcel(linha, coluna.getColunaSIRESP(), "", "String"));
+						}
+						else
+						{
+							if(coluna.getTipo().equals("String"))
+							{
+								String valor = arquivoSIRESP.getValorDaCelulaString(linha, coluna.getColunaSIRESP());
+								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
+							}else if(coluna.getTipo().equals("Date"))
+							{
+								LocalDate valor = arquivoSIRESP.getValorDaCelulaDate(linha, coluna.getColunaSIRESP());
+								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
+							}else if(coluna.getTipo().equals("DateTime"))
+							{
+								LocalDateTime valor = arquivoSIRESP.getValorDaCelulaDateTime(linha, coluna.getColunaSIRESP());
+								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
+							}else if(coluna.getTipo().equals("Int"))
+							{
+								Integer valor = arquivoSIRESP.getValorDaCelulaInt(linha, coluna.getColunaSIRESP());
+								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
+							}
+						}
+						
+					}
+					
+					linhaArquivoConsolidado++;
+				}
+				arquivoConsolidado.gravarDadosEmCelula(meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao(), celulas, true, false, ParametrosArquivoAbsenteismoConsolidado.LINHA_INICIAL_ARQUIVO_CONSOLIDADO.getIndice(), null);
+				
 			}
+			else
+				System.out.println("Não foi encontrado arquivo resultados para " + entidade.getNomeUnidadeSIRESP());
+		}
 			
 			
 			
@@ -312,36 +417,9 @@ public class Absenteismo {
 //			transferirArquivos(entidade, tiposDeBusca[i], arquivo);
 //			
 //			ultimoRecente = arquivo.getNomeDoArquivo();
-		}
-		
-
 		return "";
+		
 	}
 	
-	private String transferirArquivos(EntidadeAbsenteismo entidade, String tipoDeBusca, Arquivo arquivo)
-	{
-		
-		Pasta pasta = new Pasta(pastaDestinoArquivos, true);
-			
-		String pastaEntidade = pastaDestinoArquivos + "\\" + anoCompetencia;
-		pasta = new Pasta(pastaEntidade, true);
-			
-		pastaEntidade = pastaEntidade + "\\" + meses.getMeses().get(mesCompetencia - 1).getMesNumero() + " " + meses.getMeses().get(mesCompetencia - 1).getMesDescricao() + " " + anoCompetencia;
-		pasta = new Pasta(pastaEntidade, true);
-		
-		//pastaEntidade = pastaEntidade + "\\" + dataFormatadaPasta;
-		pasta = new Pasta(pastaEntidade, true);
-		
-		pastaEntidade = pastaEntidade + "\\" + entidade.getDistrito();
-		pasta = new Pasta(pastaEntidade, true);
-		
-		pastaEntidade = pastaEntidade + "\\" + tipoDeBusca.toUpperCase();
-		pasta = new Pasta(pastaEntidade, true);
-			
-		arquivo.mover(pastaEntidade + "\\" + arquivo.getNomeDoArquivo());
-			
-				
-		return "";
-	}
 	
 }

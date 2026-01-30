@@ -310,8 +310,10 @@ public class AcoesArquivoExcel {
         	{
         		if(linhaCelulaAnterior != celula.getLinha())
         		{
-        			copiarFormato(linhaInicial, celula.getLinha());
-        			copiarFormulas(linhaInicial, celula.getLinha(), celulasComFormulas);
+        			if(copiarFormato)
+        				copiarFormato(linhaInicial, celula.getLinha());
+        			if(copiarFormulas)
+        				copiarFormulas(linhaInicial, celula.getLinha(), celulasComFormulas);
         		}
         		
         		//System.out.println("Nome da planilha: " + nomePlanilha + ", Linha: " + celula.getLinha() + ", Coluna: " + celula.getColuna() + ", Valor: " + celula.getValor());
@@ -368,6 +370,13 @@ public class AcoesArquivoExcel {
         	DataFormat df = arquivoXLSX.createDataFormat();
 			CellStyle dateStyle = cell.getCellStyle();
 			dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
+			cell.setCellStyle(dateStyle);
+        }
+        else if (tipo.equals("DateTime"))
+        {
+        	DataFormat df = arquivoXLSX.createDataFormat();
+			CellStyle dateStyle = cell.getCellStyle();
+			dateStyle.setDataFormat(df.getFormat("hh:mm"));
 			cell.setCellStyle(dateStyle);
         }
         else if(tipo.equals("String"))
@@ -474,6 +483,29 @@ public class AcoesArquivoExcel {
 			String textoCelula = celula.getStringCellValue();
 			//System.out.println(textoCelula);
 			data = LocalDate.parse(textoCelula.substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		}
+		
+		return data;
+	}
+	
+	public LocalDateTime getValorDaCelulaDateTime(int Linha, int Coluna)
+	{
+		Row linha = planilhaAtiva.getRow(Linha);
+		Cell celula = linha.getCell(Coluna);
+		LocalDateTime data = null;
+				
+		try
+		{
+		
+			if(celula == null || celula.getLocalDateTimeCellValue() == null)
+				return null;
+
+			data = celula.getLocalDateTimeCellValue();
+		}catch(Exception e)
+		{
+			String textoCelula = celula.getStringCellValue();
+			//System.out.println(textoCelula);
+			data = LocalDateTime.parse(textoCelula.substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		}
 		
 		return data;

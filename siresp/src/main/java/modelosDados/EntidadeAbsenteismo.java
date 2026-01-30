@@ -7,8 +7,10 @@ public class EntidadeAbsenteismo {
 	private String distrito;
 	private String nomeUnidadeSIRESP;
 	private String nomeArquivoAbsenteismo;
-	private String caminhoCompletoArquivoBaixadoCSV;
-	private String arquivoBaixadoCSV;
+	private String caminhoCompletoArquivoBaixadoXLS;
+	private String caminhoCompletoArquivoBaixadoXLSX;
+	private String arquivoBaixadoXLS;
+	private String arquivoBaixadoXLSX;
 	
 	public EntidadeAbsenteismo(String cnes, String unidade, String distrito, String nomeUnidadeSIRESP, String nomeArquivoAbsenteismo) {
 		this.cnes = cnes;
@@ -34,28 +36,12 @@ public class EntidadeAbsenteismo {
 		this.unidade = unidade;
 	}
 
-	public String getCaminhoCompletoArquivoBaixadoCSV() {
-		return caminhoCompletoArquivoBaixadoCSV;
-	}
-
-	public void setCaminhoCompletoArquivoBaixadoCSV(String caminhoCompletoArquivoBaixadoCSV) {
-		this.caminhoCompletoArquivoBaixadoCSV = caminhoCompletoArquivoBaixadoCSV;
-	}
-
 	public String getDistrito() {
 		return distrito;
 	}
 
 	public void setDistrito(String distrito) {
 		this.distrito = distrito;
-	}
-
-	public String getArquivoBaixadoCSV() {
-		return arquivoBaixadoCSV;
-	}
-
-	public void setArquivoBaixadoCSV(String arquivoBaixadoCSV) {
-		this.arquivoBaixadoCSV = arquivoBaixadoCSV;
 	}
 
 	public String getNomeUnidadeSIRESP() {
@@ -72,6 +58,38 @@ public class EntidadeAbsenteismo {
 
 	public void setNomeArquivoAbsenteismo(String nomeArquivoAbsenteismo) {
 		this.nomeArquivoAbsenteismo = nomeArquivoAbsenteismo;
+	}
+
+	public String getCaminhoCompletoArquivoBaixadoXLS() {
+		return caminhoCompletoArquivoBaixadoXLS;
+	}
+
+	public void setCaminhoCompletoArquivoBaixadoXLS(String caminhoCompletoArquivoBaixadoXLS) {
+		this.caminhoCompletoArquivoBaixadoXLS = caminhoCompletoArquivoBaixadoXLS;
+	}
+
+	public String getArquivoBaixadoXLS() {
+		return arquivoBaixadoXLS;
+	}
+
+	public void setArquivoBaixadoXLS(String arquivoBaixadoXLS) {
+		this.arquivoBaixadoXLS = arquivoBaixadoXLS;
+	}
+
+	public String getCaminhoCompletoArquivoBaixadoXLSX() {
+		return caminhoCompletoArquivoBaixadoXLSX;
+	}
+
+	public void setCaminhoCompletoArquivoBaixadoXLSX(String caminhoCompletoArquivoBaixadoXLSX) {
+		this.caminhoCompletoArquivoBaixadoXLSX = caminhoCompletoArquivoBaixadoXLSX;
+	}
+
+	public String getArquivoBaixadoXLSX() {
+		return arquivoBaixadoXLSX;
+	}
+
+	public void setArquivoBaixadoXLSX(String arquivoBaixadoXLSX) {
+		this.arquivoBaixadoXLSX = arquivoBaixadoXLSX;
 	}
 	
 	
