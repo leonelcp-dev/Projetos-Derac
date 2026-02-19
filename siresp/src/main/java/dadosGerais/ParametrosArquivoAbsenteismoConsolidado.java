@@ -9,7 +9,7 @@ public enum ParametrosArquivoAbsenteismoConsolidado {
 		
 	INDICE_COLUNA_TIPO(0, 1, "Tipo", "String", ""),
 	INDICE_COLUNA_DATA_AGENDA(1, 2, "Data Agenda", "Date", "dd/MM/yyyy"),
-	INDICE_COLUNA_HORA_AGENDA(2, 3, "Hora", "DateTime", "hh:mm"),
+	INDICE_COLUNA_HORA_AGENDA(2, 3, "Hora", "Time", "HH:mm"),
 	INDICE_COLUNA_ESPECIALIDADE(3, 4, "Especialidade", "String", ""),
 	INDICE_COLUNA_CODIGO(4, 5, "Código", "Int", ""),
 	INDICE_COLUNA_USUARIO(5, 6, "Usuário", "String", ""),

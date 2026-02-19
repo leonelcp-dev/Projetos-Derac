@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
@@ -23,6 +24,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import dadosGerais.CorrelacaoArquivosAbsenteismo;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoAbsenteismoConsolidado;
@@ -344,17 +346,22 @@ public class Absenteismo {
 				int primeiraLinhaArquivoSIRESP = 0;
 				if(tiposDeBusca[i].equals("Exame"))
 					primeiraLinhaArquivoSIRESP = ParametrosArquivoAbsenteismoExameBaixado.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice();
-				else if(tiposDeBusca[i].equals("Exame"))
+				else if(tiposDeBusca[i].equals("Consulta"))
 					primeiraLinhaArquivoSIRESP = ParametrosArquivoAbsenteismoConsultaBaixado.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice();
 				
 				for(int linha = primeiraLinhaArquivoSIRESP; linha <= ultimaLinhaArquivoSIRESP; linha++)
 				{
 					celulas.add(new CelulaExcel(linhaArquivoConsolidado, ParametrosArquivoAbsenteismoConsolidado.INDICE_COLUNA_TIPO.getIndice(), tiposDeBusca[i], ParametrosArquivoAbsenteismoConsolidado.INDICE_COLUNA_TIPO.getTipo()));
 					
-					ArrayList<CorrelacaoColunasArquivosAbsenteismo> colunasConsolidado = new ArrayList<CorrelacaoColunasArquivosAbsenteismo>();
+					CorrelacaoArquivosAbsenteismo correlacoes = new CorrelacaoArquivosAbsenteismo();
+					
+					ArrayList<CorrelacaoColunasArquivosAbsenteismo> colunasConsolidado = correlacoes.obterCorrelacaoEntreArquivos(tiposDeBusca[i]);
+					
 					
 					for(CorrelacaoColunasArquivosAbsenteismo coluna : colunasConsolidado)
 					{
+						System.out.println("ColunaSIRESP: " + coluna.getColunaSIRESP() + " Coluna Consolidado: " + coluna.getColunaConsolidado() + " Formato: " + coluna.getFormato());
+						
 						if(arquivoSIRESP.ehCelulaVazia(linha, coluna.getColunaSIRESP()))
 						{
 							celulas.add(new CelulaExcel(linha, coluna.getColunaSIRESP(), "", "String"));
@@ -371,11 +378,15 @@ public class Absenteismo {
 								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
 							}else if(coluna.getTipo().equals("DateTime"))
 							{
-								LocalDateTime valor = arquivoSIRESP.getValorDaCelulaDateTime(linha, coluna.getColunaSIRESP());
+								LocalDateTime valor = arquivoSIRESP.getValorDaCelulaDateTime(linha, coluna.getColunaSIRESP(), coluna.getFormato());
+								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
+							}else if(coluna.getTipo().equals("Time"))
+							{
+								LocalTime valor = arquivoSIRESP.getValorDaCelulaTime(linha, coluna.getColunaSIRESP(), coluna.getFormato());
 								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
 							}else if(coluna.getTipo().equals("Int"))
 							{
-								Integer valor = arquivoSIRESP.getValorDaCelulaInt(linha, coluna.getColunaSIRESP());
+								Integer valor = Integer.parseInt(arquivoSIRESP.getValorDaCelulaString(linha, coluna.getColunaSIRESP()));
 								celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), valor, coluna.getTipo()));
 							}
 						}

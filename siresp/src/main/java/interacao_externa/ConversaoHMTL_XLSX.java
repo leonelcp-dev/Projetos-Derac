@@ -203,6 +203,11 @@ public class ConversaoHMTL_XLSX {
 			            colunaAtual = colIndex;
 			            //Elements cells = tr.select("> th, > td");
 			            
+			            int maximoRowSpan = 0;
+			            int maximoColSpan = 0;
+			            
+
+			            
 			            for (Node childTD : tr.childNodes())
 			            {
 			            //for (Element tr : rows) {
@@ -295,7 +300,7 @@ public class ConversaoHMTL_XLSX {
 					                    style = styleCache.cloneWithDataFormat(style, "0%");
 					                }
 					                excelCell.setCellStyle(style);
-					
+					                
 					                // Mesclagem (se colspan/rowspan > 1)
 					                if (colspan > 1 || rowspan > 1) {
 					                    firstRow = linhaAtual;
@@ -303,7 +308,7 @@ public class ConversaoHMTL_XLSX {
 					                    firstCol = colunaAtual;
 					                    lastCol = colunaAtual + colspan - 1;
 					                    
-					                    linhaAtual = linhaAtual + rowspan - 1;
+					                    maximoRowSpan = Math.max(maximoRowSpan, rowspan - 1);
 					                    colunaAtual = colunaAtual + colspan - 1;
 					
 					                    // Cria células "fantasmas" dentro da área mesclada para evitar Nulls ao autosize (opcional)
@@ -331,8 +336,8 @@ public class ConversaoHMTL_XLSX {
 					                        remainingRowSpans.set(c, Math.max(remainingRowSpans.get(c), rowspan - 1));
 					                    }
 					                }
-					                linhaFinal = linhaAtual;
-				            		colunaFinal = colunaAtual;
+					                linhaFinal = Math.max(linhaFinal, linhaAtual + rowspan - 1);
+					                colunaFinal = colunaAtual;
 				
 				                }
 				
@@ -350,8 +355,8 @@ public class ConversaoHMTL_XLSX {
 			            }
 			            finalColIndex = Math.max(finalColIndex, internalColIndex);
 			
-			            linhaAtual++;
-			            rowIndex++;	
+			            linhaAtual = linhaAtual + maximoRowSpan + 1;
+			            rowIndex = rowIndex + maximoRowSpan + 1;	
 			        }
 		        }
         	}

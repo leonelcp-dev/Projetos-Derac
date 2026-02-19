@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -376,7 +377,14 @@ public class AcoesArquivoExcel {
         {
         	DataFormat df = arquivoXLSX.createDataFormat();
 			CellStyle dateStyle = cell.getCellStyle();
-			dateStyle.setDataFormat(df.getFormat("hh:mm"));
+			dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy HH:mm"));
+			cell.setCellStyle(dateStyle);
+        }
+        else if (tipo.equals("Time"))
+        {
+        	DataFormat df = arquivoXLSX.createDataFormat();
+			CellStyle dateStyle = cell.getCellStyle();
+			dateStyle.setDataFormat(df.getFormat("HH:mm"));
 			cell.setCellStyle(dateStyle);
         }
         else if(tipo.equals("String"))
@@ -510,6 +518,53 @@ public class AcoesArquivoExcel {
 		
 		return data;
 	}
+	
+	public LocalDateTime getValorDaCelulaDateTime(int Linha, int Coluna, String formato)
+	{
+		Row linha = planilhaAtiva.getRow(Linha);
+		Cell celula = linha.getCell(Coluna);
+		LocalDateTime data = null;
+				
+		try
+		{
+		
+			if(celula == null || celula.getLocalDateTimeCellValue() == null)
+				return null;
+
+			data = celula.getLocalDateTimeCellValue();
+		}catch(Exception e)
+		{
+			String textoCelula = celula.getStringCellValue();
+			//System.out.println(textoCelula);
+			data = LocalDateTime.parse(textoCelula.substring(0, formato.length()), DateTimeFormatter.ofPattern(formato));
+		}
+		
+		return data;
+	}
+	
+	public LocalTime getValorDaCelulaTime(int Linha, int Coluna, String formato)
+	{
+		Row linha = planilhaAtiva.getRow(Linha);
+		Cell celula = linha.getCell(Coluna);
+		LocalTime data = null;
+				
+		try
+		{
+		
+			if(celula == null || celula.getLocalDateTimeCellValue() == null)
+				return null;
+
+			data = celula.getLocalDateTimeCellValue().toLocalTime();
+		}catch(Exception e)
+		{
+			String textoCelula = celula.getStringCellValue();
+			//System.out.println(textoCelula);
+			data = LocalTime.parse(textoCelula.substring(0, formato.length()), DateTimeFormatter.ofPattern(formato));
+		}
+		
+		return data;
+	}
+	
 	
 
 	public void copiarFormatoEntreLinhas(int indiceLinhaOrigem, int indiceLinhaDestino) 
