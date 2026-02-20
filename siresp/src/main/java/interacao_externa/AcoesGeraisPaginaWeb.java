@@ -1,6 +1,7 @@
 package interacao_externa;
 
 import java.time.Duration;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -92,7 +94,7 @@ public class AcoesGeraisPaginaWeb {
 			Select select = new Select(item);
 			select.selectByVisibleText(textoASelecionar);
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -117,6 +119,36 @@ public class AcoesGeraisPaginaWeb {
 				
 		return true;
 	}
+	
+
+	public void escolherEmSelect2(WebDriver driver, String idDiv, String idText, String idOpcoes, String textoParaDigitar, String opcaoExata) {
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		    
+	    // 1) Abrir o dropdown
+	    WebElement pseudoSelect = driver.findElement(By.id(idDiv));
+	    pseudoSelect.click();
+	
+	    // 2) Campo de busca interno do Select2
+	    WebElement search = driver.findElement(By.id(idText));
+	    search.click();
+	    search.clear();
+	    digitarEmInputText(driver, idText, textoParaDigitar);
+	
+	    // 3) Aguardar a lista de opções aparecer (geralmente ul.select2-results__options > li)
+	    By listaOpcoes = By.id(idOpcoes);
+	    wait.until(ExpectedConditions.visibilityOfElementLocated(listaOpcoes));
+	
+	    // 4) Selecionar por texto exato (ou use ENTER se o primeiro item já for o desejado)
+	    for (WebElement li : driver.findElements(listaOpcoes)) {
+	        if (opcaoExata.equalsIgnoreCase(li.getText().trim())) {
+	            li.click();
+	            return;
+	        }
+	    }
+	    // Fallback: ENTER para selecionar o primeiro realçado
+	    search.sendKeys(Keys.ENTER);
+	}
+
 	
 	public boolean removerSelecaoItemSelectPeloValue(WebDriver driverPagina, String id, String valueASelecionar)
 	{
@@ -206,6 +238,36 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean digitarEmInputText(WebDriver driverPagina, String id, String texto)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.id(id));
+			item.click();
+			
+
+			for (char c : texto.toCharArray()) {
+			    item.sendKeys(String.valueOf(c));
+			    try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // pausa entre teclas (100 ms ou outro valor)
+			}
+
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+	
+	
 	public boolean preencherInputTextByName(WebDriver driverPagina, String name, String texto)
 	{
 
@@ -238,6 +300,20 @@ public class AcoesGeraisPaginaWeb {
 		}
 				
 		return valor;
+	}
+	
+	public ArrayList<String> obterTextoLIDeULPorClassName(WebDriver driverPagina, String classname)
+	{
+		WebElement ul = driverPagina.findElement(By.className(classname)); 
+		List<WebElement> itens = ul.findElements(By.tagName("li"));
+		
+		ArrayList<String> lista = new ArrayList<String>();
+		
+		for (WebElement li : itens) {
+		    lista.add(li.getText().trim());
+		}
+		
+		return lista;
 	}
 	
 	public boolean clicarBotaoSubmit(WebDriver driverPagina, String id, String idOrName)
@@ -341,6 +417,54 @@ public class AcoesGeraisPaginaWeb {
 		return tabela;
 	}
 	
+	public ArrayList<ArrayList<String>> obterTableComIdDaLinhaEPaginacao(WebDriver driverPagina, String id, String ClassNamePaginacao)
+	{
+		ArrayList<ArrayList<String>> tabela = new ArrayList();
+		
+		ArrayList<String> paginas = obterTextoLIDeULPorClassName(driverPagina, ClassNamePaginacao);
+		
+		int ultimaPagina = Integer.parseInt(paginas.get(paginas.size() - 1));
+		
+		for(int pagina = 1; pagina <= ultimaPagina; pagina++)
+		{
+			if(pagina > 1)
+				clicarLinkPeloTitulo(driverPagina, String.valueOf(pagina));
+			
+			try
+			{		
+				WebElement table = driverPagina.findElement(By.id(id));
+		
+	
+				List<WebElement> linhas = table.findElements(By.tagName("tr"));
+	
+	            // Percorrer as linhas e imprimir o conteúdo das células
+	            for (WebElement tr : linhas) {
+	            	
+	            	ArrayList<String> linha = new ArrayList();
+	            	
+	            	linha.add(tr.getAttribute("id"));
+	            	
+	                List<WebElement> colunas = tr.findElements(By.tagName("td"));
+	                for (WebElement coluna : colunas) {
+	                    
+	                	linha.add(coluna.getText());
+	                }
+	                                
+	                tabela.add(linha);
+	            }
+	
+				
+			}catch(Exception e) {
+				System.out.println(e.toString());
+				System.out.println("Chegou aqui");
+				return null;
+			}
+			
+		}
+		
+		return tabela;
+	}
+	
 	public List<WebElement> obterSubmits(WebDriver driverPagina, String className)
 	{
 		List<WebElement> submits;
@@ -395,7 +519,58 @@ public class AcoesGeraisPaginaWeb {
 	
 			radio.click();
 			
-		}catch(Error e) {
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean clicarSpanPeloTitulo(WebDriver driverPagina, String titulo)
+	{
+		try
+		{	
+			WebElement radio = driverPagina.findElement(By.xpath("//span[normalize-space()='" + titulo + "']"));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			radio.click();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean clicarLinkPeloTitulo(WebDriver driverPagina, String titulo)
+	{
+		try
+		{	
+			WebElement item = driverPagina.findElement(By.xpath("//a[normalize-space()='" + titulo + "']"));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			item.click();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean clicarBotaoPeloTitulo(WebDriver driverPagina, String titulo)
+	{
+		try
+		{	
+			WebElement botao = driverPagina.findElement(By.xpath("//button[normalize-space()='" + titulo + "']"));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			botao.click();
+			
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -435,7 +610,7 @@ public class AcoesGeraisPaginaWeb {
 			
 			visivel = div.isDisplayed();
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -453,7 +628,7 @@ public class AcoesGeraisPaginaWeb {
 			
 			visivel = elemento.isDisplayed();
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}

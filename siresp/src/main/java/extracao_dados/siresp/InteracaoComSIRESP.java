@@ -14,6 +14,7 @@ import modulos.CensoLeitos;
 import modulos.FilaNominalAgendamentosPendentes;
 import modulos.FilaNominalCDRNaoRegulada;
 import modulos.FilaNominalSolicitacoesPendentes;
+import modulos.LoginsSirespDigital;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -73,6 +74,7 @@ public class InteracaoComSIRESP
         		, "Filas Nominais Regulada (Agendamentos)"
         		, "Filas Nominais Regulada (Solicitacoes)"
         		, "Absenteísmo"
+        		, "Perfis novo SIRESP"
         		}; 
         int escolha = JOptionPane.showOptionDialog( null, "Escolha uma opção:", "Caixa de Seleção", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0] );
         
@@ -100,6 +102,11 @@ public class InteracaoComSIRESP
         {
         	Absenteismo absenteismo = new Absenteismo();
         	absenteismo.verificarAbsenteismo(driver);
+        }
+        else if(escolha == 5)
+        {
+        	LoginsSirespDigital loginSIRESP = new LoginsSirespDigital();
+        	loginSIRESP.tratarLoginsSIRESP(driver);
         }
         
         driver.quit();
