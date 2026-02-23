@@ -561,6 +561,23 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean clicarLinkPeloXPath(WebDriver driverPagina, String xpath)
+	{
+		try
+		{	
+			WebElement item = driverPagina.findElement(By.xpath(xpath));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			item.click();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public boolean clicarBotaoPeloTitulo(WebDriver driverPagina, String titulo)
 	{
 		try
