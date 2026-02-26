@@ -35,6 +35,7 @@ import dadosGerais.ParametrosArquivoAbsenteismoConsultaBaixado;
 import dadosGerais.ParametrosArquivoAbsenteismoExameBaixado;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
+import dadosGerais.ParametrosArquivoLoginSIRESP;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
@@ -48,6 +49,8 @@ import modelosDados.EntidadeCDRNaoRegulada;
 import modelosDados.EntidadeLeito;
 import modelosDados.LinhaCensoLeitos;
 import modelosDados.MesFormatado;
+import modelosDados.PerfisUsuariosSIRESP;
+import modelosDados.PerfisUsuariosSIRESP.Usuario;
 import modelosDados.UsuarioSIRESP;
 import modelosDados.UsuariosVinculadosSIRESP;
 import tratamentoDeArquivos.Arquivo;
@@ -56,7 +59,8 @@ import tratamentoDeArquivos.Pasta;
 public class LoginsSirespDigital {
 	
 	private String pastaComDadosDeLogin;
-	private Map<String, Boolean> usuariosDistintos;;
+	private Map<String, Boolean> usuariosDistintos;
+	private Map<String, String> tabelaDeParaPerfis;
 	
 	
 	public String tratarLoginsSIRESP(WebDriver driver)
@@ -65,8 +69,8 @@ public class LoginsSirespDigital {
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
 		
 		criarListaUsuariosDistintos();
+		criarDeParaPerfis();
 		
-	
 		driver.get("https://digital.siresp.saude.sp.gov.br/pt_BR/usuario-acl/");
 		
 		pastaComDadosDeLogin = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados dos logins a serem criados", "Pasta", JOptionPane.QUESTION_MESSAGE).trim();
@@ -114,86 +118,130 @@ public class LoginsSirespDigital {
 		String usuarioAtual = "";
 		String loginAtual = "";
 		
-		ArrayList<UsuariosVinculadosSIRESP> usuariosVinculados = new ArrayList<UsuariosVinculadosSIRESP>();
+		
+		ArrayList<PerfisUsuariosSIRESP> listaDePerfisAProcessar = new ArrayList<PerfisUsuariosSIRESP>();
 		
 		for(UsuarioSIRESP usuario : usuarios)
 		{
+			int indexUnidade = 0;
 			
-			if(!unidadeAtual.equals(usuario.getUnidade()))
+			while(indexUnidade < listaDePerfisAProcessar.size() && !listaDePerfisAProcessar.get(indexUnidade).getUnidade().equals(usuario.getUnidade()))
+			{				
+				indexUnidade++;
+			}
+			
+			if(indexUnidade == listaDePerfisAProcessar.size())
 			{
-				if(usuariosVinculados.size() > 0)
-				{
-					//removerPerfisDeCadaUsuarioVinculado
-					//salvarEmArquivoOsRegistrosRemovidos
-					//zerarListaDeUsuariosVinculado
+				listaDePerfisAProcessar.add(new PerfisUsuariosSIRESP());
+				listaDePerfisAProcessar.get(indexUnidade).setUnidade(usuario.getUnidade());
+			}
+
+			int indexUsuario = 0;
+			
+			while(indexUsuario < listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size() && 
+					!((usuario.getLogin() != null && !usuario.getLogin().equals("") && listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin().equals(usuario.getLogin())) || 
+					  (usuario.getNomeCompleto() != null && !usuario.getNomeCompleto().equals("") &&  listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getNomeCompleto().equals(usuario.getNomeCompleto()))))
+			{
+				indexUsuario++;
+			}
+			
+			if(indexUsuario < listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size())
+			{
+				listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
+				listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(usuario.getPerfil());
+			}
+			else
+			{
+				listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
+				listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
+				listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(usuario.getPerfil());
+			}
+			
+		}
+		
+		
+		ArrayList<UsuariosVinculadosSIRESP> usuariosVinculados = new ArrayList<UsuariosVinculadosSIRESP>();
+				
+		for(PerfisUsuariosSIRESP linhaPerfil : listaDePerfisAProcessar)
+		{
+			
+
+			if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_UNIDADE.getTextoIdentificador()))
+				paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_UNIDADE.getTextoIdentificador());
+			
+			
+			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_UNIDADE.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_UNIDADE_VALOR_SELECIONE.getTextoIdentificador());
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+			
+			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_UNIDADE.getTextoIdentificador(), linhaPerfil.getUnidade());
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+			
+			if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_MODULO.getTextoIdentificador()))
+			{
+				paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_MODULO.getTextoIdentificador());
+				paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_TEXTO_FILTRO_MODULO.getTextoIdentificador(), linhaPerfil.getUsuarios().get(0).getUsuario().getModulo());
+			}
+				
+			int tentativas = 0;
+			boolean selecionado;
+			do
+			{
+				try {
+					Thread.sleep(1500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
-				if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_UNIDADE.getTextoIdentificador()))
-					paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_UNIDADE.getTextoIdentificador());
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_UNIDADE.getTextoIdentificador(), usuario.getUnidade());
+				selecionado = paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_MODULO.getTextoIdentificador(), linhaPerfil.getUsuarios().get(0).getUsuario().getModulo().toUpperCase());
+				tentativas++;
 				
-				if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_MODULO.getTextoIdentificador()))
+			}while(tentativas <= 5 && !selecionado);
+			
+			
+//			paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_PERFIL.getTextoIdentificador());
+//			paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_TEXTO_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
+//			
+//			tentativas = 0;
+//			do
+//			{
+//				try {
+//					Thread.sleep(1500);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				selecionado = paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
+//				tentativas++;
+//			}while(tentativas <= 5 && !selecionado);
+			
+			if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_PERFIL.getTextoIdentificador()))
+				paginaWeb.escolherEmSelect2(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_TEXTO_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_OPCOES_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
+			else
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
+			
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+			
+			paginaWeb.clicarSpanPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.TITULO_TELA_INTERNA_SPAN_USUARIO.getTextoIdentificador());
+			
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+			
+			paginaWeb.clicarBotaoPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.TITULO_TELA_INTERNA_BOTAO_PESQUISAR.getTextoIdentificador());
+			
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+			
+			ArrayList<ArrayList<String>> tabela = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
+			
+			int numLinha = 0;
+			for(ArrayList<String> linha : tabela)
+			{
+				System.out.println(numLinha++);
+				for(String celula : linha)
+					System.out.println(celula + "\t");
+				System.out.println();
+				
+				if(linha.size() > 1)
 				{
-					paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_MODULO.getTextoIdentificador());
-					paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_TEXTO_FILTRO_MODULO.getTextoIdentificador(), usuario.getModulo());
-				}
-					
-				int tentativas = 0;
-				boolean selecionado;
-				do
-				{
-					try {
-						Thread.sleep(1500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					selecionado = paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_MODULO.getTextoIdentificador(), usuario.getModulo().toUpperCase());
-					tentativas++;
-					
-				}while(tentativas <= 5 && !selecionado);
-				
-				
-	//			paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_PERFIL.getTextoIdentificador());
-	//			paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_TEXTO_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
-	//			
-	//			tentativas = 0;
-	//			do
-	//			{
-	//				try {
-	//					Thread.sleep(1500);
-	//				} catch (InterruptedException e) {
-	//					// TODO Auto-generated catch block
-	//					e.printStackTrace();
-	//				}
-	//				selecionado = paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
-	//				tentativas++;
-	//			}while(tentativas <= 5 && !selecionado);
-				
-				if(paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_PERFIL.getTextoIdentificador()))
-					paginaWeb.escolherEmSelect2(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_TEXTO_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INICIAL_OPCOES_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
-				else
-					paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TELA_INTERNA_FILTRO_PERFIL.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.TEXTO_FILTRO_PERFIL.getTextoIdentificador());
-				
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
-				
-				paginaWeb.clicarSpanPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.TITULO_TELA_INTERNA_SPAN_USUARIO.getTextoIdentificador());
-				
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
-				
-				paginaWeb.clicarBotaoPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.TITULO_TELA_INTERNA_BOTAO_PESQUISAR.getTextoIdentificador());
-				
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
-				
-				ArrayList<ArrayList<String>> tabela = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
-				
-				for(ArrayList<String> linha : tabela)
-				{
-					for(String celula : linha)
-						System.out.println(celula + "\t");
-					System.out.println();
-					
 					UsuariosVinculadosSIRESP usuarioVinculado = new UsuariosVinculadosSIRESP();
 					usuarioVinculado.setIdLinha(linha.get(0));
 					usuarioVinculado.setNome(linha.get(1));
@@ -207,53 +255,84 @@ public class LoginsSirespDigital {
 			
 			UsuariosVinculadosSIRESP usuarioVinculado = null;
 			
-			if(usuario.getLogin() != null && usuario.getLogin().equals(""))
-				usuarioVinculado = encontrarUsuarioVinculadoPorLogin(usuariosVinculados, usuario.getLogin());
-			
-			
-			if(usuarioVinculado == null)
+			for(Usuario usuario : linhaPerfil.getUsuarios())
 			{
-				ArrayList<UsuariosVinculadosSIRESP> usuariosVinculadosComMesmoNome = encontrarUsuarioVinculadoPorNome(usuariosVinculados, usuario.getNomeCompleto());
-				
-				if(usuariosVinculadosComMesmoNome.size() == 1)
-					usuarioVinculado = usuariosVinculadosComMesmoNome.get(0);
-				else if(usuariosVinculadosComMesmoNome.size() > 1)
+				if(!usuario.getUsuario().getExecutado().equals(ParametrosArquivoLoginSIRESP.TEXTO_CONFIRMACAO_EXECUTADO.getDescricao()))
 				{
-					for(UsuariosVinculadosSIRESP usuarioComMesmoNome : usuariosVinculadosComMesmoNome)
-					{
-						if(ehUsuarioDistinto(usuarioComMesmoNome.getLogin()))
-							usuarioVinculado = usuarioComMesmoNome;
-					}
+					if(usuario.getUsuario().getLogin() != null && !usuario.getUsuario().getLogin().equals(""))
+						usuarioVinculado = encontrarUsuarioVinculadoPorLogin(usuariosVinculados, usuario.getUsuario().getLogin());
+					
 					if(usuarioVinculado == null)
-						usuarioVinculado = usuariosVinculadosComMesmoNome.get(0);
+					{
+						ArrayList<UsuariosVinculadosSIRESP> usuariosVinculadosComMesmoNome = encontrarUsuarioVinculadoPorNome(usuariosVinculados, usuario.getUsuario().getNomeCompleto());
+						
+						if(usuariosVinculadosComMesmoNome.size() == 1)
+							usuarioVinculado = usuariosVinculadosComMesmoNome.get(0);
+						else if(usuariosVinculadosComMesmoNome.size() > 1)
+						{
+							for(UsuariosVinculadosSIRESP usuarioComMesmoNome : usuariosVinculadosComMesmoNome)
+							{
+								if(ehUsuarioDistinto(usuarioComMesmoNome.getLogin()))
+									usuarioVinculado = usuarioComMesmoNome;
+							}
+							if(usuarioVinculado == null)
+								usuarioVinculado = usuariosVinculadosComMesmoNome.get(0);
+						}
+					}
+					
+					if(usuarioVinculado == null)
+					{
+						cadastrarUsuarioNoSIRESP(driver, paginaWeb, usuario.getUsuario());
+		
+						ArrayList<ArrayList<String>> tabelaUsuario = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
+						
+						//atribuirPerfil
+						//atribuirLoginAtual
+					}
+					else
+					{
+						ArrayList<UsuariosVinculadosSIRESP> usuariosVinculadosComMesmoNome = encontrarUsuarioVinculadoPorNome(usuariosVinculados, usuario.getUsuario().getNomeCompleto());
+						
+						ArrayList<String> perfis = usuario.getPerfis();
+						
+						for(UsuariosVinculadosSIRESP usuarioVinculadoPorNome : usuariosVinculadosComMesmoNome)
+						{
+							if(usuarioVinculadoPorNome.getLogin().equals(usuario.getUsuario().getLogin()))
+							{
+							
+								paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_PESQUISAR_USUARIO_POR_LOGIN.getTextoIdentificador(), usuarioVinculadoPorNome.getLogin());
+								
+								paginaWeb.clicarBotaoPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.TITULO_TELA_INTERNA_BOTAO_PESQUISAR.getTextoIdentificador());
+								while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+								
+								paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_DROP_DOWN_LINHA_USUARIO.getTextoIdentificador());
+								paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_EDITAR_PERFIL_USUARIO.getTextoIdentificador());
+								while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+								
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+								
+								
+								paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_VOLTAR_NOVO_USUARIO.getTextoIdentificador());
+								while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
+							}
+						}
+						
+												
+						//editarCadastro
+						//atribuirPerfisAoUsuario
+						
+						//atribuirLoginAtual
+						//removerUsuarioVinculadoDaListaDeUsuariosVinculadosSIRESP
+					}
 				}
 			}
-			
-			if(usuarioVinculado == null)
-			{
-				cadastrarUsuarioNoSIRESP(driver, paginaWeb, usuario);
 
-				ArrayList<ArrayList<String>> tabela = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
-				
-				
-				
-				//atribuirPerfil
-				//atribuirLoginAtual
-			}
-			else
-			{
-				//seHaMaisCadastrosComMesmoNome
-				//buscarPerfisCadastradosParaOUsuarioNosOutrosNomes
-				
-				//editarCadastro
-				//atribuirPerfisAoUsuario
-				
-				//atribuirLoginAtual
-				//removerUsuarioVinculadoDaListaDeUsuariosVinculadosSIRESP
-			}
-			
-			unidadeAtual = usuario.getUnidade();
-			usuarioAtual = usuario.getNomeCompleto();
 			break;
 			
 		}
@@ -264,8 +343,7 @@ public class LoginsSirespDigital {
 	
 	private void cadastrarUsuarioNoSIRESP(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, UsuarioSIRESP usuario)
 	{
-		paginaWeb.clicarLinkPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_NOVO_USUARIO.getTextoIdentificador());
-		
+		paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_NOVO_USUARIO.getTextoIdentificador());
 		while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
 		
 		paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_NOME.getTextoIdentificador(), usuario.getNomeCompleto());
@@ -322,7 +400,7 @@ public class LoginsSirespDigital {
 	{
 		usuariosDistintos = new HashMap<String, Boolean>();
 		
-		usuariosDistintos.put("DANIBDSANTOS", true);
+		usuariosDistintos.put("DABSANTOS", true);
 		usuariosDistintos.put("EMANARIN", false);
 		usuariosDistintos.put("DVAMARAL", false);
 		usuariosDistintos.put("KXSILVA", true);
@@ -335,8 +413,29 @@ public class LoginsSirespDigital {
 		usuariosDistintos.put("AFBASSETTO", true);
 		usuariosDistintos.put("VBFSILVA", true);
 		usuariosDistintos.put("VIGUIMARAES", false);
-		usuariosDistintos.put("VABERNI", true);
+		usuariosDistintos.put("VBERNI", true);
 		usuariosDistintos.put("LODCOSTA", true);
+	}
+	
+	private void criarDeParaPerfis()
+	{
+		tabelaDeParaPerfis = new HashMap<String, String>();
+		
+		tabelaDeParaPerfis.put("Ambulatorial", "1 | AMBULATORIAL");
+		tabelaDeParaPerfis.put("1 | AMBULATORIAL", "Ambulatorial");
+		tabelaDeParaPerfis.put("1|AMBULATORIAL", "Ambulatorial");
+		tabelaDeParaPerfis.put("Solicitante", "SOLICITANTE_-_MRA | SOLICITANTE");
+		tabelaDeParaPerfis.put("SOLICITANTE_-_MRA | SOLICITANTE", "Solicitante");
+		tabelaDeParaPerfis.put("SOLICITANTE_-_MRA|SOLICITANTE", "Solicitante");
+		tabelaDeParaPerfis.put("Regulador", "REGULADOR | REGULADOR");
+		tabelaDeParaPerfis.put("REGULADOR | REGULADOR", "Regulador");
+		tabelaDeParaPerfis.put("REGULADOR|REGULADOR", "Regulador");
+		tabelaDeParaPerfis.put("Gestor de Acessos", "GESTOR_DE_ACESSOS | GESTOR DE ACESSOS");
+		tabelaDeParaPerfis.put("GESTOR_DE_ACESSOS | GESTOR DE ACESSOS", "Gestor de Acessos");
+		tabelaDeParaPerfis.put("GESTOR_DE_ACESSOS|Gestor de acessos", "Gestor de Acessos");
+		tabelaDeParaPerfis.put("Executante", "EXECUTANTE_-_MRA | EXECUTANTE");
+		tabelaDeParaPerfis.put("EXECUTANTE_-_MRA | EXECUTANTE", "Executante");
+		tabelaDeParaPerfis.put("EXECUTANTE_-_MRA|EXECUTANTE", "Executante");
 	}
 	
 	private boolean ehUsuarioDistinto(String login)

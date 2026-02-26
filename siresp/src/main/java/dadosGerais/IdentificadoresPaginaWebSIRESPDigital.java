@@ -30,8 +30,8 @@ public enum IdentificadoresPaginaWebSIRESPDigital {
 	CLASS_NAME_TELA_INTERNA_PAGINACAO(15, "pagination"),
 	
 	XPATH_BOTAO_EDITAR_LINHA_USUARIO(16, ""),
-	XPATH_BOTAO_DROP_DOWN_LINHA_USUARIO(17, ""),
-	XPATH_BOTAO_EDITAR_PERFIL_USUARIO(18, ""),
+	XPATH_BOTAO_DROP_DOWN_LINHA_USUARIO(17, "//button[@class='btn btn-sm btn-default dropdown-toggle']"),
+	XPATH_BOTAO_EDITAR_PERFIL_USUARIO(18, "//a[@class='perfil']"),
 	XPATH_BOTAO_NOVO_USUARIO(19, "//a[@class='btn btn-primary']"),
 	XPATH_BOTAO_SIM_EDITAR_CADASTRO_EXISTENTE(20, "//button[@type='button'][normalize-space()='Sim']"),
 	
@@ -42,11 +42,26 @@ public enum IdentificadoresPaginaWebSIRESPDigital {
 	ID_TEXT_USUARIO_CELULAR(24, "duosystem_corebundle_usuario_celular"),
 	ID_TEXT_USUARIO_SENHA(25, "duosystem_corebundle_usuario_senha"),
 	ID_TEXT_USUARIO_CONFIRMAR_SENHA(26, "duosystem_corebundle_usuario_confirmarSenha"),
+	ID_TEXT_PESQUISAR_USUARIO_POR_LOGIN(27, "duosystem_corebundle_usuario_login"),
 
 	ID_BOTAO_CADASTRAR_USUARIO(27, "btnAdicionar"),
 	ID_BOTAO_ATUALIZAR_USUARIO(27, "btnAdicionar"),
 	XPATH_BOTAO_VOLTAR_NOVO_USUARIO(28, "//a[@class='btn btn-default']"),
 	
+	MASCARA_PARA_ITENS_DINAMICOS(29, "###"),
+	
+	ID_DINAMICO_MODULO_LOGIN(29, "duosystem_corebundle_usuario_usuarioUnidadeServicoSistemaPerfis_" + MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador() + "_sistema"),
+	ID_DINAMICO_PERFIL_LOGIN(29, "duosystem_corebundle_usuario_usuarioUnidadeServicoSistemaPerfis_" + MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador() + "_perfil"),
+	ID_DINAMICO_HORARIO_LOGIN(29, "duosystem_corebundle_usuario_usuarioUnidadeServicoSistemaPerfis_" + MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador() + "_horario"),
+	
+	CLASS_NAME_LINHA_PERFIL(29, "row tag"),
+	XPATH_CLASS_NAME_LINHA_PERFIL_VISIVEL(29, "//*[contains(concat(' ', normalize-space(@class), ' '), ' row ') and contains(concat(' ', normalize-space(@class), ' '), ' tag ') and not(contains(concat(' ', normalize-space(@class), ' '), ' hide '))]"),
+	CLASS_NAME_LINHA_PERFIL_OCULTA(29, "row tag hide"),
+	XPATH_CLASS_NAME_TODAS_LINHAS(29, "//*[contains(concat(' ', normalize-space(@class), ' '), ' row ') and contains(concat(' ', normalize-space(@class), ' '), ' tag ')]"),
+	
+	PREFIXO_ID_LINHA_PERFIL(29, "row"),
+	
+	TEXTO_FILTRO_UNIDADE_VALOR_SELECIONE(10, "SELECIONE"),
 	TEXTO_FILTRO_MODULO(10, "AMBULATORIAL"),
 	TEXTO_FILTRO_PERFIL(11, "GESTOR DE ACESSOS");
 	

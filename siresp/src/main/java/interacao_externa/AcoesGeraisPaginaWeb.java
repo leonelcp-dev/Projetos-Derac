@@ -227,7 +227,7 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{		
 			WebElement item = driverPagina.findElement(By.id(id));
-	
+			item.clear();
 			item.sendKeys(texto);
 			
 		}catch(Error e) {
@@ -311,6 +311,48 @@ public class AcoesGeraisPaginaWeb {
 		
 		for (WebElement li : itens) {
 		    lista.add(li.getText().trim());
+		}
+		
+		return lista;
+	}
+	
+	public ArrayList<String> encontrarIDsPorClassName(WebDriver driverPagina, String classname)
+	{
+		
+		List<WebElement> elements = driverPagina.findElements(By.className(classname)); 
+		
+		ArrayList<String> lista = new ArrayList<String>();
+		
+		for (WebElement element : elements) {
+		    lista.add(element.getAttribute("id"));
+		}
+		
+		return lista;
+	}
+	
+	public ArrayList<String> encontrarIDsPorClassNameCSSSelector(WebDriver driverPagina, String classname)
+	{
+		
+		List<WebElement> elements = driverPagina.findElements(By.cssSelector(classname)); 
+		
+		ArrayList<String> lista = new ArrayList<String>();
+		
+		for (WebElement element : elements) {
+		    lista.add(element.getAttribute("id"));
+		}
+		
+		return lista;
+	}
+	
+	public ArrayList<String> encontrarIDsPorXPath(WebDriver driverPagina, String xpath)
+	{
+		
+		List<WebElement> elements = driverPagina.findElements(By.xpath(xpath)); 
+		
+		ArrayList<String> lista = new ArrayList<String>();
+		
+		for (WebElement element : elements) {
+		    lista.add(element.getAttribute("id"));
 		}
 		
 		return lista;

@@ -33,6 +33,23 @@ public class Arquivo {
 		return true;
 	}
 	
+
+	public boolean CopiarArquivo(String caminhoDoDestino)
+	{
+        Path destino = Paths.get(caminhoDoDestino);
+
+        try {
+			Files.copy(arquivo, destino, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+        
+        return true;
+	}
+
+	
 	public boolean renomear(String novoNome)
 	{
 		try
