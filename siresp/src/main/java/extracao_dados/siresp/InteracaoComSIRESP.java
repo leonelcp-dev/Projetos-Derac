@@ -10,6 +10,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import modulos.AbrirGoogleChrome;
 import modulos.Absenteismo;
+import modulos.CadastroUsuarioSIRESPDigital;
 import modulos.CensoLeitos;
 import modulos.FilaNominalAgendamentosPendentes;
 import modulos.FilaNominalCDRNaoRegulada;
@@ -105,8 +106,8 @@ public class InteracaoComSIRESP
         }
         else if(escolha == 5)
         {
-        	LoginsSirespDigital loginSIRESP = new LoginsSirespDigital();
-        	loginSIRESP.tratarLoginsSIRESP(driver);
+        	CadastroUsuarioSIRESPDigital cadastroSIRESP = new CadastroUsuarioSIRESPDigital();
+        	cadastroSIRESP.cadastrarListaDeAcessosSIRESP(driver);
         }
         
         driver.quit();

@@ -8,8 +8,19 @@ import java.util.stream.Collectors;
 public enum ParametrosArquivoLoginSIRESP {
 		
 	
+	INDICE_COLUNA_LOGIN(0, 11, "Login", "", ""),
+	INDICE_COLUNA_EXECUTADO(0, 12, "Executado", "", ""),
+	INDICE_COLUNA_METODO(0, 13, "Método", "", ""),
+	INDICE_COLUNA_OBSERVACAO(0, 14, "Observação", "", ""),
+	INDICE_COLUNA_STATUS(0, 15, "Status", "", ""),
 	EXTENSAO_ARQUIVO_LOGIN(0, 0, "xlsx", "", ""),
-	TEXTO_CONFIRMACAO_EXECUTADO(0, 0, "Ok", "", "");
+	TEXTO_CONFIRMACAO_EXECUTADO(0, 0, "ok", "", ""),
+	TEXTO_METODO_EXECUTADO(0, 0, "Automático", "", ""),
+	TEXTO_HORARIO(0, 0, "Sem Restrição", "", ""),
+	TEXTO_SENHA_PROVISORIA(0, 0, "Mudar@123", "", ""),
+	TEXTO_PERFIL_JA_VINCULADO(0, 0, "Perfil já vinculado", "", ""),
+	NOME_PLANILHA_ATIVA(0, 0, "Planilha1", "", ""),
+	TEXTO_ERRO_AO_CADASTRAR_USUARIO(0, 0, "Erro ao cadastrar usuário", "", "");
 	
 
 	private int idUnico;

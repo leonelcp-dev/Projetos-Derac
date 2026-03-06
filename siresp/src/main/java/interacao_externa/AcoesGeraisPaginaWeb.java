@@ -90,10 +90,63 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{		
 			WebElement item = driverPagina.findElement(By.id(id));
-	
+			
 			Select select = new Select(item);
 			select.selectByVisibleText(textoASelecionar);
 			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+
+	public boolean selecionarItemSelectComEvento(WebDriver driver, String id, String textoASelecionar) {
+	    try {
+	        WebElement selectEl = driver.findElement(By.id(id));
+	
+	        Select select = new Select(selectEl);
+	        select.selectByVisibleText(textoASelecionar);
+	
+	        // dispara eventos que frameworks esperam
+	        JavascriptExecutor js = (JavascriptExecutor) driver;
+	        js.executeScript(
+	            "var sel = arguments[0];" +
+	            "sel.dispatchEvent(new Event('change', {bubbles: true}));" +
+	            "sel.dispatchEvent(new Event('input',  {bubbles: true}));" +
+	            "sel.dispatchEvent(new Event('blur',   {bubbles: true}));",
+	            selectEl
+	        );
+	
+	        return true;
+	
+	    } catch (Exception e) {
+	        System.out.println("Erro: " + e);
+	        return false;
+	    }
+	}
+
+	
+	public boolean selecionarItemSelectULLIPeloDataValueDeUmaLinha(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
+	{
+
+		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+		
+		try
+		{		
+			WebElement linha = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xPathLinha)));
+			
+			WebElement opcao = wait.until(
+			    ExpectedConditions.elementToBeClickable(
+			        linha.findElement(By.cssSelector("li[data-value='" + textoASelecionar + "']"))
+			    )
+			);
+			
+			opcao.click();
+			
+						
 		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
@@ -244,9 +297,9 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{		
 			WebElement item = driverPagina.findElement(By.id(id));
-			item.click();
+			//item.click();
 			
-
+			item.clear();
 			for (char c : texto.toCharArray()) {
 			    item.sendKeys(String.valueOf(c));
 			    try {
@@ -304,13 +357,36 @@ public class AcoesGeraisPaginaWeb {
 	
 	public ArrayList<String> obterTextoLIDeULPorClassName(WebDriver driverPagina, String classname)
 	{
-		WebElement ul = driverPagina.findElement(By.className(classname)); 
-		List<WebElement> itens = ul.findElements(By.tagName("li"));
-		
+		int tentativas = 0;
+		boolean executado = false;
 		ArrayList<String> lista = new ArrayList<String>();
 		
-		for (WebElement li : itens) {
-		    lista.add(li.getText().trim());
+		while(tentativas < 10 && !executado)
+		{
+			
+			try
+			{
+				WebElement ul = driverPagina.findElement(By.className(classname)); 
+				List<WebElement> itens = ul.findElements(By.tagName("li"));
+				
+				for (WebElement li : itens) {
+				    lista.add(li.getText().trim());
+				}
+				
+				executado = true;
+				
+			}catch(Exception e)
+			{
+				tentativas++;
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException x) {
+					// TODO Auto-generated catch block
+					x.printStackTrace();
+				}
+				
+			}
 		}
 		
 		return lista;
@@ -465,43 +541,46 @@ public class AcoesGeraisPaginaWeb {
 		
 		ArrayList<String> paginas = obterTextoLIDeULPorClassName(driverPagina, ClassNamePaginacao);
 		
-		int ultimaPagina = Integer.parseInt(paginas.get(paginas.size() - 1));
-		
-		for(int pagina = 1; pagina <= ultimaPagina; pagina++)
+		if(paginas.size() > 0)
 		{
-			if(pagina > 1)
-				clicarLinkPeloTitulo(driverPagina, String.valueOf(pagina));
+			int ultimaPagina = Integer.parseInt(paginas.get(paginas.size() - 1));
 			
-			try
-			{		
-				WebElement table = driverPagina.findElement(By.id(id));
-		
-	
-				List<WebElement> linhas = table.findElements(By.tagName("tr"));
-	
-	            // Percorrer as linhas e imprimir o conteúdo das células
-	            for (WebElement tr : linhas) {
-	            	
-	            	ArrayList<String> linha = new ArrayList();
-	            	
-	            	linha.add(tr.getAttribute("id"));
-	            	
-	                List<WebElement> colunas = tr.findElements(By.tagName("td"));
-	                for (WebElement coluna : colunas) {
-	                    
-	                	linha.add(coluna.getText());
-	                }
-	                                
-	                tabela.add(linha);
-	            }
-	
+			for(int pagina = 1; pagina <= ultimaPagina; pagina++)
+			{
+				if(pagina > 1)
+					clicarLinkPeloTitulo(driverPagina, String.valueOf(pagina));
 				
-			}catch(Exception e) {
-				System.out.println(e.toString());
-				System.out.println("Chegou aqui");
-				return null;
-			}
+				try
+				{		
+					WebElement table = driverPagina.findElement(By.id(id));
 			
+		
+					List<WebElement> linhas = table.findElements(By.tagName("tr"));
+		
+		            // Percorrer as linhas e imprimir o conteúdo das células
+		            for (WebElement tr : linhas) {
+		            	
+		            	ArrayList<String> linha = new ArrayList();
+		            	
+		            	linha.add(tr.getAttribute("id"));
+		            	
+		                List<WebElement> colunas = tr.findElements(By.tagName("td"));
+		                for (WebElement coluna : colunas) {
+		                    
+		                	linha.add(coluna.getText());
+		                }
+		                                
+		                tabela.add(linha);
+		            }
+		
+					
+				}catch(Exception e) {
+					System.out.println(e.toString());
+					System.out.println("Chegou aqui");
+					return null;
+				}
+				
+			}
 		}
 		
 		return tabela;
@@ -620,6 +699,29 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean clicarLinkPeloXPathDeLinhaEspecifica(WebDriver driverPagina, String idLinha, String xpath)
+	{
+		try
+		{	
+			WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+			
+			// 1) Linha
+			WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//tr[@id='" + idLinha + "']"))
+			);
+			
+			// 2) Editar
+			WebElement item = wait.until(ExpectedConditions.elementToBeClickable(row.findElement(By.xpath(xpath))));
+			item.click();
+			
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public boolean clicarBotaoPeloTitulo(WebDriver driverPagina, String titulo)
 	{
 		try
@@ -693,6 +795,60 @@ public class AcoesGeraisPaginaWeb {
 		}
 		
 		return visivel;
+	}
+	
+	public boolean elementoEstaVisivelPeloXPATH(WebDriver driverPagina, String xpath)
+	{
+		boolean visivel;
+		
+		try
+		{	
+			WebElement elemento = driverPagina.findElement(By.xpath(xpath));
+			
+			visivel = elemento.isDisplayed();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return visivel;
+	}
+	
+	public boolean elementoEstaHabilitado(WebDriver driverPagina, String id)
+	{
+		boolean habilitado;
+		
+		try
+		{	
+			WebElement elemento = driverPagina.findElement(By.id(id));
+			
+			habilitado = elemento.isEnabled() && elemento.isDisplayed();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return habilitado;
+	}
+	
+	public boolean elementoEstaVazio(WebDriver driverPagina, String id)
+	{
+		boolean vazio;
+		
+		try
+		{	
+			WebElement elemento = driverPagina.findElement(By.id(id));
+			
+			vazio = elemento.getAttribute("Value").equals("");
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return vazio;
 	}
 	
 	private void aguardarElementosSobrepostos(WebDriver driverPagina, String id, String value)

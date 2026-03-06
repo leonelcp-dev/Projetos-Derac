@@ -37,11 +37,11 @@ public class PerfisUsuariosSIRESP {
 	public class Usuario
 	{
 		private UsuarioSIRESP usuario;
-		private ArrayList<String> perfis;
+		private ArrayList<PerfilSIRESP> perfis;
 		
 		public Usuario()
 		{
-			setPerfis(new ArrayList<String>());
+			setPerfis(new ArrayList<PerfilSIRESP>());
 		}
 
 		public UsuarioSIRESP getUsuario() {
@@ -52,11 +52,11 @@ public class PerfisUsuariosSIRESP {
 			this.usuario = usuarios;
 		}
 
-		public ArrayList<String> getPerfis() {
+		public ArrayList<PerfilSIRESP> getPerfis() {
 			return perfis;
 		}
 
-		public void setPerfis(ArrayList<String> perfis) {
+		public void setPerfis(ArrayList<PerfilSIRESP> perfis) {
 			this.perfis = perfis;
 		}
 	}

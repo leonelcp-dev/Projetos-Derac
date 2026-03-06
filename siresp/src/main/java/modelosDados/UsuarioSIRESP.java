@@ -3,8 +3,8 @@ package modelosDados;
 
 public class UsuarioSIRESP {
 
-    @ExcelColumn(header = "Prioridade")
-    private Integer prioridade;
+    @ExcelColumn(header = "Indice")
+    private String prioridade;
 
     @ExcelColumn(header = "Unidade")
     private String unidade;
@@ -30,11 +30,11 @@ public class UsuarioSIRESP {
     @ExcelColumn(header = "Perfil do Login")
     private String perfil;
 
-    @ExcelColumn(header = "Horário de Acesso ao Portal")
+    @ExcelColumn(header = "Horário")
     private String horarioAcesso;
 
     // Nome de usuário que será criado
-    @ExcelColumn(header = "Criação de Login")
+    @ExcelColumn(header = "Login")
     private String criacaoLogin;
     
     @ExcelColumn(header = "Módulo")
@@ -45,14 +45,19 @@ public class UsuarioSIRESP {
 
     @ExcelColumn(header = "Observação")
     private String observacao;
-
     
-    public void setPrioridade(Integer prioridade)
+//    @ExcelColumn(header = "Data de Criação")
+    private String dataDeCriacao;
+    
+    @ExcelColumn(header = "Status")
+    private String status;
+    
+    public void setPrioridade(String prioridade)
     {
     	this.prioridade = prioridade;
     }
     
-    public Integer getPrioridade()
+    public String getPrioridade()
     {
     	return prioridade;
     }
@@ -186,6 +191,26 @@ public class UsuarioSIRESP {
     public String getObservacao()
     {
     	return observacao;
+    }
+    
+    public void setDataDeCriacao(String dataDeCriacao)
+    {
+    	this.dataDeCriacao = dataDeCriacao;
+    }
+    
+    public String getDataDeCriacao()
+    {
+    	return dataDeCriacao;
+    }
+    
+    public void setStatus(String status)
+    {
+    	this.status = status;
+    }
+    
+    public String getStatus()
+    {
+    	return status;
     }
 
 }
