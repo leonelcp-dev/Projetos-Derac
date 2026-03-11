@@ -291,6 +291,22 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean tirarFocoDoCampoTexto(WebDriver driverPagina, String id)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.id(id));
+			item.sendKeys(Keys.TAB);
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 	public boolean digitarEmInputText(WebDriver driverPagina, String id, String texto)
 	{
 

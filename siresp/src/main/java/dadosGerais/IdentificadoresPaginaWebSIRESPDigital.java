@@ -60,6 +60,7 @@ public enum IdentificadoresPaginaWebSIRESPDigital {
 	XPATH_BOTAO_VOLTAR_NOVO_PERFIL_USUARIO(28, "//a[@class='btn btn-default']"),
 	XPATH_BOTAO_VOLTAR_EDICAO_USUARIO(28, "//a[normalize-space()='Voltar']"),
 	XPATH_ALERTA_ERRO_INCLUIR_USUARIO(28, "//div[@class='alert alert-info']"),
+	XPATH_CONFIRMACAO_SUCESSO_INCLUIR_USUARIO(28, "//div[@class='alert alert-success']"),
 	
 	MASCARA_PARA_ITENS_DINAMICOS(29, "###"),
 	SEGUNDA_MASCARA_PARA_ITENS_DINAMICOS(29, "@@@"),
@@ -71,9 +72,17 @@ public enum IdentificadoresPaginaWebSIRESPDigital {
 	ID_DIV_DINAMICA_ACESSOS_MODULO(29, "2"),
 	ID_DIV_DINAMICA_ACESSOS_PERFIL(29, "3"),
 	
+	SPAN_DEMAIS_LINHAS(29, "span[1]"),
+	SPAN_DEMAIS_LINHA_LINHA_ZERO(29, "span[3]"),
+	
+	XPATH_MODAL_ALERTA_NOMES_ABREVIADOS(29, "/html/body/div[2]"),
+	XPATH_BOTAO_CONFIRMAR_NOMES_ABREVIADOS(29, "/html/body/div[2]/div/div/div[3]/button[2]"),
+	
 	XPATH_DINAMICO_LINHA_PERFIL(29, "/html/body/div[1]/div[1]/section[2]/div[1]/form[1]/div[1]/fieldset[1]/div[1]/div[" + MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador() + "]/div[2]/div[" + SEGUNDA_MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador() + "]/div[1]/span[1]/ul[1]"),
 	COMPLEMENTO_XPATH_DIV_LINHA_PERFIL_MODULO(23, "//div[2]//div[2]//div[1]//span[1]//ul[1]"),
 	COMPLEMENTO_XPATH_DIV_LINHA_PERFIL_PERFIL(23, "//div[3]//div[2]//div[1]//span[1]//ul[1]"),
+	COMPLEMENTO_XPATH_DIV_LINHA_PERFIL_MODULO_LINHA_ZERO(23, "//div[2]//div[2]//div[1]//span[3]//ul[1]"),
+	COMPLEMENTO_XPATH_DIV_LINHA_PERFIL_PERFIL_LINHA_ZERO(23, "//div[3]//div[2]//div[1]//span[3]//ul[1]"),
 	//XPATH_DINAMICO_LINHA_PERFIL(29, "//div[@id='email-fields-list-row']/div[" + MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador() + "]/div[1]"),
 	XPATH_BOTAO_EDITAR_USUARIO(29, ".//a[normalize-space(.)='Editar' and contains(concat(' ', normalize-space(@class), ' '), ' btn ') and contains(concat(' ', normalize-space(@class), ' '), ' btn-sm ') and contains(concat(' ', normalize-space(@class), ' '), ' btn-default ')]"),
 	
@@ -91,7 +100,7 @@ public enum IdentificadoresPaginaWebSIRESPDigital {
 	
 	TEXTO_SEM_RESTRICAO_DE_HORARIO(10, "Não"),
 	
-	TEXTO_FILTRO_STATUS_VALOR_ATIVO(10, "ATIVO"),
+	TEXTO_FILTRO_STATUS_VALOR_ATIVO(10, "Ativo"),
 	TEXTO_FILTRO_UNIDADE_VALOR_SELECIONE(10, "SELECIONE"),
 	TEXTO_FILTRO_MODULO(10, "AMBULATORIAL"),
 	TEXTO_FILTRO_PERFIL(11, "Gestor de acessos");

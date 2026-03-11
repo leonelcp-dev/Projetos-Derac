@@ -95,6 +95,8 @@ public class CadastroUsuarioSIRESPDigital {
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
 		ArrayList<String> usuariosJaEditados = new ArrayList<String>();
 		
+		int multiplicadorTempo = 4;
+		
 		criarListaUsuariosDistintos();
 		criarDeParaPerfis();
 		
@@ -153,58 +155,62 @@ public class CadastroUsuarioSIRESPDigital {
 		{
 			int indexUnidade = 0;
 			
-			while(indexUnidade < listaDePerfisAProcessar.size() && !listaDePerfisAProcessar.get(indexUnidade).getUnidade().equals(usuario.getUnidade()))
-			{				
-				indexUnidade++;
-			}
+			if(!usuario.getExecutado().equals(ParametrosArquivoLoginSIRESP.TEXTO_CONFIRMACAO_EXECUTADO.getDescricao()) && usuario.getObservacao().equals(""))
+			{
 			
-			if(indexUnidade == listaDePerfisAProcessar.size())
-			{
-				listaDePerfisAProcessar.add(new PerfisUsuariosSIRESP());
-				listaDePerfisAProcessar.get(indexUnidade).setUnidade(usuario.getUnidade());
-				listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
-				listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(0).setUsuario(usuario);
-				listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(0).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
-			}
-			else
-			{
-	
-				int indexUsuario = 0;
+				while(indexUnidade < listaDePerfisAProcessar.size() && !listaDePerfisAProcessar.get(indexUnidade).getUnidade().equals(usuario.getUnidade()))
+				{				
+					indexUnidade++;
+				}
 				
-				if(usuario.getLogin() != null && !usuario.getLogin().equals(""))
+				if(indexUnidade == listaDePerfisAProcessar.size())
 				{
-					boolean encontrado = false;
-					
-					while(indexUsuario < listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size() && !encontrado)
-					{
-						System.out.println(listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
-						if(listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin().equals(usuario.getLogin()) || listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getNomeCompleto().equals(usuario.getNomeCompleto()))
-							encontrado = true;
-						else
-							indexUsuario++;
-					}
-						
-					if(indexUsuario < listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size())
-					{
-						System.out.println("Incrementa usuário: " + listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
-						listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
-						listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
-					}
-					else
-					{
-						listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
-						listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
-						listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
-						System.out.println("Novo usuário: " + listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
-					}
+					listaDePerfisAProcessar.add(new PerfisUsuariosSIRESP());
+					listaDePerfisAProcessar.get(indexUnidade).setUnidade(usuario.getUnidade());
+					listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
+					listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(0).setUsuario(usuario);
+					listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(0).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
 				}
 				else
 				{
-					System.out.println("Veio por null: " + listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
-					listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
-					indexUsuario = listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size() - 1;
-					listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
-					listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
+		
+					int indexUsuario = 0;
+					
+					if(usuario.getLogin() != null && !usuario.getLogin().equals(""))
+					{
+						boolean encontrado = false;
+						
+						while(indexUsuario < listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size() && !encontrado)
+						{
+							//System.out.println(listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
+							if(listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin().equals(usuario.getLogin()) || listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getNomeCompleto().equals(usuario.getNomeCompleto()))
+								encontrado = true;
+							else
+								indexUsuario++;
+						}
+							
+						if(indexUsuario < listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size())
+						{
+							System.out.println("Incrementa usuário: " + listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
+							listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
+							listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
+						}
+						else
+						{
+							listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
+							listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
+							listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
+							System.out.println("Novo usuário: " + listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
+						}
+					}
+					else
+					{
+						System.out.println("Veio por null: " + listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getUsuario().getLogin() + " - " + usuario.getLogin());
+						listaDePerfisAProcessar.get(indexUnidade).novoUsuario();
+						indexUsuario = listaDePerfisAProcessar.get(indexUnidade).getUsuarios().size() - 1;
+						listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).setUsuario(usuario);
+						listaDePerfisAProcessar.get(indexUnidade).getUsuarios().get(indexUsuario).getPerfis().add(new PerfilSIRESP(usuario.getModulo(), usuario.getPerfil(), usuario.getHorarioDeAcessoAoPortal(), linhaExcel));
+					}
 				}
 			}
 			
@@ -249,7 +255,7 @@ public class CadastroUsuarioSIRESPDigital {
 				do
 				{
 					try {
-						Thread.sleep(1500);
+						Thread.sleep(multiplicadorTempo * 1000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -277,7 +283,7 @@ public class CadastroUsuarioSIRESPDigital {
 					do
 					{
 						try {
-							Thread.sleep(1500);
+							Thread.sleep(multiplicadorTempo * 1000);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -338,30 +344,30 @@ public class CadastroUsuarioSIRESPDigital {
 					{
 						cadastradoComSucesso = cadastrarUsuarioNoSIRESP(driver, paginaWeb, usuario.getUsuario());
 						
-						ArrayList<ArrayList<String>> tabelaUsuario = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
-						usuariosVinculados = obterUsuariosTabelaSIRESP(tabelaUsuario);
-						//usuariosVinculados = obterUsuariosTabelaSIRESP(tabelaUsuario);
-						usuarioVinculado = usuariosVinculados.get(0);
+						if(cadastradoComSucesso)
+						{
+							ArrayList<ArrayList<String>> tabelaUsuario = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
+							usuariosVinculados = obterUsuariosTabelaSIRESP(tabelaUsuario);
+							//usuariosVinculados = obterUsuariosTabelaSIRESP(tabelaUsuario);
+							usuarioVinculado = usuariosVinculados.get(0);
+						}
 					}
 					
 					
 					if(cadastradoComSucesso)
 					{
-						if(!usuariosJaEditados.contains(usuario.getUsuario().getLogin()))
+						
+						if(!usuarioVinculado.getEmail().toUpperCase().equals(usuario.getUsuario().getEmail().toUpperCase()))
 						{
-							usuariosJaEditados.add(usuario.getUsuario().getLogin());
-							
 							//ArrayList<ArrayList<String>> tabelaUsuario = paginaWeb.obterTableComIdDaLinhaEPaginacao(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TABELA_TELA_INTERNA_PESQUISA_USUARIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.CLASS_NAME_TELA_INTERNA_PAGINACAO.getTextoIdentificador());
 							
 							paginaWeb.clicarLinkPeloXPathDeLinhaEspecifica(driver, usuarioVinculado.getIdLinha(), IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_EDITAR_USUARIO.getTextoIdentificador());
 							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
 							
-							//editarUsuario
-							
-							paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_VOLTAR_EDICAO_USUARIO.getTextoIdentificador());
+							editarCadastroDeUsuarioNoSIRESP(driver, paginaWeb, usuario.getUsuario());
 							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
 						}
-						
+				
 						
 						//obtendo perfis de acesso do usuário
 						paginaWeb.clicarLinkPeloXPathDeLinhaEspecifica(driver, usuarioVinculado.getIdLinha(), IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_DROP_DOWN_LINHA_USUARIO.getTextoIdentificador());
@@ -389,32 +395,43 @@ public class CadastroUsuarioSIRESPDigital {
 								
 								if(paginaWeb.elementoEstaVazio(driver, idModuloLinha))
 								{
-									System.out.println(idModuloLinha);
+									System.out.println("Vazio: " + idModuloLinha);
 									linhaTabelaPerfilUsuario = Integer.parseInt(numeroLinha);
 								}
 								else
 								{
-									System.out.println(idModuloLinha);
+									System.out.println("Preenchido: " + idModuloLinha);
 									String modulo = paginaWeb.obterTextoInputText(driver, idModuloLinha);
 									
 									String idPerfilLinha = IdentificadoresPaginaWebSIRESPDigital.ID_DINAMICO_PERFIL_LOGIN.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESPDigital.MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), numeroLinha);
 									String perfil = paginaWeb.obterTextoInputText(driver, idPerfilLinha);
 									perfisExistentes.add(tabelaDeParaPerfis.get(modulo) + "|" + tabelaDeParaPerfis.get(perfil));
 									
-									System.out.println("Adicionado: " + tabelaDeParaPerfis.get(modulo) + "|" + tabelaDeParaPerfis.get(perfil));
+									System.out.println("Adicionado como já existente: " + tabelaDeParaPerfis.get(modulo) + "|" + tabelaDeParaPerfis.get(perfil));
 								}
 							}
+							else
+								linhaTabelaPerfilUsuario = 0;
 							
 						}
 						
 						int contPerfil = 0;
 						int numeroDaLinha = 0;
+						int perfisAtribuidos = 0;
 						
 						if(linhaTabelaPerfilUsuario >= 0)
 						{
-							paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESPDigital.ID_BOTAO_ADICIONAR_PERFIL.getTextoIdentificador(), "id");
+							//paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESPDigital.ID_BOTAO_ADICIONAR_PERFIL.getTextoIdentificador(), "id");
 							
 							adicionarPerfilAoUsuarioNaUnidade(driver, paginaWeb, usuario.getPerfis().get(0), numeroDaLinha);
+							
+							perfisAtribuidos++;
+							
+							celulas.add(new CelulaExcel(usuario.getPerfis().get(0).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_LOGIN.getIndice(), usuarioVinculado.getLogin().toLowerCase(), "String"));
+							celulas.add(new CelulaExcel(usuario.getPerfis().get(0).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_EXECUTADO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_CONFIRMACAO_EXECUTADO.getDescricao(), "String"));
+							celulas.add(new CelulaExcel(usuario.getPerfis().get(0).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_METODO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_METODO_EXECUTADO.getDescricao(), "String"));
+							celulas.add(new CelulaExcel(usuario.getPerfis().get(0).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_OBSERVACAO.getIndice(), "", "String"));
+							celulas.add(new CelulaExcel(usuario.getPerfis().get(0).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_STATUS.getIndice(), "", "String"));
 							
 							contPerfil++;
 						}
@@ -423,16 +440,19 @@ public class CadastroUsuarioSIRESPDigital {
 							linhasPerfisVisiveis = paginaWeb.encontrarIDsPorXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_CLASS_NAME_TODAS_LINHAS.getTextoIdentificador());
 							String numeroLinha = linhasPerfisVisiveis.get(linhasPerfisVisiveis.size()-1).replace(IdentificadoresPaginaWebSIRESPDigital.PREFIXO_ID_LINHA_PERFIL.getTextoIdentificador(), "");
 							
-							numeroDaLinha = Integer.parseInt(numeroLinha);
+							if(numeroLinha.equals(""))
+								numeroDaLinha = -1;
+							else
+								numeroDaLinha = Integer.parseInt(numeroLinha);
 						}
 						
-						int perfisAtribuidos = 0;
+						
 						
 						for(;contPerfil < usuario.getPerfis().size(); contPerfil++)
 						{
-							if(!perfisExistentes.contains(usuario.getUsuario().getModulo() + "|" + usuario.getUsuario().getPerfil()))
+							if(!perfisExistentes.contains(usuario.getPerfis().get(contPerfil).getModulo() + "|" + usuario.getPerfis().get(contPerfil).getPerfil()))
 							{
-								System.out.println("Atribuir: " + usuario.getUsuario().getModulo() + "|" + usuario.getUsuario().getPerfil());
+								System.out.println("Atribuir: " + usuario.getPerfis().get(contPerfil).getModulo() + "|" + usuario.getPerfis().get(contPerfil).getPerfil());
 								
 								paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESPDigital.ID_BOTAO_ADICIONAR_PERFIL.getTextoIdentificador(), "id");
 								numeroDaLinha++;
@@ -440,9 +460,9 @@ public class CadastroUsuarioSIRESPDigital {
 								adicionarPerfilAoUsuarioNaUnidade(driver, paginaWeb, usuario.getPerfis().get(contPerfil), numeroDaLinha);
 								perfisAtribuidos++;
 								
-								perfisExistentes.add(usuario.getUsuario().getModulo() + "|" + usuario.getUsuario().getPerfil());
+								perfisExistentes.add(usuario.getPerfis().get(contPerfil).getModulo() + "|" + usuario.getPerfis().get(contPerfil).getPerfil());
 								
-								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_EXECUTADO.getIndice(), usuarioVinculado.getLogin(), "String"));
+								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_LOGIN.getIndice(), usuarioVinculado.getLogin().toLowerCase(), "String"));
 								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_EXECUTADO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_CONFIRMACAO_EXECUTADO.getDescricao(), "String"));
 								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_METODO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_METODO_EXECUTADO.getDescricao(), "String"));
 								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_OBSERVACAO.getIndice(), "", "String"));
@@ -450,7 +470,7 @@ public class CadastroUsuarioSIRESPDigital {
 							}
 							else
 							{
-								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_EXECUTADO.getIndice(), usuarioVinculado.getLogin(), "String"));
+								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_LOGIN.getIndice(), usuarioVinculado.getLogin().toLowerCase(), "String"));
 								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_EXECUTADO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_CONFIRMACAO_EXECUTADO.getDescricao(), "String"));
 								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_METODO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_METODO_EXECUTADO.getDescricao(), "String"));
 								celulas.add(new CelulaExcel(usuario.getPerfis().get(contPerfil).getLinhaExcel(), ParametrosArquivoLoginSIRESP.INDICE_COLUNA_OBSERVACAO.getIndice(), ParametrosArquivoLoginSIRESP.TEXTO_PERFIL_JA_VINCULADO.getDescricao(), "String"));
@@ -529,43 +549,60 @@ public class CadastroUsuarioSIRESPDigital {
 			
 			System.out.println(idModuloLinha);
 			
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			String xPathDivLinha = "";
+			String xPathAcesso = "";
 			
-			paginaWeb.digitarEmInputText(driver, idModuloLinha, perfis.getModulo());
-			
-			String xPathAcesso = IdentificadoresPaginaWebSIRESPDigital.XPATH_DINAMICO_LINHA_PERFIL.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESPDigital.MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), numeroLinhaDiv);
-			String xPathDivLinha = xPathAcesso.replace(IdentificadoresPaginaWebSIRESPDigital.SEGUNDA_MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_DIV_DINAMICA_ACESSOS_MODULO.getTextoIdentificador());
-			
-			System.out.println(xPathDivLinha);
-			
-			paginaWeb.selecionarItemSelectULLIPeloDataValueDeUmaLinha(driver, xPathDivLinha, tabelaDeParaPerfis.get(perfis.getModulo()));
+			do {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
+				paginaWeb.digitarEmInputText(driver, idModuloLinha, perfis.getModulo());
+				
+				xPathAcesso = IdentificadoresPaginaWebSIRESPDigital.XPATH_DINAMICO_LINHA_PERFIL.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESPDigital.MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), numeroLinhaDiv);
+				xPathDivLinha = xPathAcesso.replace(IdentificadoresPaginaWebSIRESPDigital.SEGUNDA_MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_DIV_DINAMICA_ACESSOS_MODULO.getTextoIdentificador());
+				
+				if(numeroDaLinha == 0)
+					xPathDivLinha = xPathDivLinha.replace(IdentificadoresPaginaWebSIRESPDigital.SPAN_DEMAIS_LINHAS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.SPAN_DEMAIS_LINHA_LINHA_ZERO.getTextoIdentificador());
+					
+				System.out.println(xPathDivLinha);
+
+				paginaWeb.selecionarItemSelectULLIPeloDataValueDeUmaLinha(driver, xPathDivLinha, tabelaDeParaPerfis.get(perfis.getModulo()));
+				
+			}while(!paginaWeb.obterTextoInputText(driver, idModuloLinha).equals(tabelaDeParaPerfis.get(perfis.getModulo())));
+			
 			String idPerfilLinha = IdentificadoresPaginaWebSIRESPDigital.ID_DINAMICO_PERFIL_LOGIN.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESPDigital.MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), numeroLinhaCampos);
 			
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			paginaWeb.digitarEmInputText(driver, idPerfilLinha, perfis.getPerfil());
-			
-//			try {
-//				Thread.sleep(3000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			do
+			{
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				paginaWeb.digitarEmInputText(driver, idPerfilLinha, perfis.getPerfil());
+				
+	//			try {
+	//				Thread.sleep(3000);
+	//			} catch (InterruptedException e) {
+	//				// TODO Auto-generated catch block
+	//				e.printStackTrace();
+	//			}
+	
+				xPathDivLinha = xPathAcesso.replace(IdentificadoresPaginaWebSIRESPDigital.SEGUNDA_MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_DIV_DINAMICA_ACESSOS_PERFIL.getTextoIdentificador());
+				
 
-			xPathDivLinha = xPathAcesso.replace(IdentificadoresPaginaWebSIRESPDigital.SEGUNDA_MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.ID_DIV_DINAMICA_ACESSOS_PERFIL.getTextoIdentificador());
-			paginaWeb.selecionarItemSelectULLIPeloDataValueDeUmaLinha(driver, xPathDivLinha, tabelaDeParaPerfis.get(perfis.getPerfil()));
-			
+				if(numeroDaLinha == 0)
+					xPathDivLinha = xPathDivLinha.replace(IdentificadoresPaginaWebSIRESPDigital.SPAN_DEMAIS_LINHAS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESPDigital.SPAN_DEMAIS_LINHA_LINHA_ZERO.getTextoIdentificador());
+				
+				
+				paginaWeb.selecionarItemSelectULLIPeloDataValueDeUmaLinha(driver, xPathDivLinha, tabelaDeParaPerfis.get(perfis.getPerfil()));
+			}while(!paginaWeb.obterTextoInputText(driver, idPerfilLinha).equals(tabelaDeParaPerfis.get(perfis.getPerfil())));
 			
 			String idHorarioLinha = IdentificadoresPaginaWebSIRESPDigital.ID_DINAMICO_HORARIO_LOGIN.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESPDigital.MASCARA_PARA_ITENS_DINAMICOS.getTextoIdentificador(), numeroLinhaCampos);
 			paginaWeb.selecionarItemSelect(driver, idHorarioLinha, IdentificadoresPaginaWebSIRESPDigital.TEXTO_SEM_RESTRICAO_DE_HORARIO.getTextoIdentificador());
@@ -612,6 +649,18 @@ public class CadastroUsuarioSIRESPDigital {
 		while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
 		
 		paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_NOME.getTextoIdentificador(), usuario.getNomeCompleto());
+		paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_NOME.getTextoIdentificador());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_MODAL_ALERTA_NOMES_ABREVIADOS.getTextoIdentificador()))
+			paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_CONFIRMAR_NOMES_ABREVIADOS.getTextoIdentificador());
+		
 		paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_EMAIL.getTextoIdentificador(), usuario.getEmail());
 		paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_RG.getTextoIdentificador(), usuario.getRG());
 		paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_CPF.getTextoIdentificador(), usuario.getCPF());
@@ -640,6 +689,17 @@ public class CadastroUsuarioSIRESPDigital {
 		if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_ALERTA_ERRO_INCLUIR_USUARIO.getTextoIdentificador()))
 		{
 			paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_NOME.getTextoIdentificador(), usuario.getNomeCompleto());
+			paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_NOME.getTextoIdentificador());
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_MODAL_ALERTA_NOMES_ABREVIADOS.getTextoIdentificador()))
+				paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_BOTAO_CONFIRMAR_NOMES_ABREVIADOS.getTextoIdentificador());
+			
 			paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_EMAIL.getTextoIdentificador(), usuario.getEmail());
 			paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_RG.getTextoIdentificador(), usuario.getRG());
 			paginaWeb.digitarEmInputText(driver, IdentificadoresPaginaWebSIRESPDigital.ID_TEXT_USUARIO_CPF.getTextoIdentificador(), usuario.getCPF());
@@ -658,6 +718,11 @@ public class CadastroUsuarioSIRESPDigital {
 		{
 			cadastradoComSucesso = false;
 		}
+		else if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESPDigital.XPATH_CONFIRMACAO_SUCESSO_INCLUIR_USUARIO.getTextoIdentificador()))
+		{
+			cadastradoComSucesso = false;
+		}
+		
 		
 		return cadastradoComSucesso;
 	}
