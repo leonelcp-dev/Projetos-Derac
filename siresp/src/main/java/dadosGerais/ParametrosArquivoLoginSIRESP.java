@@ -7,7 +7,17 @@ import java.util.stream.Collectors;
 
 public enum ParametrosArquivoLoginSIRESP {
 		
-	
+	INDICE_COLUNA_INDICE(0, 0, "Indice", "", ""),
+	INDICE_COLUNA_UNIDADE(0, 1, "Unidade", "", ""),
+	INDICE_COLUNA_NOME_COMPLETO(0, 2, "Nome Completo", "", ""),
+	INDICE_COLUNA_EMAIL(0, 3, "E-mail do colaborador", "", ""),
+	INDICE_COLUNA_RG(0, 4, "RG", "", ""),
+	INDICE_COLUNA_CPF(0, 5, "CPF", "", ""),
+	INDICE_COLUNA_TELEFONE(0, 6, "Número de telefone do colaborador", "", ""),
+	INDICE_COLUNA_SENHA_PROVISORIA(0, 7, "Senha provisória", "", ""),
+	INDICE_COLUNA_MODULO(0, 8, "Módulo", "", ""),
+	INDICE_COLUNA_PERFIL(0, 9, "Perfil do Login", "", ""),
+	INDICE_COLUNA_HORARIO(0, 10, "Horário", "", ""),
 	INDICE_COLUNA_LOGIN(0, 11, "Login", "", ""),
 	INDICE_COLUNA_EXECUTADO(0, 12, "Executado", "", ""),
 	INDICE_COLUNA_METODO(0, 13, "Método", "", ""),
@@ -18,9 +28,12 @@ public enum ParametrosArquivoLoginSIRESP {
 	TEXTO_METODO_EXECUTADO(0, 0, "Automático", "", ""),
 	TEXTO_HORARIO(0, 0, "Sem Restrição", "", ""),
 	TEXTO_SENHA_PROVISORIA(0, 0, "Mudar@123", "", ""),
+	TEXTO_SENHA_PROVISORIA_NAO_SE_APLICA(0, 0, "-----", "", ""),
 	TEXTO_PERFIL_JA_VINCULADO(0, 0, "Perfil já vinculado", "", ""),
-	NOME_PLANILHA_ATIVA(0, 0, "Planilha1", "", ""),
-	TEXTO_ERRO_AO_CADASTRAR_USUARIO(0, 0, "Erro ao cadastrar usuário", "", "");
+	NOME_PLANILHA_LOGINS(0, 0, "Perfis", "", ""),
+	NOME_PLANILHA_PROCESSADOS(0, 0, "Processados", "", ""),
+	TEXTO_ERRO_AO_CADASTRAR_USUARIO(0, 0, "Erro ao cadastrar usuário", "", ""),
+	TEXTO_UNIDADE_CONCLUIDA(0, 0, "Unidade concluída com sucesso", "", "");
 	
 
 	private int idUnico;

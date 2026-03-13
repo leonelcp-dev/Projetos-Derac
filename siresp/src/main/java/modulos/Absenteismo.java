@@ -85,17 +85,28 @@ public class Absenteismo {
 		
 		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados de Absenteismo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
-		String mes = JOptionPane.showInputDialog(null, "Qual o mês de referência?", "Mês de Referência", JOptionPane.QUESTION_MESSAGE).trim();
-		String ano = JOptionPane.showInputDialog(null, "Qual o ano de referência?", "Ano de Referência", JOptionPane.QUESTION_MESSAGE).trim();
+		String mes = JOptionPane.showInputDialog(null, "Qual o mês de análise?", "Mês de Referência", JOptionPane.QUESTION_MESSAGE).trim();
+		String ano = JOptionPane.showInputDialog(null, "Qual o ano de análise?", "Ano de Referência", JOptionPane.QUESTION_MESSAGE).trim();
 		
-		mesReferencia = Integer.parseInt(mes);
-		anoReferencia = Integer.parseInt(ano);
+		mesCompetencia = Integer.parseInt(mes);
+		anoCompetencia = Integer.parseInt(ano);
 		
 			
-		if(mesReferencia < 10)
-			dataFormatadaInicioReferencia = "01-0" + mes + "-" + ano;
+		if(mesCompetencia == 1)
+		{
+			mesReferencia = 12;
+			anoReferencia = anoCompetencia - 1;
+		}
 		else
-			dataFormatadaInicioReferencia = "01-" + mes + "-" + ano;
+		{
+			mesReferencia = mesCompetencia + 1;
+			anoReferencia = anoCompetencia;
+		}
+		
+		if(mesReferencia < 10)
+			dataFormatadaInicioReferencia = "01-0" + mesReferencia + "-" + anoReferencia;
+		else
+			dataFormatadaInicioReferencia = "01-" + mesReferencia + "-" + anoReferencia;
 		
 		dataInicioReferencia = LocalDate.parse(dataFormatadaInicioReferencia, formatoDataPaginaWeb);
 		
@@ -104,16 +115,7 @@ public class Absenteismo {
 		
 		//System.out.println(dataFormatadaPasta);
 		
-		if(mesReferencia == 12)
-		{
-			mesCompetencia = 1;
-			anoCompetencia = anoReferencia + 1;
-		}
-		else
-		{
-			mesCompetencia = mesReferencia + 1;
-			anoCompetencia = anoReferencia;
-		}
+		
 		
 		if(mesCompetencia < 10)
 			dataFormatadaInicioCompetencia = "01/0" + mesCompetencia + "/" + anoCompetencia;
@@ -126,7 +128,7 @@ public class Absenteismo {
 		dataFormatadaFinalCompetencia = dataFinalCompetencia.format(formatoDataArquivo);
 		
 		//definindo entidades para o censo de leitos
-		ArrayList<EntidadeAbsenteismo> entidades = lerEntidades(pastaDestinoArquivos + "\\unidadessolicitantes.csv");
+		ArrayList<EntidadeAbsenteismo> entidades = lerEntidades(pastaDestinoArquivos + "\\unidadessolicitantes.csv", anoCompetencia);
 		
 //		for(EntidadeAbsenteismo entidade : entidades)
 //		{
@@ -229,9 +231,11 @@ public class Absenteismo {
 		return "";	
 	}
 	
-	private ArrayList<EntidadeAbsenteismo> lerEntidades(String nomeArquivo)
+	private ArrayList<EntidadeAbsenteismo> lerEntidades(String nomeArquivo, int anoCompetencia)
 	{
 		ArrayList<EntidadeAbsenteismo> entidades = new ArrayList();
+		
+		String ano = String.valueOf(anoCompetencia);
 		
         try (Reader reader = new FileReader(nomeArquivo);
              CSVParser csvParser = new CSVParser(reader, CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").setHeader().setSkipHeaderRecord(true).build())) {
@@ -243,9 +247,10 @@ public class Absenteismo {
                 String unidade = registro.get("Unidade");
                 String distrito = registro.get("Distrito");
                 String nomeUnidadeSIRESP = registro.get("Nome SIRESP");
-                String nomeArquivoAbsenteismo = registro.get("Nome Arquivo") + ".xlsx";
+                String nomeParaGrafico = registro.get("Nome Gráfico");
+                String nomeArquivoAbsenteismo = registro.get("Nome Arquivo");
                 
-                entidades.add(new EntidadeAbsenteismo(cnes, unidade, distrito, nomeUnidadeSIRESP, nomeArquivoAbsenteismo));
+                entidades.add(new EntidadeAbsenteismo(cnes, unidade, distrito, nomeUnidadeSIRESP, nomeArquivoAbsenteismo, nomeParaGrafico, ano));
             }
             
             return entidades;
@@ -272,10 +277,10 @@ public class Absenteismo {
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_TIPO_CONSULTA_EXAME.getTextoIdentificador(), tiposDeBusca[i]);
 			
 			paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador());
-			paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataFormatadaInicioReferencia.replaceAll("-", ""));
+			paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataFormatadaInicioCompetencia.replaceAll("/", ""));
 					
 			paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador());
-			paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFormatadaFinalReferencia.replaceAll("-", ""));
+			paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFormatadaFinalCompetencia.replaceAll("/", ""));
 			
 			paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_ORDENACAO_RELATORIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO.getTextoIdentificador());
 			
@@ -334,7 +339,7 @@ public class Absenteismo {
 				AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + entidade.getNomeArquivoAbsenteismo(), 0);
 				
 				ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
-				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MES_DE_REFERENCIA.getIndice(), dataInicioCompetencia, "Date"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MES_DE_REFERENCIA.getIndice(), dataInicioCompetencia, "Date mes/ano"));
 				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_TEXTO_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TEXTO_MES_DE_REFERENCIA.getIndice(), "*ref. " + meses.getMeses().get(mesReferencia - 1).getMesDescricao() + " " + anoReferencia, "String"));
 				
 				arquivoConsolidado.gravarDadosEmCelula(meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao(), celulas, false, false, i, null);
@@ -360,11 +365,11 @@ public class Absenteismo {
 					
 					for(CorrelacaoColunasArquivosAbsenteismo coluna : colunasConsolidado)
 					{
-						System.out.println("ColunaSIRESP: " + coluna.getColunaSIRESP() + " Coluna Consolidado: " + coluna.getColunaConsolidado() + " Formato: " + coluna.getFormato());
+						//System.out.println("ColunaSIRESP: " + coluna.getColunaSIRESP() + " Coluna Consolidado: " + coluna.getColunaConsolidado() + " Formato: " + coluna.getFormato());
 						
 						if(arquivoSIRESP.ehCelulaVazia(linha, coluna.getColunaSIRESP()))
 						{
-							celulas.add(new CelulaExcel(linha, coluna.getColunaSIRESP(), "", "String"));
+							celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaSIRESP(), "", "String"));
 						}
 						else
 						{
@@ -395,8 +400,14 @@ public class Absenteismo {
 					
 					linhaArquivoConsolidado++;
 				}
+				arquivoConsolidado.forcarCalculos();
 				arquivoConsolidado.gravarDadosEmCelula(meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao(), celulas, true, false, ParametrosArquivoAbsenteismoConsolidado.LINHA_INICIAL_ARQUIVO_CONSOLIDADO.getIndice(), null);
+
+				Arquivo arquivoAApagar = new Arquivo(pastaDownloads, entidade.getArquivoBaixadoXLS());
+				arquivoAApagar.apagar();
 				
+				arquivoAApagar = new Arquivo(pastaDownloads, entidade.getArquivoBaixadoXLSX());
+				arquivoAApagar.apagar();
 			}
 			else
 				System.out.println("Não foi encontrado arquivo resultados para " + entidade.getNomeUnidadeSIRESP());
@@ -430,6 +441,104 @@ public class Absenteismo {
 //			ultimoRecente = arquivo.getNomeDoArquivo();
 		return "";
 		
+	}
+	
+	public String consolidarArquivoMunicipal(ArrayList<EntidadeAbsenteismo> entidades, int mesCompetencia)
+	{
+		int totalConsultasAgendadas = 0;
+		int totalFaltasEmConsultas = 0;
+		int totalExamesAgendados = 0;
+		int totalFaltasEmExames = 0;
+
+		String nomeDaPlanilha = meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao();
+		for(EntidadeAbsenteismo entidade : entidades)
+		{
+
+			AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + entidade.getNomeArquivoAbsenteismo(), 0);
+			arquivoConsolidado.abrirPlanilha(nomeDaPlanilha, 0);
+			
+			entidade.setQuantidadeConsultasAgendadas(arquivoConsolidado.obterValorInteiroDeUmaCelulaComFormula(nomeDaPlanilha, ParametrosArquivoAbsenteismoConsolidado.LINHA_TOTAL_CONSULTAS_AGENDADAS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TOTAL_CONSULTAS_AGENDADAS.getIndice()));
+		}
+		
+		return "";
+	}
+	
+	public String parametrizarArquivosVazios(WebDriver driver)
+	{			
+		formatoDataPaginaWeb = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		formatoDataArquivo = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+				
+		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
+		
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Relatório");
+		opcoes.add("Pacientes  >>");
+		opcoes.add("PC02 - Paciente X Solicitante");
+
+		
+		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
+		meses = new MesesFormatados();
+		
+		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados de Absenteismo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+		String ano = JOptionPane.showInputDialog(null, "Qual o ano de análise?", "Ano de Referência", JOptionPane.QUESTION_MESSAGE).trim();
+		
+		anoCompetencia = Integer.parseInt(ano);
+		
+		//definindo entidades para o censo de leitos
+		ArrayList<EntidadeAbsenteismo> entidades = lerEntidades(pastaDestinoArquivos + "\\unidadessolicitantes.csv", anoCompetencia);
+		pastaDestinoArquivos = pastaDestinoArquivos + "\\Absenteísmo\\" + anoCompetencia + "\\";
+		
+		for(EntidadeAbsenteismo entidade : entidades)
+		{
+		
+			AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + entidade.getNomeArquivoAbsenteismo(), 0);
+				
+			for(mesCompetencia = 1; mesCompetencia <= 12; mesCompetencia++)
+			{
+				if(mesCompetencia == 1)
+				{
+					mesReferencia = 12;
+					anoReferencia = anoCompetencia - 1;
+				}
+				else
+				{
+					mesReferencia = mesCompetencia - 1;
+					anoReferencia = anoCompetencia;
+				}
+				
+				if(mesReferencia < 10)
+					dataFormatadaInicioReferencia = "01-0" + mesReferencia + "-" + anoReferencia;
+				else
+					dataFormatadaInicioReferencia = "01-" + mesReferencia + "-" + anoReferencia;
+				
+				dataInicioReferencia = LocalDate.parse(dataFormatadaInicioReferencia, formatoDataPaginaWeb);
+				
+				dataFinalReferencia = dataInicioReferencia.with(TemporalAdjusters.lastDayOfMonth());
+				dataFormatadaFinalReferencia = dataFinalReferencia.format(formatoDataPaginaWeb);
+				
+				if(mesCompetencia < 10)
+					dataFormatadaInicioCompetencia = "01/0" + mesCompetencia + "/" + anoCompetencia;
+				else
+					dataFormatadaInicioCompetencia = "01/" + mesCompetencia + "/" + anoCompetencia;
+				
+				dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, formatoDataArquivo);
+				
+				dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
+				dataFormatadaFinalCompetencia = dataFinalCompetencia.format(formatoDataArquivo);
+				
+				ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+				
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MES_DE_REFERENCIA.getIndice(), dataInicioCompetencia, "Date mes/ano"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_TEXTO_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TEXTO_MES_DE_REFERENCIA.getIndice(), "*ref. " + meses.getMeses().get(mesReferencia - 1).getMesDescricao() + " " + anoReferencia, "String"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_NOME_UNIDADE.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_NOME_UNIDADE.getIndice(), entidade.getNomePadraoAbsenteismo(), "String"));
+				
+				arquivoConsolidado.gravarDadosEmCelula(meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao(), celulas, false, false, 0, null);
+				
+			}
+			arquivoConsolidado.editarTituloGrafico(ParametrosArquivoAbsenteismoConsolidado.NOME_PLANILHA_GRAFICO.getDescricao(), ParametrosArquivoAbsenteismoConsolidado.INDICE_DESENHO_GRAFICO_PLANILHA.getIndice(), entidade.getNomeParaGrafico());
+		}
+		
+		return "";	
 	}
 	
 	

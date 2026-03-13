@@ -33,6 +33,20 @@ public class Arquivo {
 		return true;
 	}
 	
+	public boolean apagar()
+	{
+		try
+		{
+		
+			Files.delete(arquivo);
+		}catch(IOException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
 
 	public boolean CopiarArquivo(String caminhoDoDestino)
 	{

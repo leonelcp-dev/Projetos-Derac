@@ -16,6 +16,7 @@ import modulos.FilaNominalAgendamentosPendentes;
 import modulos.FilaNominalCDRNaoRegulada;
 import modulos.FilaNominalSolicitacoesPendentes;
 import modulos.LoginsSirespDigital;
+import modulos.OfertaDemandaDeAcesso;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -28,6 +29,29 @@ public class InteracaoComSIRESP
     {
     	
     	//ChromeOptions options = new ChromeOptions();
+    	
+    	int escolha = -1;
+    	int maximoEscolha = 7;
+    	boolean abrirMenuInicial = false;
+    	
+    	if(args.length == 0)
+    	{
+    		abrirMenuInicial = true;
+    	}
+    	else
+    	{
+    		try
+    		{
+    			escolha = Integer.parseInt(args[0]);
+    			
+    			if(escolha < 0 || escolha > maximoEscolha)
+    				abrirMenuInicial = true;
+    			
+    		}catch(Exception e)
+    		{
+    			abrirMenuInicial = true;
+    		}
+    	}
     	
     	String nomeUsuario = System.getProperty("user.name");
     	
@@ -69,15 +93,18 @@ public class InteracaoComSIRESP
        
         System.out.println("Page Title: " + driver.getTitle());
         
-        String[] opcoes = {
-        		"Censo diário de Leitos"
-        		, "Filas Nominais CDR (Não Regulada)"
-        		, "Filas Nominais Regulada (Agendamentos)"
-        		, "Filas Nominais Regulada (Solicitacoes)"
-        		, "Absenteísmo"
-        		, "Perfis novo SIRESP"
-        		}; 
-        int escolha = JOptionPane.showOptionDialog( null, "Escolha uma opção:", "Caixa de Seleção", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0] );
+        if(abrirMenuInicial)
+        {
+	        String[] opcoes = {
+	        		"Censo diário de Leitos"
+	        		, "Filas Nominais CDR (Não Regulada)"
+	        		, "Filas Nominais Regulada (Agendamentos)"
+	        		, "Filas Nominais Regulada (Solicitacoes)"
+	        		, "Absenteísmo"
+	        		, "Perfis novo SIRESP"
+	        		}; 
+	        escolha = JOptionPane.showOptionDialog( null, "Escolha uma opção:", "Caixa de Seleção", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0] );
+        }
         
         if(escolha == 0)
         {
@@ -103,11 +130,22 @@ public class InteracaoComSIRESP
         {
         	Absenteismo absenteismo = new Absenteismo();
         	absenteismo.verificarAbsenteismo(driver);
+        	//absenteismo.parametrizarArquivosVazios(driver);
         }
         else if(escolha == 5)
         {
         	CadastroUsuarioSIRESPDigital cadastroSIRESP = new CadastroUsuarioSIRESPDigital();
         	cadastroSIRESP.cadastrarListaDeAcessosSIRESP(driver);
+        }
+        else if(escolha == 6)
+        {
+        	LoginsSirespDigital loginsSIRESP = new LoginsSirespDigital();
+        	loginsSIRESP.listarTodosAcessosSIRESP(driver);
+        }
+        else if(escolha == 7)
+        {
+        	OfertaDemandaDeAcesso ofertaDemanda = new OfertaDemandaDeAcesso();
+        	ofertaDemanda.calcularOfertaEDemanda(driver);
         }
         
         driver.quit();

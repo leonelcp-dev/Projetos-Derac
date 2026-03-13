@@ -87,6 +87,7 @@ public class CensoLeitos {
 		mesCompetencia = data.getMonthValue();
 		anoCompetencia = data.getYear();
 		
+	
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
@@ -128,6 +129,8 @@ public class CensoLeitos {
 		
 		if(rotinaCompleta.equals("Sim"))
 			consolidarArquivoZero(entidades);
+		
+		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";	
 	}

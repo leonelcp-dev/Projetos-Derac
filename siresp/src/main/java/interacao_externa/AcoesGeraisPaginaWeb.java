@@ -155,6 +155,32 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean selecionarItemSelectULLIPeloDataValueDeUmOption(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
+	{
+
+		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+		
+		try
+		{		
+			WebElement linha = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xPathLinha)));
+			
+			WebElement opcao = wait.until(
+			    ExpectedConditions.elementToBeClickable(
+			        linha.findElement(By.cssSelector("option[data-value='" + textoASelecionar + "']"))
+			    )
+			);
+			
+			opcao.click();
+			
+						
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 	public boolean selecionarItemSelectPeloValue(WebDriver driverPagina, String id, String valueASelecionar)
 	{
 
@@ -526,6 +552,42 @@ public class AcoesGeraisPaginaWeb {
 	
 
 			List<WebElement> linhas = table.findElements(By.tagName("tr"));
+
+            // Percorrer as linhas e imprimir o conteúdo das células
+            for (WebElement tr : linhas) {
+            	
+            	ArrayList<String> linha = new ArrayList();
+            	
+                List<WebElement> colunas = tr.findElements(By.tagName("td"));
+                for (WebElement coluna : colunas) {
+                    
+                	linha.add(coluna.getText());
+                }
+                                
+                tabela.add(linha);
+            }
+
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			System.out.println("Chegou aqui");
+			return null;
+		}
+		
+		return tabela;
+	}
+	
+	public ArrayList<ArrayList<String>> obterTablePeloXPath(WebDriver driverPagina, String xpath)
+	{
+		ArrayList<ArrayList<String>> tabela = new ArrayList();
+		
+		try
+		{		
+			WebElement table = driverPagina.findElement(By.xpath(xpath));
+	
+			WebElement tbody = table.findElement(By.tagName("tbody"));
+
+			List<WebElement> linhas = tbody.findElements(By.tagName("tr"));
 
             // Percorrer as linhas e imprimir o conteúdo das células
             for (WebElement tr : linhas) {

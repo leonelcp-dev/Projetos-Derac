@@ -39,6 +39,7 @@ public enum IdentificadoresPaginaWebSIRESPDigital {
 	XPATH_BOTAO_EDITAR_PERFIL_USUARIO(18, ".//a[contains(concat(' ', normalize-space(@class), ' '), ' perfil ')]"),
 	XPATH_BOTAO_NOVO_USUARIO(19, "//a[@class='btn btn-primary']"),
 	XPATH_BOTAO_SIM_EDITAR_CADASTRO_EXISTENTE(20, "//button[@type='button'][normalize-space()='Sim']"),
+	XPATH_SPAN_MENU_USUARIO(12, "//a[@title='USUÁRIO']//span[contains(text(),'Usuário')]"),
 	
 	ID_TEXT_USUARIO_NOME(20, "duosystem_corebundle_usuario_nome"),
 	ID_TEXT_USUARIO_EMAIL(21, "duosystem_corebundle_usuario_email"),

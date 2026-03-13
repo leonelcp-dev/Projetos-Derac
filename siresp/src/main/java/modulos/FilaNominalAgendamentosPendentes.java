@@ -135,6 +135,8 @@ public class FilaNominalAgendamentosPendentes {
 				System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade() + "(" + entidade.getDistrito() + ")");
 		}
 		
+		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		
 		return "";	
 	}
 	

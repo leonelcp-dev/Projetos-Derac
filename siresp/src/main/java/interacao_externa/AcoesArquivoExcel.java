@@ -2,11 +2,16 @@ package interacao_externa;
 
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.awt.List;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -57,6 +62,7 @@ public class AcoesArquivoExcel {
 			}
 			else
 			{
+				ZipSecureFile.setMinInflateRatio(0.0);
 				arquivoLeitura = new FileInputStream(nomeDoArquivo);
 	            arquivoXLSX = new XSSFWorkbook(arquivoLeitura); 
 	            abrirPlanilha(0, linhaBaseFormatacao);
@@ -301,6 +307,7 @@ public class AcoesArquivoExcel {
 	public void gravarDadosEmCelula(String nomePlanilha, ArrayList<CelulaExcel> celulas, boolean copiarFormato, boolean copiarFormulas, int linhaInicial, ArrayList<Integer> celulasComFormulas) 
 	{
         Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+        abrirPlanilha(nomePlanilha, linhaInicial);
 
         int linhaCelulaAnterior = linhaInicial;
         
@@ -311,6 +318,8 @@ public class AcoesArquivoExcel {
         	{
         		if(linhaCelulaAnterior != celula.getLinha())
         		{
+        			//System.out.println("De: " + linhaInicial + "Para: " + celula.getLinha());
+        			
         			if(copiarFormato)
         				copiarFormato(linhaInicial, celula.getLinha());
         			if(copiarFormulas)
@@ -373,6 +382,13 @@ public class AcoesArquivoExcel {
 			dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
 			cell.setCellStyle(dateStyle);
         }
+        else if(tipo.equals("Date mes/ano"))
+        {
+        	DataFormat df = arquivoXLSX.createDataFormat();
+        	CellStyle dateStyle = cell.getCellStyle();
+			dateStyle.setDataFormat(df.getFormat("[$-pt-BR]mmm/yyyy"));
+			cell.setCellStyle(dateStyle);
+        }
         else if (tipo.equals("DateTime"))
         {
         	DataFormat df = arquivoXLSX.createDataFormat();
@@ -389,9 +405,21 @@ public class AcoesArquivoExcel {
         }
         else if(tipo.equals("String"))
         {
-
-			CellStyle general = cell.getCellStyle();
+        	CellStyle general = cell.getCellStyle();
 			general.setDataFormat((short) 0); // General
+			cell.setCellStyle(general);
+        }
+        else if(tipo.equals("Integer"))
+        {
+        	CellStyle general = cell.getCellStyle();
+			general.setDataFormat((short) 0); // General
+			cell.setCellStyle(general);
+        }
+        else if(tipo.equals("Porcentagem"))
+        {
+        	DataFormat df = arquivoXLSX.createDataFormat();
+        	CellStyle general = cell.getCellStyle();
+			general.setDataFormat(df.getFormat("0.00%")); // General
 			cell.setCellStyle(general);
         }
     }
@@ -657,6 +685,10 @@ public class AcoesArquivoExcel {
         }
     }
 	
+	public void forcarCalculos()
+	{
+		arquivoXLSX.setForceFormulaRecalculation(true);
+	}
 
 	public void copiarFormulas(int linhaComFormula, int linhaOndeAplicarAFormula, ArrayList<Integer> colunas){
 
@@ -757,6 +789,56 @@ public class AcoesArquivoExcel {
 
 		return false;
 	}
+	
+
+    public void editarTituloGrafico(String nomeDaPlanilha, int indiceImagemGrafica, String tituloDoGrafico)
+    {
+    	try
+    	{
+
+	        Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+	        abrirPlanilha(nomeDaPlanilha, 0);
+	        
+	        XSSFSheet sheet = (XSSFSheet) arquivoXLSX.getSheet(nomeDaPlanilha); // ou getSheetAt(0)
+	
+	        XSSFDrawing drawing = sheet.getDrawingPatriarch();
+	        if (drawing == null) {
+	            throw new IllegalStateException("A planilha não possui desenho/gráficos.");
+	        }
+	
+	        ArrayList<XSSFChart> charts = (ArrayList<XSSFChart>)drawing.getCharts();
+	        if (charts.isEmpty()) {
+	            throw new IllegalStateException("Nenhum gráfico encontrado na planilha.");
+	        }
+	
+	        XSSFChart chart = charts.get(indiceImagemGrafica); // pegue o gráfico desejado
+	        chart.setTitleText(tituloDoGrafico);
+	        chart.setTitleOverlay(false); // exibe título como elemento separado (sem sobrepor o gráfico)
+	
+	        try (FileOutputStream fos = new FileOutputStream(caminho.toFile())) {
+	            arquivoXLSX.write(fos);
+	        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public int obterValorInteiroDeUmaCelulaComFormula(String nomeDaPlanilha, int linha, int coluna)
+    {
+		Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+		abrirPlanilha(nomeDaPlanilha, 0);
+		
+
+		Row row = planilhaAtiva.getRow(linha);     // linha 2 (0-based)
+        Cell cell = row.getCell(coluna);    // coluna D (0-based)
+
+        FormulaEvaluator evaluator = arquivoXLSX.getCreationHelper().createFormulaEvaluator();
+        CellValue cv = evaluator.evaluate(cell); // NÃO altera a célula
+
+		int valor = (int)cv.getNumberValue();
+        
+		return valor;
+    }
 	
 /*
  * public void copiarFormulasDaLinhaAnterior(int linhaComFormula,

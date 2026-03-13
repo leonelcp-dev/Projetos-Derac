@@ -490,7 +490,7 @@ public class CadastroUsuarioSIRESPDigital {
 						}
 						
 						AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(caminhoCompletoArquivo, 0);
-						arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_ATIVA.getDescricao(), celulas, true, false, 0, null);
+						arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_LOGINS.getDescricao(), celulas, true, false, 0, null);
 					}
 					else
 					{
@@ -505,7 +505,7 @@ public class CadastroUsuarioSIRESPDigital {
 						}
 						
 						AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(caminhoCompletoArquivo, 0);
-						arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_ATIVA.getDescricao(), celulas, true, false, 0, null);
+						arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_LOGINS.getDescricao(), celulas, true, false, 0, null);
 						
 						paginaWeb.clicarSpanPeloTitulo(driver, IdentificadoresPaginaWebSIRESPDigital.TITULO_TELA_INTERNA_SPAN_USUARIO.getTextoIdentificador());
 						while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESPDigital.ID_DIV_CARREGANDO_PAGINA.getTextoIdentificador()));
@@ -529,7 +529,7 @@ public class CadastroUsuarioSIRESPDigital {
 				}
 				
 				AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(caminhoCompletoArquivo, 0);
-				arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_ATIVA.getDescricao(), celulas, true, false, 0, null);
+				arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_LOGINS.getDescricao(), celulas, true, false, 0, null);
 			}
 
 		}

@@ -395,6 +395,8 @@ public class FilaNominalSolicitacoesPendentes {
 //			ultimoRecente = arquivo.getNomeDoArquivo();
 		}
 		
+		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		
 
 		return "";
 	}
