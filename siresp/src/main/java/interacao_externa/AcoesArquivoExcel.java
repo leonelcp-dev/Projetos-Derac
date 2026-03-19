@@ -27,6 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.text.DateFormatter;
 
@@ -45,7 +47,8 @@ public class AcoesArquivoExcel {
 	private Sheet planilhaAtiva;
 	private int primeiraLinhaVazia;
 	private FileInputStream arquivoLeitura;
-	private ArrayList<CellStyle> estilosDasColunas;
+	//private ArrayList<CellStyle> estilosDasColunas;
+	private Map<Integer, CellStyle> estilosDasColunas;
 	
 	public AcoesArquivoExcel(String nomeDoArquivo, int linhaBaseFormatacao)
 	{
@@ -311,6 +314,10 @@ public class AcoesArquivoExcel {
 
         int linhaCelulaAnterior = linhaInicial;
         
+        ArrayList<Integer> linhasFormatadas = new ArrayList<Integer>();
+        
+        estilosDasColunas = new HashMap<Integer, CellStyle>();
+        
         // Abrir, alterar e salvar (try-with-resources fecha tudo corretamente)
         try {
 
@@ -318,17 +325,23 @@ public class AcoesArquivoExcel {
         	{
         		if(linhaCelulaAnterior != celula.getLinha())
         		{
-        			//System.out.println("De: " + linhaInicial + "Para: " + celula.getLinha());
         			
-        			if(copiarFormato)
-        				copiarFormato(linhaInicial, celula.getLinha());
-        			if(copiarFormulas)
-        				copiarFormulas(linhaInicial, celula.getLinha(), celulasComFormulas);
+        			
+        			if(!linhasFormatadas.contains(celula.getLinha()))
+        			{
+        				//System.out.println("De: " + linhaInicial + "Para: " + celula.getLinha());
+            			//System.out.println("------------");
+	        			if(copiarFormato)
+	        				copiarFormato(linhaInicial, celula.getLinha());
+	        			if(copiarFormulas)
+	        				copiarFormulas(linhaInicial, celula.getLinha(), celulasComFormulas);
+	        			linhasFormatadas.add(celula.getLinha());
+        			}
         		}
         		
-        		//System.out.println("Nome da planilha: " + nomePlanilha + ", Linha: " + celula.getLinha() + ", Coluna: " + celula.getColuna() + ", Valor: " + celula.getValor());
+        		//System.out.println("Nome da planilha: " + nomePlanilha + ", Linha: " + celula.getLinha() + ", Coluna: " + celula.getColuna() + ", Valor: " + celula.getValor() + ", Tipo: " + celula.getTipo());
         		setCellValue(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor());   // B3: linha 1, coluna 2
-                setFormat(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor(), celula.getTipo());
+                setFormat(planilhaAtiva, celula.getLinha(), celula.getColuna(), celula.getValor(), celula.getTipo(), copiarFormato);
                 
                 linhaCelulaAnterior = celula.getLinha();
         	}
@@ -368,7 +381,7 @@ public class AcoesArquivoExcel {
         else cell.setCellValue(String.valueOf(value)); // fallback como texto
     }
     
-    private void setFormat(Sheet sheet, int rowIdx, int colIdx, Object value, String tipo) {
+    private void setFormat(Sheet sheet, int rowIdx, int colIdx, Object value, String tipo, boolean copiarFormato) {
         Cell cell = ensureCell(sheet, rowIdx, colIdx);
         if (value == null) {
             cell.setBlank();
@@ -377,10 +390,29 @@ public class AcoesArquivoExcel {
         
         if (tipo.equals("Date"))
         {
-        	DataFormat df = arquivoXLSX.createDataFormat();
-			CellStyle dateStyle = cell.getCellStyle();
-			dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
-			cell.setCellStyle(dateStyle);
+        	if(copiarFormato)
+        	{
+        		CellStyle dateStyle;
+        		if(estilosDasColunas.containsKey(colIdx))
+        			dateStyle = estilosDasColunas.get(colIdx);
+        		else
+        		{
+        			dateStyle = arquivoXLSX.createCellStyle();
+        			dateStyle.cloneStyleFrom(cell.getCellStyle());
+        			
+        			estilosDasColunas.put(colIdx, dateStyle);
+        		}
+        		DataFormat df = arquivoXLSX.createDataFormat();
+        		dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
+        		cell.setCellStyle(dateStyle);
+        	}
+        	else
+        	{
+        		DataFormat df = arquivoXLSX.createDataFormat();
+        		CellStyle dateStyle = cell.getCellStyle();
+        		dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
+        		cell.setCellStyle(dateStyle);
+        	}
         }
         else if(tipo.equals("Date mes/ano"))
         {
@@ -685,6 +717,11 @@ public class AcoesArquivoExcel {
         }
     }
 	
+	public void desabilitarCalculos()
+	{
+		arquivoXLSX.setForceFormulaRecalculation(false);
+	}
+	
 	public void forcarCalculos()
 	{
 		arquivoXLSX.setForceFormulaRecalculation(true);
@@ -838,6 +875,86 @@ public class AcoesArquivoExcel {
 		int valor = (int)cv.getNumberValue();
         
 		return valor;
+    }
+    
+    public void formatarColuna(String nomeDaPlanilha, int linhaInicial, int coluna, String tipo)
+    {
+    	Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+    	
+    	abrirPlanilha(nomeDaPlanilha, linhaInicial);
+    	
+    	try {
+    	
+	    	CellStyle dateStyle;
+	    	
+	    	Row row = planilhaAtiva.getRow(linhaInicial);     // linha 2 (0-based)
+	        Cell cell = row.getCell(coluna);
+	    	
+			dateStyle = arquivoXLSX.createCellStyle();
+			dateStyle.cloneStyleFrom(cell.getCellStyle());
+			
+			if (tipo.equals("Date"))
+	        {
+	   			dateStyle = arquivoXLSX.createCellStyle();
+	   			dateStyle.cloneStyleFrom(cell.getCellStyle());
+	       		DataFormat df = arquivoXLSX.createDataFormat();
+	      		dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy"));
+	        }
+	        else if(tipo.equals("Date mes/ano"))
+	        {
+	   			dateStyle = arquivoXLSX.createCellStyle();
+	   			dateStyle.cloneStyleFrom(cell.getCellStyle());
+	        	DataFormat df = arquivoXLSX.createDataFormat();
+				dateStyle.setDataFormat(df.getFormat("[$-pt-BR]mmm/yyyy"));
+	        }
+	        else if (tipo.equals("DateTime"))
+	        {
+	   			dateStyle = arquivoXLSX.createCellStyle();
+	   			dateStyle.cloneStyleFrom(cell.getCellStyle());
+	        	DataFormat df = arquivoXLSX.createDataFormat();
+				dateStyle.setDataFormat(df.getFormat("dd/MM/yyyy HH:mm"));
+	        }
+	        else if (tipo.equals("Time"))
+	        {
+	   			dateStyle = arquivoXLSX.createCellStyle();
+	   			dateStyle.cloneStyleFrom(cell.getCellStyle());
+	        	DataFormat df = arquivoXLSX.createDataFormat();
+				dateStyle.setDataFormat(df.getFormat("HH:mm"));
+	        }
+	        else if(tipo.equals("String"))
+	        {
+	   			dateStyle = arquivoXLSX.createCellStyle();
+	   			dateStyle.cloneStyleFrom(cell.getCellStyle());
+	        	CellStyle general = cell.getCellStyle();
+				general.setDataFormat((short) 0); // General
+	        }
+	        else if(tipo.equals("Integer"))
+	        {
+	   			dateStyle = arquivoXLSX.createCellStyle();
+	   			dateStyle.cloneStyleFrom(cell.getCellStyle());
+	        	CellStyle general = cell.getCellStyle();
+				general.setDataFormat((short) 0); // General
+	        }
+	        else if(tipo.equals("Porcentagem"))
+	        {
+	        	DataFormat df = arquivoXLSX.createDataFormat();
+	        	CellStyle general = cell.getCellStyle();
+				general.setDataFormat(df.getFormat("0.00%")); // General
+	        }
+	        
+	        for(int linha = linhaInicial; linha < primeiraLinhaVazia; linha++)
+	        {
+	        	row = planilhaAtiva.getRow(linha);     // linha 2 (0-based)
+	            cell = row.getCell(coluna);
+	            if(cell != null)
+	            	cell.setCellStyle(dateStyle);
+	        }
+	        try (FileOutputStream fos = new FileOutputStream(caminho.toFile())) {
+	            arquivoXLSX.write(fos);
+	        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 	
 /*

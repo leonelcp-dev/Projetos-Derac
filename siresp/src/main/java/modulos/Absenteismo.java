@@ -83,6 +83,10 @@ public class Absenteismo {
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
+		
+		String[] opcoesRotina = {"Executar rotina completa", "Executar apenas consolidação"}; 
+        int escolhaRotina = JOptionPane.showOptionDialog( null, "O que deseja fazer?", "Rotinas", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoesRotina, opcoesRotina[0] );
+        
 		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados de Absenteismo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
 		String mes = JOptionPane.showInputDialog(null, "Qual o mês de análise?", "Mês de Referência", JOptionPane.QUESTION_MESSAGE).trim();
@@ -99,7 +103,7 @@ public class Absenteismo {
 		}
 		else
 		{
-			mesReferencia = mesCompetencia + 1;
+			mesReferencia = mesCompetencia - 1;
 			anoReferencia = anoCompetencia;
 		}
 		
@@ -144,55 +148,85 @@ public class Absenteismo {
 //			}
 //		}
 		
-		driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
-		
-		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
-		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-		ArrayList<ElementoSelecao> listaUnidadeRadio = paginaWeb.getListaDeOpcoesRadioPorName(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_RADIO_UNIDADES.getTextoIdentificador());
-		
-		HashMap<String, String> elementosRadioUnidades = new HashMap<String, String>();
-		
-		for(ElementoSelecao elemento : listaUnidadeRadio)
-		{
-			String cnes = elemento.getText().substring(0, 7);
-			String value = elemento.getValue();
-			
-			int posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Administrador Unidade Reg");
-			
-			if(posicaoPerfilDeAcesso > 0)
-			{
-				String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
-				elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
-				
-				//System.out.println("CNES: " + cnes + "| Value: " + value + "| Composição: " + composicaoCNESNomeUnidade + "|");
-			}
-
-		}
-		
 		pastaDestinoArquivos = pastaDestinoArquivos + "\\Absenteísmo\\" + anoCompetencia + "\\";
 		
-		for(EntidadeAbsenteismo entidade : entidades)
+		if(escolhaRotina == 0)
 		{
+		
 			driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
 			
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
-			String value = elementosRadioUnidades.get(entidade.getCNES() + " - " + entidade.getNomeUnidadeSIRESP());
-			//System.out.println(value);
+			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
+			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+			ArrayList<ElementoSelecao> listaUnidadeRadio = paginaWeb.getListaDeOpcoesRadioPorName(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_RADIO_UNIDADES.getTextoIdentificador());
 			
+			HashMap<String, String> elementosRadioUnidades = new HashMap<String, String>();
 			
-			if(value != null)
+			for(ElementoSelecao elemento : listaUnidadeRadio)
 			{
-				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
-			
-				boolean visivel;
-				do
+				String cnes = elemento.getText().substring(0, 7);
+				String value = elemento.getValue();
+				
+				int posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Administrador Unidade Reg");
+				
+				if(posicaoPerfilDeAcesso > 0)
 				{
-
+					String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
+					elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
+					
+					//System.out.println("CNES: " + cnes + "| Value: " + value + "| Composição: " + composicaoCNESNomeUnidade + "|");
+				}
+	
+			}
+			
+			for(EntidadeAbsenteismo entidade : entidades)
+			{
+				driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
+				
+				
+				String value = elementosRadioUnidades.get(entidade.getCNES() + " - " + entidade.getNomeUnidadeSIRESP());
+				//System.out.println(value);
+				
+				
+				if(value != null)
+				{
+					paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
+				
+					boolean visivel;
+					do
+					{
+	
+						paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+						
+						boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
+						
+						paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
+						
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						//buscando arquivos e baixando
+						paginaWeb.voltarAoTopoDaPagina(driver);
+					
+	
+						//visivel = paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
+					
+						visivel = paginaWeb.clicarMenuUL(driver, 2, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
+						
+					
+					}while(!visivel);
+					
 					paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-					
-					boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
-					
-					paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
 					
 					try {
 						Thread.sleep(1000);
@@ -200,33 +234,16 @@ public class Absenteismo {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				
+					montarAbsenteismo(driver, paginaWeb, entidade);
 					
-					//buscando arquivos e baixando
-					paginaWeb.voltarAoTopoDaPagina(driver);
-				
-
-					//visivel = paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
-				
-					visivel = paginaWeb.clicarMenuUL(driver, 2, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
-					
-				
-				}while(!visivel);
-				
-				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-				
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
-			
-				montarAbsenteismo(driver, paginaWeb, entidade);
-				
+				else
+					System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade() + "(" + entidade.getDistrito() + ")");
 			}
-			else
-				System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade() + "(" + entidade.getDistrito() + ")");
 		}
+		
+		consolidarArquivoMunicipal(entidades, mesCompetencia, anoCompetencia);
 		
 		return "";	
 	}
@@ -413,37 +430,11 @@ public class Absenteismo {
 				System.out.println("Não foi encontrado arquivo resultados para " + entidade.getNomeUnidadeSIRESP());
 		}
 			
-			
-			
-			
-//			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AMBULATORIAL_CDR_BOTAO_DOWNLOAD.getTextoIdentificador(), "name");
-//			
-//			String arquivoMaisRecente;
-//			
-//			do
-//			{
-//				try {
-//					Thread.sleep(5000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
-//				
-//				System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
-//			}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_CDR.getDescricao()));
-//			
-//			Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
-//			arquivo.renomear(entidade.getUnidade() + " - " + tiposDeBusca[i].toUpperCase() + " " + arquivoMaisRecente);
-//			
-//			transferirArquivos(entidade, tiposDeBusca[i], arquivo);
-//			
-//			ultimoRecente = arquivo.getNomeDoArquivo();
 		return "";
 		
 	}
 	
-	public String consolidarArquivoMunicipal(ArrayList<EntidadeAbsenteismo> entidades, int mesCompetencia)
+	public String consolidarArquivoMunicipal(ArrayList<EntidadeAbsenteismo> entidades, int mesCompetencia, int anoCompetencia)
 	{
 		int totalConsultasAgendadas = 0;
 		int totalFaltasEmConsultas = 0;
@@ -453,11 +444,83 @@ public class Absenteismo {
 		String nomeDaPlanilha = meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao();
 		for(EntidadeAbsenteismo entidade : entidades)
 		{
-
-			AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + entidade.getNomeArquivoAbsenteismo(), 0);
+			AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\" + entidade.getNomeArquivoAbsenteismo(), 0);
 			arquivoConsolidado.abrirPlanilha(nomeDaPlanilha, 0);
 			
 			entidade.setQuantidadeConsultasAgendadas(arquivoConsolidado.obterValorInteiroDeUmaCelulaComFormula(nomeDaPlanilha, ParametrosArquivoAbsenteismoConsolidado.LINHA_TOTAL_CONSULTAS_AGENDADAS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TOTAL_CONSULTAS_AGENDADAS.getIndice()));
+			entidade.setQuantidadeFaltasConsultas(arquivoConsolidado.obterValorInteiroDeUmaCelulaComFormula(nomeDaPlanilha, ParametrosArquivoAbsenteismoConsolidado.LINHA_TOTAL_FALTAS_CONSULTAS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TOTAL_FALTAS_CONSULTAS.getIndice()));
+			
+			entidade.setQuantidadeExamesAgendados(arquivoConsolidado.obterValorInteiroDeUmaCelulaComFormula(nomeDaPlanilha, ParametrosArquivoAbsenteismoConsolidado.LINHA_TOTAL_EXAMES_AGENDADOS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TOTAL_EXAMES_AGENDADOS.getIndice()));
+			entidade.setQuantidadeFaltasExames(arquivoConsolidado.obterValorInteiroDeUmaCelulaComFormula(nomeDaPlanilha, ParametrosArquivoAbsenteismoConsolidado.LINHA_TOTAL_FALTAS_EXAMES.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TOTAL_FALTAS_EXAMES.getIndice()));
+			
+			totalConsultasAgendadas += entidade.getQuantidadeConsultasAgendadas();
+			totalFaltasEmConsultas += entidade.getQuantidadeFaltasConsultas();
+			totalExamesAgendados += entidade.getQuantidadeExamesAgendados();
+			totalFaltasEmExames += entidade.getQuantidadeFaltasExames();
+		}
+		
+		double absenteismoMunicipalEmConsultas = 1.0 * totalFaltasEmConsultas / totalConsultasAgendadas;
+		double absenteismoMunicipalEmExames = 1.0 * totalFaltasEmExames / totalExamesAgendados;
+		
+		String nomeArquivoConsolidado = pastaDestinoArquivos + "\\" + ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_NOME.getDescricao().replaceAll(ParametrosArquivoAbsenteismoConsolidado.TEXTO_DINAMICO_PARA_SUBSTITUICAO.getDescricao(), String.valueOf(anoCompetencia));
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(nomeArquivoConsolidado, 0);
+		
+		ArrayList<CelulaExcel> celulasArquivoConsolidadoPlanilhaMMA = new ArrayList<CelulaExcel>();
+		celulasArquivoConsolidadoPlanilhaMMA.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_MMA.getIndice() + (mesCompetencia - 1), ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_CONSULTAS_PLANILHA_MMA.getIndice(), absenteismoMunicipalEmConsultas, "Porcentagem"));
+		celulasArquivoConsolidadoPlanilhaMMA.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_MMA.getIndice() + (mesCompetencia - 1), ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_EXAMES_PLANILHA_MMA.getIndice(), absenteismoMunicipalEmExames, "Porcentagem"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoAbsenteismoConsolidado.NOME_PLANILHA_MMA.getDescricao(), celulasArquivoConsolidadoPlanilhaMMA, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		arquivoConsolidado.abrirPlanilha(nomeDaPlanilha, 0);
+		
+		int linhaInicialArquivoMunicipal = ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL_UNIDADES.getIndice();
+		int linhaFinalArquivoMunicipal = arquivoConsolidado.getPrimeiraLinhaVazia();
+		
+		for(EntidadeAbsenteismo entidade : entidades)
+		{
+			String nomeArquivoUnidade= pastaDestinoArquivos + "\\" + entidade.getNomeArquivoAbsenteismo();
+			
+			AcoesArquivoExcel arquivoUnidade = new AcoesArquivoExcel(nomeArquivoUnidade, 0);
+			
+			ArrayList<CelulaExcel> celulasArquivoUnidade = new ArrayList<CelulaExcel>();
+			ArrayList<CelulaExcel> celulasArquivoConsolidado = new ArrayList<CelulaExcel>();
+			
+			celulasArquivoUnidade.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS.getIndice(), absenteismoMunicipalEmConsultas, "Porcentagem"));
+			celulasArquivoUnidade.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES.getIndice(), absenteismoMunicipalEmExames, "Porcentagem"));
+			
+			int linha = linhaInicialArquivoMunicipal;
+			while(linha <= linhaFinalArquivoMunicipal && !arquivoConsolidado.getValorDaCelulaString(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_UNIDADE.getIndice()).equals(entidade.getNomePadraoAbsenteismo()))
+			{
+				System.out.println(linha + ": " + arquivoConsolidado.getValorDaCelulaString(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_UNIDADE.getIndice()) + " x " + entidade.getNomePadraoAbsenteismo());
+				
+				linha++;
+			}
+			
+			if(linha <= linhaFinalArquivoMunicipal)
+			{
+				if(entidade.getAbsenteismoEmConsultas() < 0)
+					celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_CONSULTA_UNIDADE.getIndice(), "-", "String"));
+				else
+					celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_CONSULTA_UNIDADE.getIndice(), entidade.getAbsenteismoEmConsultas(), "Porcentagem"));
+				
+				if(entidade.getAbsenteismoEmExames() < 0)
+					celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_EXAME_UNIDADE.getIndice(), "-", "String"));
+				else
+					celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_EXAME_UNIDADE.getIndice(), entidade.getAbsenteismoEmExames(), "Porcentagem"));
+				
+				celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_CONSULTA_MUNICIPAL.getIndice(), absenteismoMunicipalEmConsultas, "Porcentagem"));
+				celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_EXAME_MUNICIPAL.getIndice(), absenteismoMunicipalEmExames, "Porcentagem"));
+				
+				celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_DISTRITO.getIndice(), entidade.getDistrito(), "String"));
+				celulasArquivoConsolidado.add(new CelulaExcel(linha, ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_COLUNA_MES_REFERENCIA.getIndice(), dataInicioCompetencia, "Date"));
+			}
+			
+			arquivoUnidade.gravarDadosEmCelula(nomeDaPlanilha, celulasArquivoUnidade, false, false, 0, null);
+			arquivoUnidade.forcarCalculos();
+			
+			arquivoConsolidado.gravarDadosEmCelula(nomeDaPlanilha, celulasArquivoConsolidado, false, false, 0, null);
+			arquivoConsolidado.forcarCalculos();
 		}
 		
 		return "";
@@ -529,8 +592,14 @@ public class Absenteismo {
 				ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 				
 				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MES_DE_REFERENCIA.getIndice(), dataInicioCompetencia, "Date mes/ano"));
+				
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_TEXTO_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TEXTO_MES_DE_REFERENCIA.getIndice(), null, "String"));
 				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_TEXTO_MES_DE_REFERENCIA.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_TEXTO_MES_DE_REFERENCIA.getIndice(), "*ref. " + meses.getMeses().get(mesReferencia - 1).getMesDescricao() + " " + anoReferencia, "String"));
 				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_NOME_UNIDADE.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_NOME_UNIDADE.getIndice(), entidade.getNomePadraoAbsenteismo(), "String"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS.getIndice(), null, "Porcentagem"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS.getIndice(), 0, "Porcentagem"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES.getIndice(), null, "Porcentagem"));
+				celulas.add(new CelulaExcel(ParametrosArquivoAbsenteismoConsolidado.LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES.getIndice(), ParametrosArquivoAbsenteismoConsolidado.COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES.getIndice(), 0, "Porcentagem"));
 				
 				arquivoConsolidado.gravarDadosEmCelula(meses.getMeses().get(mesCompetencia - 1).getMesDescricaoSemAcentuacao(), celulas, false, false, 0, null);
 				

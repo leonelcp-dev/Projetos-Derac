@@ -528,6 +528,10 @@ public class LoginsSirespDigital {
 		tabelaDeParaPerfis.put("RELATORIOS|Relatórios", "Relatórios");
 		tabelaDeParaPerfis.put("ADMINISTRADOR|DUOSYSTEM", "Administrador DuoSystem");
 		tabelaDeParaPerfis.put("INTEGRACAO|integração", "Integração");
+		tabelaDeParaPerfis.put("PACIENTE_-_HISTORICO|Paciente - Histórico", "Paciente - Histórico");
+		tabelaDeParaPerfis.put("TARM|tarm", "TARM");
+		tabelaDeParaPerfis.put("MASTER_CROSS|MASTER CROSS", "Master CROSS");
+		tabelaDeParaPerfis.put("DRS|drs", "DRS");
 	}
 	
 	private boolean ehUsuarioDistinto(String login)

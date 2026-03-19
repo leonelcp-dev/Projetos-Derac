@@ -102,6 +102,24 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean selecionarItemSelectPeloName(WebDriver driverPagina, String name, String textoASelecionar)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.name(name));
+			
+			Select select = new Select(item);
+			select.selectByVisibleText(textoASelecionar);
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 
 	public boolean selecionarItemSelectComEvento(WebDriver driver, String id, String textoASelecionar) {
 	    try {
@@ -542,6 +560,24 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean MarcarElementoCheckBoxPeloName(WebDriver driverPagina, String name)
+	{
+		try
+		{	
+			WebElement elemento = null;
+			
+			elemento = driverPagina.findElement(By.name(name));
+			if(!elemento.isSelected())
+				elemento.click();
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public ArrayList<ArrayList<String>> obterTable(WebDriver driverPagina, String id)
 	{
 		ArrayList<ArrayList<String>> tabela = new ArrayList();
@@ -839,6 +875,29 @@ public class AcoesGeraisPaginaWeb {
 		return opcoes;
 	}
 	
+	public boolean verificarExistenciaDeTextoEmUmSelectPeloName(WebDriver driverPagina, String name, String textoAPesquisar)
+	{
+		boolean possui = false;
+		
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.name(name));
+	
+			Select select = new Select(item);
+			List<WebElement> options = select.getOptions();
+			
+			for(WebElement option : options)
+				if(option.getText().equals(textoAPesquisar))
+					possui = true;
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return possui;
+	}
+	
 	public boolean divEstaVisivel(WebDriver driverPagina, String id)
 	{
 		boolean visivel;
@@ -900,6 +959,24 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{	
 			WebElement elemento = driverPagina.findElement(By.id(id));
+			
+			habilitado = elemento.isEnabled() && elemento.isDisplayed();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return habilitado;
+	}
+	
+	public boolean elementoEstaHabilitadoPeloName(WebDriver driverPagina, String name)
+	{
+		boolean habilitado;
+		
+		try
+		{	
+			WebElement elemento = driverPagina.findElement(By.name(name));
 			
 			habilitado = elemento.isEnabled() && elemento.isDisplayed();
 			

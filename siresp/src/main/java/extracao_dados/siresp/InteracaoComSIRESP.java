@@ -17,6 +17,7 @@ import modulos.FilaNominalCDRNaoRegulada;
 import modulos.FilaNominalSolicitacoesPendentes;
 import modulos.LoginsSirespDigital;
 import modulos.OfertaDemandaDeAcesso;
+import modulos.OfertaDemandaDeAcessoR1;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -145,6 +146,11 @@ public class InteracaoComSIRESP
         else if(escolha == 7)
         {
         	OfertaDemandaDeAcesso ofertaDemanda = new OfertaDemandaDeAcesso();
+        	ofertaDemanda.calcularOfertaEDemanda(driver);
+        }
+        else if(escolha == 8)
+        {
+        	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
         	ofertaDemanda.calcularOfertaEDemanda(driver);
         }
         

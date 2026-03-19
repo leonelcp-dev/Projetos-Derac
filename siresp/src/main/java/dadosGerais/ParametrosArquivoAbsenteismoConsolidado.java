@@ -42,7 +42,26 @@ public enum ParametrosArquivoAbsenteismoConsolidado {
 	COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_CONSULTAS(32, 4,"Ajustado de acordo com o Java, no arquivo é a coluna E (5)", "", ""),
 	LINHA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES(33, 15,"Ajustado de acordo com o Java, no arquivo é a linha 16", "", ""),
 	COLUNA_MEDIA_MUNICIPAL_ABSENTEISMO_EXAMES(34, 6,"Ajustado de acordo com o Java, no arquivo é a coluna G (7)", "", ""),
-	EXTENSAO_ARQUIVO_ABSENTEISMO(31, 0, "xlsx", "", "");
+
+	TEXTO_DINAMICO_PARA_SUBSTITUICAO(35, 0, "####", "", ""),
+	
+	ARQUIVO_MUNICIPAL_NOME(36, 6,"01 - COMPILADO MUNICIPAL " + TEXTO_DINAMICO_PARA_SUBSTITUICAO.getDescricao() + ".xlsx", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_UNIDADE(37, 1,"Ajustado de acordo com o Java, no arquivo é a coluna B (2)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_CONSULTA_UNIDADE(38, 4,"Ajustado de acordo com o Java, no arquivo é a coluna E (5)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_EXAME_UNIDADE(39, 5,"Ajustado de acordo com o Java, no arquivo é a coluna F (6)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_CONSULTA_MUNICIPAL(40, 6,"Ajustado de acordo com o Java, no arquivo é a coluna G (7)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_ABSENTEISMO_EXAME_MUNICIPAL(41, 7,"Ajustado de acordo com o Java, no arquivo é a coluna H (8)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_DISTRITO(42, 2,"Ajustado de acordo com o Java, no arquivo é a coluna C (3)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_MES_REFERENCIA(43, 3,"Ajustado de acordo com o Java, no arquivo é a coluna D (4)", "", ""),
+	
+	ARQUIVO_MUNICIPAL_LINHA_INICIAL_UNIDADES(44, 8,"Ajustado de acordo com o Java, no arquivo é a Linha 9", "", ""),
+	
+	NOME_PLANILHA_MMA(45, 8,"MMA", "", ""),
+	ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_MMA(46, 4,"Ajustado de acordo com o Java, no arquivo é a Linha 5", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_CONSULTAS_PLANILHA_MMA(47, 2,"Ajustado de acordo com o Java, no arquivo é a coluna C (3)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_EXAMES_PLANILHA_MMA(48, 3,"Ajustado de acordo coxm o Java, no arquivo é a coluna D (4)", "", ""),
+	
+	EXTENSAO_ARQUIVO_ABSENTEISMO(49, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;

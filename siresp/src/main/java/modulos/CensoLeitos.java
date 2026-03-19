@@ -63,6 +63,7 @@ public class CensoLeitos {
 	private int anoCompetencia;
 	private String pastaDestinoArquivos;
 	private String pastaDownloads;
+	private int execucao10Horas;
 	private int execucaoCompleta;
 	private MesesFormatados meses;	
 	private DateTimeFormatter formatoDataCenso;
@@ -91,14 +92,23 @@ public class CensoLeitos {
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
-		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados do censo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
-		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
-		execucaoCompleta = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina completa com a execução da macro.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados do censo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+		execucao10Horas = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina das 10 horas da manhã.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
 		System.out.println(execucaoCompleta);
 		
-		if(execucaoCompleta == 0)
+		if(execucao10Horas == 0)
 		{
-			rotinaCompleta = "Sim";
+			execucaoCompleta = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina completa com a execução da macro.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+			
+			if(execucaoCompleta == 0)
+			{
+				rotinaCompleta = "Sim";
+			}
+			else
+			{
+				rotinaCompleta = "Não";
+			}
 			pastaPrint = "";
 			pastaPrintFormatada = "";
 		}
@@ -112,12 +122,20 @@ public class CensoLeitos {
 		//definindo entidades para o censo de leitos
 		ArrayList<EntidadeLeito> entidades = lerEntidades(pastaDestinoArquivos + "\\entidades.csv");
 				
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		System.out.println(IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
 		System.out.println(IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador());
 		
 		//paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
 		
-		paginaWeb.clicarMenuUL(driver, 1, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
+		paginaWeb.clicarMenuUL(driver, 2, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
 		
 		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 		
@@ -167,6 +185,18 @@ public class CensoLeitos {
 		for(EntidadeLeito entidade : entidades)
 		{
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador(), entidade.getNomeSIRESP());
+			
+			while(!paginaWeb.obterValorSelecionadoDoSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador()).equals(entidade.getNomeSIRESP()))
+			{
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador(), entidade.getNomeSIRESP());
+			}
+			
 			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_LEITOS_BOTAO_DOWNLOAD.getTextoIdentificador(), "name");
 			
 			String arquivoMaisRecente;
@@ -226,6 +256,19 @@ public class CensoLeitos {
 			if(arquivoExcelEntidade.isAberto())
 			{
 				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador(), entidade.getNomeSIRESP());
+				
+				while(!paginaWeb.obterValorSelecionadoDoSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador()).equals(entidade.getNomeSIRESP()))
+				{
+					paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_BOTAO_BUSCAR.getTextoIdentificador(), "id");
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador(), entidade.getNomeSIRESP());
+				}
+				
 				ArrayList<CelulaExcel> celulas = new ArrayList();
 				
 				for(int contLinha = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice(); contLinha < arquivoExcelEntidade.getPrimeiraLinhaVazia(); contLinha++)
@@ -494,8 +537,9 @@ public class CensoLeitos {
 					
 					//System.out.println("Início do preenchimento da linha: " + linhaCenso + " Primeira linha vazia do arquivo diário: " + primeiraLinhaVaziaArquivoDiario);
 					//preenchendo a linha do diário
-					ArrayList<CelulaExcel> celulas = new ArrayList();
+
 					
+					ArrayList<CelulaExcel> celulas = new ArrayList();
 					for(int linhaDiario = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice(); linhaDiario < primeiraLinhaVaziaArquivoDiario; linhaDiario++)
 					{
 						//preenchendo até a coluna do motivo do bloqueio
@@ -513,7 +557,8 @@ public class CensoLeitos {
 							}
 							else
 							{
-															
+								//System.out.println(ParametrosArquivoCenso.poIdUnico(coluna).getDescricao() + " " + ParametrosArquivoCenso.poIdUnico(coluna).getTipo());
+								
 								if(ParametrosArquivoCenso.poIdUnico(coluna).getTipo().equals("String"))
 								{
 									if(arquivoDiario.ehCelulaComString(linhaDiario, coluna))
@@ -555,6 +600,10 @@ public class CensoLeitos {
 //						arquivoConsolidado.copiarFormatoEntreLinhas(linhaCenso - 1, linhaCenso);
 					
 					arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoCenso.NOME_PLANILHA_CENSO.getDescricao(), celulas, true, true, ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(), colunasComFormulasNoArquivoCenso);
+					
+					arquivoConsolidado.formatarColuna(ParametrosArquivoCenso.NOME_PLANILHA_CENSO.getDescricao(), ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(), ParametrosArquivoCenso.INDICE_COLUNA_DATA_NASCIMENTO.getIndice(), "Date");
+					arquivoConsolidado.formatarColuna(ParametrosArquivoCenso.NOME_PLANILHA_CENSO.getDescricao(), ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(), ParametrosArquivoCenso.INDICE_COLUNA_DATA_DE_INTERNACAO.getIndice(), "Date");
+					arquivoConsolidado.forcarCalculos();
 					
 					//arquivoConsolidado.copiarFormulas(linhaCenso - 1, colunasComFormulasNoArquivoCenso);
 					

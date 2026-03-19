@@ -19,6 +19,8 @@ public class EntidadeAbsenteismo {
 	private int quantidadeFaltasConsultas;
 	private int quantidadeExamesAgendados;
 	private int quantidadeFaltasExames;
+	private double absenteismoEmConsultas;
+	private double absenteismoEmExames;
 	
 	public EntidadeAbsenteismo(String cnes, String unidade, String distrito, String nomeUnidadeSIRESP, String nomePadraoAbsenteismo, String nomeParaGrafico, String anoCompetencia) {
 		this.cnes = cnes;
@@ -154,6 +156,26 @@ public class EntidadeAbsenteismo {
 
 	public void setQuantidadeFaltasExames(int quantidadeFaltasExames) {
 		this.quantidadeFaltasExames = quantidadeFaltasExames;
+	}
+
+	public double getAbsenteismoEmConsultas() {
+		if(quantidadeConsultasAgendadas <= 0)
+			return -1;
+		return 1.0 * quantidadeFaltasConsultas / quantidadeConsultasAgendadas;
+	}
+
+	public void setAbsenteismoEmConsultas(double absenteismoEmConsultas) {
+		this.absenteismoEmConsultas = absenteismoEmConsultas;
+	}
+
+	public double getAbsenteismoEmExames() {
+		if(quantidadeExamesAgendados <= 0)
+			return -1;
+		return 1.0 * quantidadeFaltasExames / quantidadeExamesAgendados;
+	}
+
+	public void setAbsenteismoEmExames(double absenteismoEmExames) {
+		this.absenteismoEmExames = absenteismoEmExames;
 	}
 	
 	
