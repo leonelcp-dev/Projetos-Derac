@@ -126,7 +126,7 @@ public class InteracaoComSIRESP
         {
         	FilaNominalSolicitacoesPendentes filaNominalRegulada = new FilaNominalSolicitacoesPendentes();
         	filaNominalRegulada.baixarFilaAgendamentosPendentes(driver);
-        }
+        } 
         else if(escolha == 4)
         {
         	Absenteismo absenteismo = new Absenteismo();

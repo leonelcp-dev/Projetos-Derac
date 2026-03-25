@@ -104,6 +104,16 @@ public class FilaNominalCDRNaoRegulada {
 				
 				//System.out.println("CNES: " + cnes + "| Value: " + value + "| Composição: " + composicaoCNESNomeUnidade + "|");
 			}
+			else
+			{
+				posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Agendador Reg");
+				
+				if(posicaoPerfilDeAcesso > 0)
+				{
+					String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
+					elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
+				}
+			}
 
 		}
 		

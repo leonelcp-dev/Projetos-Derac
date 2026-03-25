@@ -28,13 +28,13 @@ public class EntidadeExecutanteR1 {
 		this.cnes = cnes;
 	}
 
-	public String getUnidade() {
-		return vinculo;
-	}
-
-	public void setUnidade(String unidade) {
-		this.vinculo = unidade;
-	}
+//	public String getUnidade() {
+//		return vinculo;
+//	}
+//
+//	public void setUnidade(String unidade) {
+//		this.vinculo = unidade;
+//	}
 
 	public String getExecutante() {
 		return executante;

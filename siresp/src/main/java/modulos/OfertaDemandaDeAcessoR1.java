@@ -37,6 +37,10 @@ import dadosGerais.ParametrosArquivoAbsenteismoExameBaixado;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
+import dadosGerais.ParametrosTabelaAgendaHorarioConsultas;
+import dadosGerais.ParametrosTabelaAgendaHorarioExame;
+import dadosGerais.ParametrosTabelaPacientesSemRecepcaoConsulta;
+import dadosGerais.ParametrosTabelaPacientesSemRecepcaoExame;
 import dadosGerais.ParametrosTabelaProducaoConsolidadoConsultas;
 import dadosGerais.ParametrosTabelaProducaoConsolidadoExames;
 import dadosGerais.ParametrosTabelaProducaoExecutanteConsultas;
@@ -111,26 +115,30 @@ public class OfertaDemandaDeAcessoR1 {
 		{
 			oferta.setCompetencia(normalizarDataParaMesAno(oferta.getCompetencia()));
 			
+			System.out.println(oferta.getUnidade() + oferta.getCompetencia());
+			
 			if(ofertasDemandasProcessadas.containsKey(oferta.getUnidade() + oferta.getCompetencia()))
 			{
 				HashMap<String, OfertaEDemanda> mapaEspecialidade = ofertasDemandasProcessadas.get(oferta.getUnidade() + oferta.getCompetencia());
 				
-				if(mapaEspecialidade.containsKey(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase()))
+				System.out.println(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim());
+				
+				if(mapaEspecialidade.containsKey(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim()))
 				{
-					OfertaEDemanda ofertaEncontrada = mapaEspecialidade.get(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase());
+					OfertaEDemanda ofertaEncontrada = mapaEspecialidade.get(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim());
 					ofertaEncontrada.setLinhaExcel(linhaArquivo);
 				}
 				else
 				{
 					oferta.setLinhaExcel(linhaArquivo);
-					mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase(), oferta);
+					mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim(), oferta);
 				}
 			}
 			else
 			{
 				HashMap<String, OfertaEDemanda> mapaEspecialidade = new HashMap<String, OfertaEDemanda>();
 				oferta.setLinhaExcel(linhaArquivo);
-				mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase(), oferta);
+				mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim(), oferta);
 				
 				ofertasDemandasProcessadas.put(oferta.getUnidade() + oferta.getCompetencia(), mapaEspecialidade);
 			}
@@ -138,6 +146,7 @@ public class OfertaDemandaDeAcessoR1 {
 			linhaArquivo++;
 		}
 		
+
 		String mes = JOptionPane.showInputDialog(null, "Qual o mês de análise?", "Mês de Referência", JOptionPane.QUESTION_MESSAGE).trim();
 		String ano = JOptionPane.showInputDialog(null, "Qual o ano de análise?", "Ano de Referência", JOptionPane.QUESTION_MESSAGE).trim();
 		
@@ -269,7 +278,7 @@ public class OfertaDemandaDeAcessoR1 {
 					
 				}
 				else
-					System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade());
+					System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
 			}
 		}
 		
@@ -405,6 +414,282 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 		}
 		
+		String[] buscas = new String[2];
+		buscas[0] = tiposDeBusca[0][0];
+		buscas[1] = tiposDeBusca[1][0];
+		
+		preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
+		//preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
+		
+		return "";
+	}
+	
+	private String preencherInformacoesDeBloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Agendamento");
+		opcoes.add("Horários");
+		
+		HashMap<String, Integer> colunaTipoDeOferta = new HashMap<String, Integer>();
+		colunaTipoDeOferta.put("Consulta-Coluna Bloqueio", ParametrosTabelaAgendaHorarioConsultas.INDICE_COLUNA_BLOQUEADO.getIndice());
+		colunaTipoDeOferta.put("Exame-Coluna Bloqueio", ParametrosTabelaAgendaHorarioExame.INDICE_COLUNA_BLOQUEADO.getIndice());
+		colunaTipoDeOferta.put("Consulta-Coluna Especialidade", ParametrosTabelaAgendaHorarioConsultas.INDICE_COLUNA_ESPECIALIDADE.getIndice());
+		colunaTipoDeOferta.put("Exame-Coluna Especialidade", ParametrosTabelaAgendaHorarioExame.INDICE_COLUNA_EQUIPAMENTO.getIndice());
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		boolean visivel;
+		do
+		{
+		
+			visivel = acessarMenu(driver, paginaWeb, opcoes);
+			
+		
+		}while(!visivel);
+		
+		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				oferta.setOfertaBloqueada("0");
+				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
+			}
+		
+			for(String tipoDeBusca : tiposDeBusca)
+			{
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIOS_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
+				
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AGENDA_HORARIO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
+				{
+					ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_TABELA_RESULTADOS.getTextoIdentificador());
+					System.out.println("Tabela encontrada");
+					
+					int colunaEspecialidade = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Especialidade");
+					int colunaBloqueio = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Bloqueio");
+				
+					
+					for(ArrayList<String> linhaDaTabela : tabelaResultados)
+					{
+						OfertaEDemanda oferta = mapaEspecialidades.get(tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).toUpperCase().trim());
+						
+						if(oferta != null)
+						{
+							
+							
+							int ofertaTotal;
+							if(oferta.getOfertaTotal().trim().equals(""))
+								ofertaTotal = 0;
+							else
+								ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
+							
+							int agendamentoTotal;
+							if(oferta.getAgendamentoTotal().trim().equals(""))
+								agendamentoTotal = 0;
+							else
+								agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
+							
+							int bloqueado;
+							if(linhaDaTabela.get(colunaBloqueio).trim().equals(("")))
+								bloqueado = 0;
+							else
+								bloqueado = Integer.parseInt(linhaDaTabela.get(colunaBloqueio).trim());
+							
+							System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
+							
+							int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
+							
+							oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
+						}
+					}
+				}
+			}
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
+		
+		return "";
+	}
+	
+	private String preencherInformacoesDeRecepcao(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Relatório");
+		opcoes.add("Pacientes  >>");
+		opcoes.add("PC05 - Paciente sem Recepção");
+		
+		HashMap<String, Integer> colunaTipoDeOferta = new HashMap<String, Integer>();
+		colunaTipoDeOferta.put("Consulta-Coluna Especialidade", ParametrosTabelaPacientesSemRecepcaoConsulta.INDICE_COLUNA_ESPECIALIDADE.getIndice());
+		colunaTipoDeOferta.put("Exame-Coluna Especialidade", ParametrosTabelaPacientesSemRecepcaoExame.INDICE_COLUNA_GRUPO_DE_COTA.getIndice());
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		boolean visivel;
+		do
+		{
+		
+			visivel = acessarMenu(driver, paginaWeb, opcoes);
+			
+		
+		}while(!visivel);
+		
+		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				oferta.setOfertaBloqueada("0");
+				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
+			}
+		
+			for(String tipoDeBusca : tiposDeBusca)
+			{
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIOS_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
+				
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AGENDA_HORARIO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
+				{
+					ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_TABELA_RESULTADOS.getTextoIdentificador());
+					System.out.println("Tabela encontrada");
+					
+					int colunaEspecialidade = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Especialidade");
+					int colunaBloqueio = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Bloqueio");
+				
+					
+					for(ArrayList<String> linhaDaTabela : tabelaResultados)
+					{
+						OfertaEDemanda oferta = mapaEspecialidades.get(tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).toUpperCase().trim());
+						
+						if(oferta != null)
+						{
+							
+							
+							int ofertaTotal;
+							if(oferta.getOfertaTotal().trim().equals(""))
+								ofertaTotal = 0;
+							else
+								ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
+							
+							int agendamentoTotal;
+							if(oferta.getAgendamentoTotal().trim().equals(""))
+								agendamentoTotal = 0;
+							else
+								agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
+							
+							int bloqueado;
+							if(linhaDaTabela.get(colunaBloqueio).trim().equals(("")))
+								bloqueado = 0;
+							else
+								bloqueado = Integer.parseInt(linhaDaTabela.get(colunaBloqueio).trim());
+							
+							System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
+							
+							int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
+							
+							oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
+						}
+					}
+				}
+			}
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
+		
 		return "";
 	}
 	
@@ -449,6 +734,12 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 		}
 		
+		String[] buscas = new String[2];
+		buscas[0] = tiposDeBusca[0][0];
+		buscas[1] = tiposDeBusca[1][0];
+		
+		preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
+		
 		return "";
 	}
 	
@@ -474,11 +765,16 @@ public class OfertaDemandaDeAcessoR1 {
 			if(linhaDaTabela.size() >= quantidadeEsperadaDeColunas && !linhaDaTabela.get(0).trim().equals("Total"))
 			{
 				HashMap<String, OfertaEDemanda> mapaEspecialidade = null;
+				ArrayList<String> dadosSequenciais = new ArrayList<String>();
 				OfertaEDemanda oferta = null;
-				String especialidade = linhaDaTabela.get(colunasConsolidado.get(0).getColunaSIRESP().get(0));
+				String especialidade = linhaDaTabela.get(colunasConsolidado.get(0).getColunaSIRESP().get(0)).trim();
+				
+				System.out.println(entidade.getExecutante() + inicioCompetenciaFormatado);
 				
 				if(ofertasDemandasProcessadas.containsKey(entidade.getExecutante() + inicioCompetenciaFormatado))
 				{
+					System.out.println(tipoDeBusca + especialidade.toUpperCase());
+					
 					mapaEspecialidade = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
 					if(mapaEspecialidade.containsKey(tipoDeBusca + especialidade.toUpperCase()))
 					{
@@ -507,25 +803,29 @@ public class OfertaDemandaDeAcessoR1 {
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), dataInicioCompetencia, "Date mes/ano"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_TIPO_OFERTA.getIndice(), tipoDeBusca, ""));
 				
-				System.out.print(linhaExcel + "(T: " + linhaDaTabela.size() + ") E: (" + quantidadeEsperadaDeColunas + ") - ");
-				for(String celula : linhaDaTabela)
-					System.out.print(celula + "\t");
-				System.out.println();
+//				System.out.print(linhaExcel + "(T: " + linhaDaTabela.size() + ") E: (" + quantidadeEsperadaDeColunas + ") - ");
+//				for(String celula : linhaDaTabela)
+//					System.out.print(celula + "\t");
+//				System.out.println();
 				
 				for(CorrelacaoColunasOfertasDemandas correlacao : colunasConsolidado)
 				{
 						
 					if(correlacao.getColunaSIRESP() == null)
+					{
 						celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), "-", "String"));
+						dadosSequenciais.add("-");
+					}
 					else
 					{
 						if(correlacao.getTipo().equals("String")) 
 						{
 							String valor = "";
 							for(int indice : correlacao.getColunaSIRESP())
-								valor += linhaDaTabela.get(indice);
+								valor += linhaDaTabela.get(indice).trim();
 							
 							celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), valor, correlacao.getTipo()));
+							dadosSequenciais.add(valor);
 						}
 						else
 						{
@@ -543,6 +843,7 @@ public class OfertaDemandaDeAcessoR1 {
 							if(divisor == 0)
 							{
 								celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), "-", "String"));
+								dadosSequenciais.add("-");
 							}
 							else
 							{				
@@ -562,30 +863,32 @@ public class OfertaDemandaDeAcessoR1 {
 								{
 									int resultado = (soma - subtraendo) / divisor;
 									celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), resultado, correlacao.getTipo()));
+									dadosSequenciais.add(Integer.toString(resultado));
 								}
 								else
 								{
 									double resultado = 1.0 * (soma - subtraendo) / divisor;
 									celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), resultado, correlacao.getTipo()));
+									dadosSequenciais.add(Double.toString(resultado));
 								}
 							}
 						}
 					}
 				}
-				montarObjetoOferta(oferta, entidade, tipoDeBusca, dataInicioCompetencia, celulas);
+				montarObjetoOferta(oferta, entidade, tipoDeBusca, dataInicioCompetencia, linhaExcel, especialidade, dadosSequenciais);
 				
 				if(mapaEspecialidade != null)
 				{
-					mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase(), oferta);
+					mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim(), oferta);
 				}
 			}
 		}
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 	}
 	
-	private OfertaEDemanda montarObjetoOferta(OfertaEDemanda oferta, EntidadeExecutanteR1 entidade, String tipoOferta, LocalDate dataInicioCompetencia, ArrayList<CelulaExcel> celulas)
+	private OfertaEDemanda montarObjetoOferta(OfertaEDemanda oferta, EntidadeExecutanteR1 entidade, String tipoOferta, LocalDate dataInicioCompetencia, int linhaExcel, String especialidade, ArrayList<String> dadosSequenciais)
 	{
-		oferta.setUnidade(entidade.getUnidade());
+		oferta.setUnidade(entidade.getExecutante());
 		oferta.setVinculo(entidade.getVinculo());
 		
 		Locale localeBR = Locale.of("pt", "BR");
@@ -593,22 +896,25 @@ public class OfertaDemandaDeAcessoR1 {
 		oferta.setCompetencia(dataInicioCompetencia.format(formatter));
 		
 		oferta.setTipoDeOferta(tipoOferta);
-		oferta.setEspecialidade(celulas.get(0).getValor().toString());
+		oferta.setEspecialidade(especialidade);
 		
-		oferta.setOfertaTotal(celulas.get(1).getTipo().equals("Int")?String.valueOf(celulas.get(1).getValor()):celulas.get(1).toString());
-		oferta.setAgendamentoTotal(celulas.get(2).getTipo().equals("Int")?String.valueOf(celulas.get(2).getValor()):celulas.get(2).toString());
-		oferta.setAgendamentoCota(celulas.get(3).getTipo().equals("Int")?String.valueOf(celulas.get(3).getValor()):celulas.get(3).toString());
-		oferta.setAgendamentoBolsao(celulas.get(4).getTipo().equals("Int")?String.valueOf(celulas.get(4).getValor()):celulas.get(4).toString());
-		oferta.setAgendamentoNaoDistribuido(celulas.get(5).getTipo().equals("Int")?String.valueOf(celulas.get(5).getValor()):celulas.get(5).toString());
-		oferta.setAgendamentoExtra(celulas.get(6).getTipo().equals("Int")?String.valueOf(celulas.get(6).getValor()):celulas.get(6).toString());
-		oferta.setRecepcaoAtendido(celulas.get(7).getTipo().equals("Int")?String.valueOf(celulas.get(7).getValor()):celulas.get(7).toString());
-		oferta.setRecepcaoAusente(celulas.get(8).getTipo().equals("Int")?String.valueOf(celulas.get(8).getValor()):celulas.get(8).toString());
-		oferta.setRecepcaoAusenteCalculado(celulas.get(9).getTipo().equals("Int")?String.valueOf(celulas.get(9).getValor()):celulas.get(9).toString());
-		oferta.setRecepcaoDesistencia(celulas.get(10).getTipo().equals("Int")?String.valueOf(celulas.get(10).getValor()):celulas.get(10).toString());
-		oferta.setRecepcaoDispensado(celulas.get(11).getTipo().equals("Int")?String.valueOf(celulas.get(11).getValor()):celulas.get(11).toString());
-		oferta.setRecepcaoNaoInformado(celulas.get(12).getTipo().equals("Int")?String.valueOf(celulas.get(12).getValor()):celulas.get(12).toString());
+		oferta.setOfertaTotal(dadosSequenciais.get(1));
+		oferta.setAgendamentoTotal(dadosSequenciais.get(2));
+		oferta.setAgendamentoCota(dadosSequenciais.get(3));
+		oferta.setAgendamentoBolsao(dadosSequenciais.get(4));
+		oferta.setAgendamentoNaoDistribuido(dadosSequenciais.get(5));
+		oferta.setAgendamentoExtra(dadosSequenciais.get(6));
+		oferta.setRecepcaoAtendido(dadosSequenciais.get(7));
+		oferta.setRecepcaoAusente(dadosSequenciais.get(8));
+		oferta.setRecepcaoAusenteCalculado(dadosSequenciais.get(9));
+		oferta.setRecepcaoDesistencia(dadosSequenciais.get(10));
+		oferta.setRecepcaoDispensado(dadosSequenciais.get(11));
+		oferta.setRecepcaoNaoInformado(dadosSequenciais.get(12));
 		
-		oferta.setLinhaExcel(celulas.get(0).getLinha());
+		oferta.setOfertaBloqueada("");
+		oferta.setRecepcaoFechada("");
+		
+		oferta.setLinhaExcel(linhaExcel);
 		
 		return oferta;
 	}
@@ -704,7 +1010,7 @@ public class OfertaDemandaDeAcessoR1 {
 	        return fmtMesAno.format(data);
 	    }
 	
-	    // 2️⃣ Caso seja dd/MM/yyyy
+	    // 2️ Caso seja dd/MM/yyyy
 	    try {
 	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("dd/MM/yyyy", localeBR);
 	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
@@ -713,7 +1019,7 @@ public class OfertaDemandaDeAcessoR1 {
 	        // ignora e tenta o próximo formato
 	    }
 	
-	    // 3️⃣ Caso seja mmm/yyyy (direto do Excel ou do POI)
+	    // 3️ Caso seja mmm/yyyy (direto do Excel ou do POI)
 	    try {
 	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
 	        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy", localeBR));

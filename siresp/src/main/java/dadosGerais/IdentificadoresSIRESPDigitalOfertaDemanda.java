@@ -57,6 +57,8 @@ public enum IdentificadoresSIRESPDigitalOfertaDemanda {
 	TEXTO_FILTRO_PERFIL(11, "EXECUTANTE");
 	
 	
+	
+	
 	private int indice;
 	private String textoIdentificador;
 	
