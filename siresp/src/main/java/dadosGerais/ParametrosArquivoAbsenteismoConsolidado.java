@@ -57,11 +57,17 @@ public enum ParametrosArquivoAbsenteismoConsolidado {
 	ARQUIVO_MUNICIPAL_LINHA_INICIAL_UNIDADES(44, 8,"Ajustado de acordo com o Java, no arquivo é a Linha 9", "", ""),
 	
 	NOME_PLANILHA_MMA(45, 8,"MMA", "", ""),
-	ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_MMA(46, 4,"Ajustado de acordo com o Java, no arquivo é a Linha 5", "", ""),
-	ARQUIVO_MUNICIPAL_COLUNA_CONSULTAS_PLANILHA_MMA(47, 2,"Ajustado de acordo com o Java, no arquivo é a coluna C (3)", "", ""),
-	ARQUIVO_MUNICIPAL_COLUNA_EXAMES_PLANILHA_MMA(48, 3,"Ajustado de acordo coxm o Java, no arquivo é a coluna D (4)", "", ""),
+	NOME_PLANILHA_VALORES_CONSULTA(46, 8,"VALORES CONSULTA", "", ""),
+	NOME_PLANILHA_VALORES_EXAME(47, 8,"VALORES EXAME", "", ""),
+	ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_MMA(48, 4,"Ajustado de acordo com o Java, no arquivo é a Linha 5", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_CONSULTAS_PLANILHA_MMA(49, 2,"Ajustado de acordo com o Java, no arquivo é a coluna C (3)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_EXAMES_PLANILHA_MMA(50, 3,"Ajustado de acordo coxm o Java, no arquivo é a coluna D (4)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_REFERENCIA_PLANILHA_MMA(51, 4,"Ajustado de acordo coxm o Java, no arquivo é a coluna E (5)", "", ""),
+	ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_VALORES(52, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_AGENDADOS_PLANILHA_VALORES(53, 4,"Ajustado de acordo coxm o Java, no arquivo é a coluna E (5)", "", ""),
+	ARQUIVO_MUNICIPAL_COLUNA_AUSENTES_PLANILHA_VALORES(54, 16,"Ajustado de acordo coxm o Java, no arquivo é a coluna P (17)", "", ""),
 	
-	EXTENSAO_ARQUIVO_ABSENTEISMO(49, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_ABSENTEISMO(55, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;

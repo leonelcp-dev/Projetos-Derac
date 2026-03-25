@@ -630,7 +630,7 @@ public class AcoesGeraisPaginaWeb {
             	
             	ArrayList<String> linha = new ArrayList();
             	
-                List<WebElement> colunas = tr.findElements(By.tagName("td"));
+                List<WebElement> colunas = tr.findElements(By.xpath("./td"));
                 for (WebElement coluna : colunas) {
                     
                 	linha.add(coluna.getText());

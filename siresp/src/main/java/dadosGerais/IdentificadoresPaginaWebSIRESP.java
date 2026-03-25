@@ -59,7 +59,7 @@ public enum IdentificadoresPaginaWebSIRESP {
 	
 	ID_CONSOLIDADO_MENSAL_TIPO_RELATORIO(0, "FLT_CBO_REL"),
 	TEXTO_CONSOLIDADO_MENSAL_RELATORIO_CONSULTAS(0, "Consolidado Mensal - Agendamentos Consulta x Especialidade"),
-	TEXTO_CONSOLIDADO_MENSAL_RELATORIO_EXAMES(0, "Consolidado Mensal - Agendamentos Exame    x Grupo de Cota"),
+	TEXTO_CONSOLIDADO_MENSAL_RELATORIO_EXAMES(0, "Consolidado Mensal - Agendamentos Exame x Grupo de Cota"),
 	
 	ID_CONSOLIDADO_MENSAL_BOTAO_BUSCAR(0, "btn_acao"),
 	NAME_CONSOLIDADO_MENSAL_BOTAO_DOWNLOAD(0, "btn_excel"),
@@ -91,7 +91,9 @@ public enum IdentificadoresPaginaWebSIRESP {
 	XPATH_PRODUCAO_EXECUTANTE_NENHUM_RESULTADO_ENCONTRADO(0, "/html/body/form/table/tbody/tr[8]/td/table/tbody/tr/td/table/tbody/tr/td/center/span"),
 	
 	TEXTO_VINCULO_ESTADUAL(0, "ESTADUAL"),
-	TEXTO_VINCULO_MUNICIPAL(0, "MUNICIPAL"),
+	TEXTO_VINCULO_CONVENIO(0, "CONVÊNIO"),
+	TEXTO_VINCULO_PROPRIO(0, "PRÓPRIO"),
+	TEXTO_VINCULO_CONTRATO(0, "CONTRATO"),
 	
 	VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO(0, "DT_HR_ACAO");
 	

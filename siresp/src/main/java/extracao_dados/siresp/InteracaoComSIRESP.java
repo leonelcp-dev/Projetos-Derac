@@ -32,7 +32,7 @@ public class InteracaoComSIRESP
     	//ChromeOptions options = new ChromeOptions();
     	
     	int escolha = -1;
-    	int maximoEscolha = 7;
+    	int maximoEscolha = 8;
     	boolean abrirMenuInicial = false;
     	
     	if(args.length == 0)
@@ -130,7 +130,8 @@ public class InteracaoComSIRESP
         else if(escolha == 4)
         {
         	Absenteismo absenteismo = new Absenteismo();
-        	absenteismo.verificarAbsenteismo(driver);
+        	//absenteismo.verificarAbsenteismo(driver, null, null);
+        	absenteismo.verificarAbsenteismo(driver, "12/2024", "12/2024");
         	//absenteismo.parametrizarArquivosVazios(driver);
         }
         else if(escolha == 5)

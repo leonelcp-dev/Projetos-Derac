@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public enum ParametrosTabelaProducaoConsolidadoExames {
 		
-	INDICE_COLUNA_ESPECIALIDADE(0, 0, "Especialidade", "String", ""),
+	INDICE_COLUNA_GRUPO_DE_COTA(0, 0, "Grupo de Cota", "String", ""),
 	INDICE_COLUNA_OFERTA(1, 1, "Oferta Total", "Int", ""),
 	INDICE_COLUNA_AGENDAMENTO_TOTAL(2, 2, "Agendado Total", "Int", ""),
 	INDICE_COLUNA_AGENDAMENTO_TOTAL_INTERNO(3, 3, "Agendamento Total Interno", "Int", ""),
@@ -37,7 +37,7 @@ public enum ParametrosTabelaProducaoConsolidadoExames {
 	QUANTIDADE_ESPERADA_DE_COLUNAS(26, 26, "Quantidade Esperada de Colunas", "", ""),
 	
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(27, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(27, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(28, 0, "xls", "", "");
 	
 
 	private int idUnico;

@@ -180,10 +180,12 @@ public class CensoLeitos {
 	private String baixarArquivosCenso(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, ArrayList<EntidadeLeito> entidades) 
 	{
 		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
-		String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
+		
 		
 		for(EntidadeLeito entidade : entidades)
 		{
+			String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
+			
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador(), entidade.getNomeSIRESP());
 			
 			while(!paginaWeb.obterValorSelecionadoDoSelect(driver, IdentificadoresPaginaWebSIRESP.ID_LEITOS_FILTRO_UNIDADE.getTextoIdentificador()).equals(entidade.getNomeSIRESP()))

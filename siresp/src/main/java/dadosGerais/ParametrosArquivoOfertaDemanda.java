@@ -23,7 +23,7 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_AGENDAMENTOS_BOLSAO(13, 14,"Agendamentos Bolsão", "Int", ""),
 	INDICE_COLUNA_AGENDAMENTOS_NAO_DISTRIBUIDO(14, 15,"Agendamentos Não Distribuídos", "Int", ""),
 	INDICE_COLUNA_AGENDAMENTOS_EXTRA(15, 16,"Agendamentos Extras", "Int", ""),
-	INDICE_COLUNA_ATENDIMENTOS_TOTAL(16, 17,"Atendimentos Total", "Int", ""),
+	INDICE_COLUNA_ATENDIMENTOS_PRESENTE(16, 17,"Atendimentos Total", "Int", ""),
 	INDICE_COLUNA_ATENDIMENTOS_AUSENTE(17, 18,"Atendimentos Ausentes", "Int", ""),
 	INDICE_COLUNA_ATENDIMENTOS_AUSENTE_CALCULADO(18, 19,"Atendimentos Ausentes Calculado", "Int", ""),
 	INDICE_COLUNA_ATENDIMENTOS_DESISTENCIA(19, 20,"Atendimentos Desistencia", "Int", ""),
@@ -38,8 +38,12 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(28, 29,"Cálculos Tempo de Espera", "Double", ""),
 	INDICE_COLUNA_RECEPCAO_FECHADA(29, 30,"Recepção Fechada", "String", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(30, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(31, 0, "xls", "", "");
+	LINHA_INICIAL_ARQUIVO(30, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	
+	NOME_PLANILHA_CONSOLIDADA(31, 0, "Ofertas", "", ""),
+	
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(32, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(33, 0, "xls", "", "");
 	
 
 	private int idUnico;
