@@ -37,13 +37,16 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_DEMANDA_REPRIMIDA(27, 28,"Demanda Reprimida", "Int", ""),
 	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(28, 29,"Cálculos Tempo de Espera", "Double", ""),
 	INDICE_COLUNA_RECEPCAO_FECHADA(29, 30,"Recepção Fechada", "String", ""),
+	INDICE_COLUNA_OBSERVACAO(30, 31,"Recepção Fechada", "String", ""),
 	
-	LINHA_INICIAL_ARQUIVO(30, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	LINHA_INICIAL_ARQUIVO(31, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(31, 0, "Ofertas", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(32, 0, "Ofertas", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(32, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(33, 0, "xls", "", "");
+	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(33, 0, "Erro ao selecionar o grupo de cota", "", ""),
+	
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(34, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(35, 0, "xls", "", "");
 	
 
 	private int idUnico;

@@ -37,8 +37,10 @@ import dadosGerais.ParametrosArquivoAbsenteismoExameBaixado;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
+import dadosGerais.ParametrosArquivoOfertasParaBloqueio;
 import dadosGerais.ParametrosTabelaAgendaHorarioConsultas;
 import dadosGerais.ParametrosTabelaAgendaHorarioExame;
+import dadosGerais.ParametrosTabelaManutencaoEquipamento;
 import dadosGerais.ParametrosTabelaPacientesSemRecepcaoConsulta;
 import dadosGerais.ParametrosTabelaPacientesSemRecepcaoExame;
 import dadosGerais.ParametrosTabelaProducaoConsolidadoConsultas;
@@ -62,6 +64,7 @@ import modelosDados.EntidadeLeito;
 import modelosDados.LinhaCensoLeitos;
 import modelosDados.MesFormatado;
 import modelosDados.OfertaEDemanda;
+import modelosDados.RelacaoOfertasEmBloqueio;
 import modelosDados.UsuarioSIRESP;
 import tratamentoDeArquivos.Arquivo;
 import tratamentoDeArquivos.Pasta;
@@ -87,8 +90,9 @@ public class OfertaDemandaDeAcessoR1 {
 	String dataFormatadaFinalCompetencia;
 	
 	HashMap<String, HashMap<String, OfertaEDemanda>> ofertasDemandasProcessadas;
+	HashMap<String, String> relacoesOfertaEmBloqueios;
 
-	public String calcularOfertaEDemanda(WebDriver driver)
+	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal)
 	{			
 		formatoDataPaginaWeb = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		formatoDataArquivo = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -146,143 +150,185 @@ public class OfertaDemandaDeAcessoR1 {
 			linhaArquivo++;
 		}
 		
-
-		String mes = JOptionPane.showInputDialog(null, "Qual o mês de análise?", "Mês de Referência", JOptionPane.QUESTION_MESSAGE).trim();
-		String ano = JOptionPane.showInputDialog(null, "Qual o ano de análise?", "Ano de Referência", JOptionPane.QUESTION_MESSAGE).trim();
+		ArrayList<RelacaoOfertasEmBloqueio> relacaoGrupoEspecificidade = lerRelacaoOfertasParaBloqueio(pastaDestinoArquivos + "\\RelacaoEspecialidadesBloqueio.xlsx", ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertasParaBloqueio.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
 		
-		mesCompetencia = Integer.parseInt(mes);
-		anoCompetencia = Integer.parseInt(ano);
-		
-			
-		if(mesCompetencia == 1)
+		relacoesOfertaEmBloqueios = new HashMap<String, String>();
+		for(RelacaoOfertasEmBloqueio relacao : relacaoGrupoEspecificidade)
 		{
-			mesReferencia = 12;
-			anoReferencia = anoCompetencia - 1;
+			relacoesOfertaEmBloqueios.put(relacao.getUnidade() + relacao.getTipoDeOferta() + relacao.getEquipamento().trim(), relacao.getGrupo().trim());
+		}
+		
+		for(String texto : relacoesOfertaEmBloqueios.keySet())
+		{
+			System.out.println(texto);
+		}
+		
+		String mesInicio;
+		String anoInicio;
+		String mesFim;
+		String anoFim;
+		
+		if(competenciaInicial == null)
+		{
+			mesInicio = JOptionPane.showInputDialog(null, "Qual o mês de análise?", "Mês de Referência", JOptionPane.QUESTION_MESSAGE).trim();
+			anoInicio = JOptionPane.showInputDialog(null, "Qual o ano de análise?", "Ano de Referência", JOptionPane.QUESTION_MESSAGE).trim();
+			
+			mesFim = mesInicio;
+			anoFim = anoInicio;
 		}
 		else
 		{
-			mesReferencia = mesCompetencia + 1;
-			anoReferencia = anoCompetencia;
+			mesInicio = competenciaInicial.split("/")[0];
+			anoInicio = competenciaInicial.split("/")[1];
+			
+			mesFim = competenciaFinal.split("/")[0];
+			anoFim = competenciaFinal.split("/")[1];
 		}
 		
-		if(mesReferencia < 10)
-			dataFormatadaInicioReferencia = "01-0" + mesReferencia + "-" + anoReferencia;
-		else
-			dataFormatadaInicioReferencia = "01-" + mesReferencia + "-" + anoReferencia;
+		mesCompetencia = Integer.parseInt(mesInicio);
+		anoCompetencia = Integer.parseInt(anoInicio);
 		
-		dataInicioReferencia = LocalDate.parse(dataFormatadaInicioReferencia, formatoDataPaginaWeb);
+		int ultimoMesProcessamento = Integer.parseInt(mesFim);
+		int ultimoAnoProcessamento = Integer.parseInt(anoFim);
 		
-		dataFinalReferencia = dataInicioReferencia.with(TemporalAdjusters.lastDayOfMonth());
-		dataFormatadaFinalReferencia = dataFinalReferencia.format(formatoDataPaginaWeb);
-		
-		//System.out.println(dataFormatadaPasta);
-		
-		
-		
-		if(mesCompetencia < 10)
-			dataFormatadaInicioCompetencia = "01/0" + mesCompetencia + "/" + anoCompetencia;
-		else
-			dataFormatadaInicioCompetencia = "01/" + mesCompetencia + "/" + anoCompetencia;
-		
-		dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, formatoDataArquivo);
-		
-		dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
-		dataFormatadaFinalCompetencia = dataFinalCompetencia.format(formatoDataArquivo);
-		
-		//definindo entidades para o censo de leitos
-		ArrayList<EntidadeExecutanteR1> entidades = lerEntidadesR1(pastaDestinoArquivos + "\\unidadesExecutantes.csv");
-		
-	
-		if(escolhaRotina == 0)
+		while((anoCompetencia < ultimoAnoProcessamento) || (anoCompetencia == ultimoAnoProcessamento && mesCompetencia <= ultimoMesProcessamento))
 		{
-		
-			driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
 			
-			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
-			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-			ArrayList<ElementoSelecao> listaUnidadeRadio = paginaWeb.getListaDeOpcoesRadioPorName(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_RADIO_UNIDADES.getTextoIdentificador());
-			
-			HashMap<String, String> elementosRadioUnidades = new HashMap<String, String>();
-			
-			for(ElementoSelecao elemento : listaUnidadeRadio)
+			if(mesCompetencia == 1)
 			{
-				String cnes = elemento.getText().substring(0, 7);
-				String value = elemento.getValue();
-				
-				int posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Administrador Unidade Reg");
-				
-				if(posicaoPerfilDeAcesso > 0)
-				{
-					String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
-					elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
-					
-					//System.out.println("CNES: " + cnes + "| Value: " + value + "| Composição: " + composicaoCNESNomeUnidade + "|");
-				}
-	
+				mesReferencia = 12;
+				anoReferencia = anoCompetencia - 1;
+			}
+			else
+			{
+				mesReferencia = mesCompetencia - 1;
+				anoReferencia = anoCompetencia;
 			}
 			
-			for(EntidadeExecutanteR1 entidade : entidades)
+			if(mesReferencia < 10)
+				dataFormatadaInicioReferencia = "01-0" + mesReferencia + "-" + anoReferencia;
+			else
+				dataFormatadaInicioReferencia = "01-" + mesReferencia + "-" + anoReferencia;
+			
+			dataInicioReferencia = LocalDate.parse(dataFormatadaInicioReferencia, formatoDataPaginaWeb);
+			
+			dataFinalReferencia = dataInicioReferencia.with(TemporalAdjusters.lastDayOfMonth());
+			dataFormatadaFinalReferencia = dataFinalReferencia.format(formatoDataPaginaWeb);
+			
+			//System.out.println(dataFormatadaPasta);
+			
+			
+			
+			if(mesCompetencia < 10)
+				dataFormatadaInicioCompetencia = "01/0" + mesCompetencia + "/" + anoCompetencia;
+			else
+				dataFormatadaInicioCompetencia = "01/" + mesCompetencia + "/" + anoCompetencia;
+			
+			dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, formatoDataArquivo);
+			
+			dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
+			dataFormatadaFinalCompetencia = dataFinalCompetencia.format(formatoDataArquivo);
+			
+			//definindo entidades para o censo de leitos
+			ArrayList<EntidadeExecutanteR1> entidades = lerEntidadesR1(pastaDestinoArquivos + "\\unidadesExecutantes.csv");
+			
+		
+			if(escolhaRotina == 0)
 			{
+			
 				driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
 				
-				ArrayList<String> opcoes = new ArrayList<>();
-				opcoes.add("Relatório");
-				opcoes.add("Produtividade  >>");
+				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
+				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+				ArrayList<ElementoSelecao> listaUnidadeRadio = paginaWeb.getListaDeOpcoesRadioPorName(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_RADIO_UNIDADES.getTextoIdentificador());
 				
-				if(entidade.getVinculo().equals(IdentificadoresPaginaWebSIRESP.TEXTO_VINCULO_ESTADUAL.getTextoIdentificador()))
-					opcoes.add("P01 - Produção Executante");
-				else
-					opcoes.add("P06 - Consolidado");
+				HashMap<String, String> elementosRadioUnidades = new HashMap<String, String>();
 				
-				
-				String value = elementosRadioUnidades.get(entidade.getCNES() + " - " + entidade.getNomeUnidadeSIRESP());
-				//System.out.println(value);
-				
-				
-				if(value != null)
+				for(ElementoSelecao elemento : listaUnidadeRadio)
 				{
-					paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
-				
-					paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+					String cnes = elemento.getText().substring(0, 7);
+					String value = elemento.getValue();
 					
-					boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
+					int posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Administrador Unidade Reg");
 					
-					paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
-					
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					boolean visivel;
-					do
+					if(posicaoPerfilDeAcesso > 0)
 					{
-					
-						visivel = acessarMenu(driver, paginaWeb, opcoes);
+						String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
+						elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
 						
-					
-					}while(!visivel);
-					
-					//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-					
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						//System.out.println("CNES: " + cnes + "| Value: " + value + "| Composição: " + composicaoCNESNomeUnidade + "|");
 					}
-				
-					montarOfertaDemanda(driver, paginaWeb, entidade);
-					
+		
 				}
-				else
-					System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
+				
+				for(EntidadeExecutanteR1 entidade : entidades)
+				{
+					driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
+					
+					ArrayList<String> opcoes = new ArrayList<>();
+					opcoes.add("Relatório");
+					opcoes.add("Produtividade  >>");
+					
+					if(entidade.getVinculo().equals(IdentificadoresPaginaWebSIRESP.TEXTO_VINCULO_ESTADUAL.getTextoIdentificador()))
+						opcoes.add("P01 - Produção Executante");
+					else
+						opcoes.add("P06 - Consolidado");
+					
+					
+					String value = elementosRadioUnidades.get(entidade.getCNES() + " - " + entidade.getNomeUnidadeSIRESP());
+					//System.out.println(value);
+					
+					
+					if(value != null)
+					{
+						paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
+					
+						paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+						
+						boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
+						
+						paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
+						
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						boolean visivel;
+						do
+						{
+						
+							visivel = acessarMenu(driver, paginaWeb, opcoes);
+							
+						
+						}while(!visivel);
+						
+						//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+						
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					
+						montarOfertaDemanda(driver, paginaWeb, entidade);
+						
+					}
+					else
+						System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
+				}
+			}
+			
+			mesCompetencia++;
+			if(mesCompetencia > 12)
+			{
+				mesCompetencia = 1;
+				anoCompetencia++;
 			}
 		}
-		
-		consolidarArquivoMunicipal(entidades, mesCompetencia, anoCompetencia);
 		
 		return "";	
 	}
@@ -419,276 +465,7 @@ public class OfertaDemandaDeAcessoR1 {
 		buscas[1] = tiposDeBusca[1][0];
 		
 		preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
-		//preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
-		
-		return "";
-	}
-	
-	private String preencherInformacoesDeBloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
-	{
-		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
-		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
-		
-		ArrayList<String> opcoes = new ArrayList<>();
-		opcoes.add("Agendamento");
-		opcoes.add("Horários");
-		
-		HashMap<String, Integer> colunaTipoDeOferta = new HashMap<String, Integer>();
-		colunaTipoDeOferta.put("Consulta-Coluna Bloqueio", ParametrosTabelaAgendaHorarioConsultas.INDICE_COLUNA_BLOQUEADO.getIndice());
-		colunaTipoDeOferta.put("Exame-Coluna Bloqueio", ParametrosTabelaAgendaHorarioExame.INDICE_COLUNA_BLOQUEADO.getIndice());
-		colunaTipoDeOferta.put("Consulta-Coluna Especialidade", ParametrosTabelaAgendaHorarioConsultas.INDICE_COLUNA_ESPECIALIDADE.getIndice());
-		colunaTipoDeOferta.put("Exame-Coluna Especialidade", ParametrosTabelaAgendaHorarioExame.INDICE_COLUNA_EQUIPAMENTO.getIndice());
-		
-		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		boolean visivel;
-		do
-		{
-		
-			visivel = acessarMenu(driver, paginaWeb, opcoes);
-			
-		
-		}while(!visivel);
-		
-		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		Locale localeBR = Locale.of("pt", "BR");
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
-		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
-		
-		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
-		
-		if(mapaEspecialidades != null)
-		{
-			for(OfertaEDemanda oferta : mapaEspecialidades.values())
-			{
-				oferta.setOfertaBloqueada("0");
-				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
-			}
-		
-			for(String tipoDeBusca : tiposDeBusca)
-			{
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIOS_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-				
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
-				
-				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AGENDA_HORARIO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-				
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
-				{
-					ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_TABELA_RESULTADOS.getTextoIdentificador());
-					System.out.println("Tabela encontrada");
-					
-					int colunaEspecialidade = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Especialidade");
-					int colunaBloqueio = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Bloqueio");
-				
-					
-					for(ArrayList<String> linhaDaTabela : tabelaResultados)
-					{
-						OfertaEDemanda oferta = mapaEspecialidades.get(tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).toUpperCase().trim());
-						
-						if(oferta != null)
-						{
-							
-							
-							int ofertaTotal;
-							if(oferta.getOfertaTotal().trim().equals(""))
-								ofertaTotal = 0;
-							else
-								ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
-							
-							int agendamentoTotal;
-							if(oferta.getAgendamentoTotal().trim().equals(""))
-								agendamentoTotal = 0;
-							else
-								agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
-							
-							int bloqueado;
-							if(linhaDaTabela.get(colunaBloqueio).trim().equals(("")))
-								bloqueado = 0;
-							else
-								bloqueado = Integer.parseInt(linhaDaTabela.get(colunaBloqueio).trim());
-							
-							System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
-							
-							int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
-							
-							oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
-						}
-					}
-				}
-			}
-			for(OfertaEDemanda oferta : mapaEspecialidades.values())
-			{
-				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
-			}
-			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
-		}
-		
-		return "";
-	}
-	
-	private String preencherInformacoesDeRecepcao(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
-	{
-		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
-		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
-		
-		ArrayList<String> opcoes = new ArrayList<>();
-		opcoes.add("Relatório");
-		opcoes.add("Pacientes  >>");
-		opcoes.add("PC05 - Paciente sem Recepção");
-		
-		HashMap<String, Integer> colunaTipoDeOferta = new HashMap<String, Integer>();
-		colunaTipoDeOferta.put("Consulta-Coluna Especialidade", ParametrosTabelaPacientesSemRecepcaoConsulta.INDICE_COLUNA_ESPECIALIDADE.getIndice());
-		colunaTipoDeOferta.put("Exame-Coluna Especialidade", ParametrosTabelaPacientesSemRecepcaoExame.INDICE_COLUNA_GRUPO_DE_COTA.getIndice());
-		
-		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		boolean visivel;
-		do
-		{
-		
-			visivel = acessarMenu(driver, paginaWeb, opcoes);
-			
-		
-		}while(!visivel);
-		
-		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		Locale localeBR = Locale.of("pt", "BR");
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
-		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
-		
-		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
-		
-		if(mapaEspecialidades != null)
-		{
-			for(OfertaEDemanda oferta : mapaEspecialidades.values())
-			{
-				oferta.setOfertaBloqueada("0");
-				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
-			}
-		
-			for(String tipoDeBusca : tiposDeBusca)
-			{
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIOS_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-				
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
-				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
-				
-				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AGENDA_HORARIO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
-				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-				
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
-				{
-					ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_TABELA_RESULTADOS.getTextoIdentificador());
-					System.out.println("Tabela encontrada");
-					
-					int colunaEspecialidade = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Especialidade");
-					int colunaBloqueio = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Bloqueio");
-				
-					
-					for(ArrayList<String> linhaDaTabela : tabelaResultados)
-					{
-						OfertaEDemanda oferta = mapaEspecialidades.get(tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).toUpperCase().trim());
-						
-						if(oferta != null)
-						{
-							
-							
-							int ofertaTotal;
-							if(oferta.getOfertaTotal().trim().equals(""))
-								ofertaTotal = 0;
-							else
-								ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
-							
-							int agendamentoTotal;
-							if(oferta.getAgendamentoTotal().trim().equals(""))
-								agendamentoTotal = 0;
-							else
-								agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
-							
-							int bloqueado;
-							if(linhaDaTabela.get(colunaBloqueio).trim().equals(("")))
-								bloqueado = 0;
-							else
-								bloqueado = Integer.parseInt(linhaDaTabela.get(colunaBloqueio).trim());
-							
-							System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
-							
-							int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
-							
-							oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
-						}
-					}
-				}
-			}
-			for(OfertaEDemanda oferta : mapaEspecialidades.values())
-			{
-				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
-			}
-			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
-		}
+		preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
 		
 		return "";
 	}
@@ -739,6 +516,486 @@ public class OfertaDemandaDeAcessoR1 {
 		buscas[1] = tiposDeBusca[1][0];
 		
 		preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
+		preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
+		
+		return "";
+	}
+	
+//	private String preencherInformacoesDeBloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
+//	{
+//		preencherInformacoesDeBloqueioEmConsultas(driver, paginaWeb, entidade, tiposDeBusca[0]);
+//		
+//		preencherInformacoesDeBloqueioEmExames(driver, paginaWeb, entidade, tiposDeBusca[1]);
+//		
+//		return "";
+//	}
+	
+	
+	private String preencherInformacoesDeBloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Agendamento");
+		opcoes.add("Horários");
+		
+		HashMap<String, Integer> bloqueiosPorGrupo = new HashMap<String, Integer>();
+		
+		HashMap<String, Integer> colunaTipoDeOferta = new HashMap<String, Integer>();
+		colunaTipoDeOferta.put("Consulta-Coluna Bloqueio", ParametrosTabelaAgendaHorarioConsultas.INDICE_COLUNA_BLOQUEADO.getIndice());
+		colunaTipoDeOferta.put("Exame-Coluna Bloqueio", ParametrosTabelaAgendaHorarioExame.INDICE_COLUNA_BLOQUEADO.getIndice());
+		colunaTipoDeOferta.put("Consulta-Coluna Especialidade", ParametrosTabelaAgendaHorarioConsultas.INDICE_COLUNA_ESPECIALIDADE.getIndice());
+		colunaTipoDeOferta.put("Exame-Coluna Especialidade", ParametrosTabelaAgendaHorarioExame.INDICE_COLUNA_EQUIPAMENTO.getIndice());
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		boolean visivel;
+		do
+		{
+		
+			visivel = acessarMenu(driver, paginaWeb, opcoes);
+			
+		
+		}while(!visivel);
+		
+		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				oferta.setOfertaBloqueada("0");
+				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
+			}
+			
+			for(String tipoDeBusca : tiposDeBusca)
+			{
+		
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIOS_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_AGENDA_HORARIO_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AGENDA_HORARIO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
+				{
+					ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_AGENDA_HORARIO_TABELA_RESULTADOS.getTextoIdentificador());
+					System.out.println("Tabela encontrada");
+					
+					int colunaEspecialidade = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Especialidade");
+					int colunaBloqueio = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Bloqueio");
+				
+					
+					for(ArrayList<String> linhaDaTabela : tabelaResultados)
+					{
+						if(!linhaDaTabela.get(colunaEspecialidade).trim().equals("Especialidade") && !linhaDaTabela.get(colunaEspecialidade).trim().equals("Equipamento") && !linhaDaTabela.get(colunaEspecialidade - 1).trim().equals("Total"))
+						{
+							System.out.println(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim() + "|");
+							
+							if(!relacoesOfertaEmBloqueios.containsKey(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase()))
+							{
+								System.out.println(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim());
+								atualizarPlanilhaDeRelacoes(driver, paginaWeb, tipoDeBusca, entidade, linhaDaTabela.get(colunaEspecialidade));
+							}
+							
+							String grupo = relacoesOfertaEmBloqueios.get(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase());	
+							String textoBloqueadoDaEspecialidade = linhaDaTabela.get(colunaBloqueio);
+							int valorBloqueadoDaEspecialidade;
+							
+							if(textoBloqueadoDaEspecialidade.trim().equals(""))
+								valorBloqueadoDaEspecialidade = 0;
+							else
+							{
+								valorBloqueadoDaEspecialidade = Integer.parseInt(textoBloqueadoDaEspecialidade.trim());
+							}
+												
+							int valorBloqueadoDoGrupo = 0;
+							if(bloqueiosPorGrupo.containsKey(grupo))
+							{
+								valorBloqueadoDoGrupo = bloqueiosPorGrupo.get(grupo);
+							}
+							
+							bloqueiosPorGrupo.put(grupo, valorBloqueadoDoGrupo + valorBloqueadoDaEspecialidade);
+						}
+					}
+					
+					
+					
+					for(OfertaEDemanda oferta : mapaEspecialidades.values())
+					{
+						if(oferta != null && oferta.getTipoDeOferta().equals(tipoDeBusca))
+						{
+							System.out.println(oferta.getEspecialidade());
+							
+							int ofertaTotal;
+							if(oferta.getOfertaTotal().trim().equals(""))
+								ofertaTotal = 0;
+							else
+								ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
+							
+							int agendamentoTotal;
+							if(oferta.getAgendamentoTotal().trim().equals(""))
+								agendamentoTotal = 0;
+							else
+								agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
+
+							int bloqueado;
+							if(!bloqueiosPorGrupo.containsKey(oferta.getEspecialidade().toUpperCase()))
+								bloqueado = 0;
+							else
+								bloqueado = bloqueiosPorGrupo.get(oferta.getEspecialidade().toUpperCase());
+							
+							System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
+							
+							int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
+							
+							oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
+						}
+					}
+				}
+			}
+			
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
+		
+		return "";
+	}
+	
+	private String preencherInformacoesDeBloqueioEmExames(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String tipoDeBusca)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Manutenção");
+		opcoes.add("Distribuição de Cota");
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		boolean visivel;
+		do
+		{
+		
+			visivel = acessarMenu(driver, paginaWeb, opcoes);
+			
+		
+		}while(!visivel);
+		
+		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
+		while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+		
+		paginaWeb.preencherInputTextByNameComEventos(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
+		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_ARVORE.getTextoIdentificador(), entidade.getExecutante());
+		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_ATIVOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_ATIVOS_TODAS.getTextoIdentificador());
+		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
+
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				if(oferta.getTipoDeOferta().equals(tipoDeBusca))
+				{
+					oferta.setOfertaBloqueada("0");
+					System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
+				}
+			}
+			
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				if(oferta.getTipoDeOferta().equals(tipoDeBusca))
+				{
+					System.out.println("|" + oferta.getEspecialidade() + "|");
+					
+					paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_GRUPO_DE_COTA.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_VALOR_PADRAO_GRUPO_DE_COTA.getTextoIdentificador());
+					
+					boolean selecionado = paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_GRUPO_DE_COTA.getTextoIdentificador(), oferta.getEspecialidade());
+					
+					if(selecionado)
+					{
+						oferta.setObservacao(oferta.getObservacao() + "");
+						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OBSERVACAO.getIndice(), oferta.getObservacao(), "String"));
+						
+						paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_DISTRIBUICAO_DE_COTA_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+			
+						while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+						
+						if(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_DISTRIBUICAO_DE_COTA_ARVORE_PRINCIPAL.getTextoIdentificador())) 
+						{
+							paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_DISTRIBUICAO_DE_COTA_ARVORE_PRINCIPAL.getTextoIdentificador());
+							
+							paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_DISTRIBUICAO_COTAS_TABELA_RESULTADOS.getTextoIdentificador());
+							
+							String resumoOfertas;
+							do
+							{
+								resumoOfertas = paginaWeb.obterConteudoDeUmTDPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_DISTRIBUICAO_DE_COTA_TABELA_RESULTADO.getTextoIdentificador());
+							}while(resumoOfertas == null);
+							
+							System.out.println(resumoOfertas);
+							
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							if(resumoOfertas.contains(IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_RESULTADO_BLOQUEADOS.getTextoIdentificador()))
+							{
+								String ofertasBloqueadas = resumoOfertas.substring(resumoOfertas.indexOf(IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_RESULTADO_BLOQUEADOS.getTextoIdentificador()) + IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_RESULTADO_BLOQUEADOS.getTextoIdentificador().length(), resumoOfertas.length()).trim();
+								
+								int ofertaTotal;
+								if(oferta.getOfertaTotal().trim().equals(""))
+									ofertaTotal = 0;
+								else
+									ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
+								
+								int agendamentoTotal;
+								if(oferta.getAgendamentoTotal().trim().equals(""))
+									agendamentoTotal = 0;
+								else
+									agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
+								
+								int bloqueado;
+								if(ofertasBloqueadas.equals(("")))
+									bloqueado = 0;
+								else
+									bloqueado = Integer.parseInt(ofertasBloqueadas);
+								
+								//System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
+								
+								int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
+								
+								oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
+							}
+							
+							paginaWeb.voltarAoFramePai(driver);
+						}
+					}
+					else
+					{
+						oferta.setObservacao(oferta.getObservacao() + ParametrosArquivoOfertaDemanda.TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA.getDescricao() +";");
+						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OBSERVACAO.getIndice(), oferta.getObservacao(), "String"));
+					}
+				}
+			}
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				if(oferta.getTipoDeOferta().equals(tipoDeBusca))
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
+		
+		return "";
+	}
+	
+	private String preencherInformacoesDeRecepcao(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Relatório");
+		opcoes.add("Pacientes  >>");
+		opcoes.add("PC05 - Paciente sem Recepção");
+		
+		HashMap<String, Integer> colunaTipoDeOferta = new HashMap<String, Integer>();
+		colunaTipoDeOferta.put("Consulta-Coluna Especialidade", ParametrosTabelaPacientesSemRecepcaoConsulta.INDICE_COLUNA_ESPECIALIDADE.getIndice());
+		colunaTipoDeOferta.put("Exame-Coluna Especialidade", ParametrosTabelaPacientesSemRecepcaoExame.INDICE_COLUNA_GRUPO_DE_COTA.getIndice());
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		boolean visivel;
+		do
+		{
+		
+			visivel = acessarMenu(driver, paginaWeb, opcoes);
+			
+		
+		}while(!visivel);
+		
+		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		LocalDate dataFinal;
+		LocalDate dataInicial;
+		LocalDate hoje = LocalDate.now();
+		
+		if(hoje.isBefore(dataInicioCompetencia))
+			dataInicial = hoje;
+		else
+			dataInicial = dataInicioCompetencia;
+			
+		if(hoje.isBefore(dataFinalCompetencia))
+			dataFinal = hoje;
+		else
+			dataFinal = dataFinalCompetencia;
+		
+		String dataInicioFormatada;
+		String dataFimFormatada;
+		
+		DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		
+		dataInicioFormatada = dataInicial.format(formatoData);
+		dataFimFormatada = dataFinal.format(formatoData);
+		
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicial.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				oferta.setRecepcaoFechada("Sim");
+				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
+			}
+		
+			for(String tipoDeBusca : tiposDeBusca)
+			{
+				paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_PACIENTES_SEM_RECEPCAO_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_PACIENTES_SEM_RECEPCAO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataInicioFormatada.replace("-", ""));
+				paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_PACIENTES_SEM_RECEPCAO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replace("-", ""));
+				
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_PACIENTES_SEM_RECEPCAO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+				while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_PACIENTES_SEM_RECEPCAO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
+				{
+					paginaWeb.clicarRadioInputPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_PACIENTES_SEM_RECEPCAO_FITLRO_UNIDADE.getTextoIdentificador());
+					while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+					
+					ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_PACIENTES_SEM_RECEPCAO_TABELA_RESULTADOS.getTextoIdentificador());
+					System.out.println("Tabela encontrada");
+					
+					int colunaEspecialidade = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Especialidade");
+					
+					ArrayList<String> especialidadesSemRecepcao = new ArrayList<String>();
+					
+					for(ArrayList<String> linhaDaTabela : tabelaResultados)
+					{
+						if(!especialidadesSemRecepcao.contains(linhaDaTabela.get(colunaEspecialidade).toUpperCase().trim()))
+						{
+							especialidadesSemRecepcao.add(linhaDaTabela.get(colunaEspecialidade).toUpperCase().trim());
+						}
+					}
+					
+					for(String especialidade : especialidadesSemRecepcao)
+					{
+						OfertaEDemanda oferta = mapaEspecialidades.get(tipoDeBusca + especialidade);
+						
+						if(oferta != null)
+						{
+							oferta.setRecepcaoFechada("Não");
+						}
+					}
+				}
+			}
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_RECEPCAO_FECHADA.getIndice(), oferta.getRecepcaoFechada(), "String"));
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
 		
 		return "";
 	}
@@ -784,7 +1041,7 @@ public class OfertaDemandaDeAcessoR1 {
 					else
 					{
 						oferta = new OfertaEDemanda();
-						mapaEspecialidade = new HashMap<String, OfertaEDemanda>();
+						//mapaEspecialidade = new HashMap<String, OfertaEDemanda>();
 						linhaExcel = ultimaLinhaLivre;
 						ultimaLinhaLivre++;
 					}
@@ -824,7 +1081,7 @@ public class OfertaDemandaDeAcessoR1 {
 							for(int indice : correlacao.getColunaSIRESP())
 								valor += linhaDaTabela.get(indice).trim();
 							
-							celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), valor, correlacao.getTipo()));
+							celulas.add(new CelulaExcel(linhaExcel, correlacao.getColunaConsolidado(), valor.toUpperCase(), correlacao.getTipo()));
 							dadosSequenciais.add(valor);
 						}
 						else
@@ -879,6 +1136,7 @@ public class OfertaDemandaDeAcessoR1 {
 				
 				if(mapaEspecialidade != null)
 				{
+					System.out.println("(" + oferta.getLinhaExcel() + ") " + oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim());
 					mapaEspecialidade.put(oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim(), oferta);
 				}
 			}
@@ -896,7 +1154,7 @@ public class OfertaDemandaDeAcessoR1 {
 		oferta.setCompetencia(dataInicioCompetencia.format(formatter));
 		
 		oferta.setTipoDeOferta(tipoOferta);
-		oferta.setEspecialidade(especialidade);
+		oferta.setEspecialidade(especialidade.toUpperCase());
 		
 		oferta.setOfertaTotal(dadosSequenciais.get(1));
 		oferta.setAgendamentoTotal(dadosSequenciais.get(2));
@@ -914,14 +1172,111 @@ public class OfertaDemandaDeAcessoR1 {
 		oferta.setOfertaBloqueada("");
 		oferta.setRecepcaoFechada("");
 		
+		if(oferta.getObservacao()  == null)
+			oferta.setObservacao("");
+		
 		oferta.setLinhaExcel(linhaExcel);
 		
 		return oferta;
 	}
 	
-	public String consolidarArquivoMunicipal(ArrayList<EntidadeExecutanteR1> entidades, int mesCompetencia, int anoCompetencia)
-	{
 
+	private String atualizarPlanilhaDeRelacoes(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String tipoDeBusca, EntidadeExecutanteR1 entidade, String especialidade)
+	{
+		ArrayList<String> opcoes = new ArrayList<>();
+		opcoes.add("Manutenção");
+		opcoes.add("Equipamento");
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\RelacaoEspecialidadesBloqueio.xlsx", 0);
+		
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
+		int primeiraLinhaVazia = arquivoConsolidado.getPrimeiraLinhaVazia() + 1;
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		if(tipoDeBusca.equals("Consulta"))
+		{
+			relacoesOfertaEmBloqueios.put(entidade.getExecutante() + tipoDeBusca + especialidade.trim().toUpperCase(), especialidade.trim());
+			
+			celulas.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getExecutante(), "String"));
+			celulas.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_TIPO_OFERTA.getIndice(), tipoDeBusca, "String"));
+			celulas.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_GRUPO.getIndice(), especialidade.trim().toUpperCase(), "String"));
+			celulas.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_EQUIPAMENTO.getIndice(), especialidade.trim().toUpperCase(), "String"));
+		}
+		else
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			boolean visivel;
+			do
+			{
+			
+				visivel = acessarMenu(driver, paginaWeb, opcoes);
+				
+			
+			}while(!visivel);
+			
+			//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			ArrayList<ElementoSelecao> itens = paginaWeb.obterItensDeUmSelectPeloNome(driver, IdentificadoresPaginaWebSIRESP.NAME_MANUTENCAO_EQUIPAMENTO_GRUPO_DE_COTA.getTextoIdentificador());
+			
+			int linha = primeiraLinhaVazia;
+			for(ElementoSelecao elemento : itens)
+			{
+				if(!elemento.getText().equals(IdentificadoresPaginaWebSIRESP.TEXTO_MANUTENCAO_EQUIPAMENTO_VALOR_PADRAO_GRUPO_DE_COTA.getTextoIdentificador()))
+				{
+					paginaWeb.selecionarItemSelectPeloName(driver, IdentificadoresPaginaWebSIRESP.NAME_MANUTENCAO_EQUIPAMENTO_GRUPO_DE_COTA.getTextoIdentificador(), elemento.getText());
+					paginaWeb.selecionarItemSelectPeloName(driver, IdentificadoresPaginaWebSIRESP.NAME_MANUTENCAO_EQUIPAMENTO_LISTAGEM_ATIVOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_MANUTENCAO_EQUIPAMENTO_LISTAGEM_TODOS.getTextoIdentificador());
+					
+					paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_MANUTENCAO_EQUIPAMENTO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					ArrayList<ArrayList<String>> tabelaDeResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_MANUTENCAO_EQUIPAMENTO_TABELA_RESULTADOS.getTextoIdentificador());
+					
+					if(tabelaDeResultados != null)
+					{
+						for(ArrayList<String> linhaDaTabela : tabelaDeResultados)
+						{
+							if(!linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).equals(IdentificadoresPaginaWebSIRESP.TEXTO_MANUTENCAO_EQUIPAMENTO_TABELA_RESULTADOS_PRIMEIRA_CELULA.getTextoIdentificador()))
+							{
+								if(!relacoesOfertaEmBloqueios.containsKey(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).trim()))
+								{
+									relacoesOfertaEmBloqueios.put(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).trim(), elemento.getText().trim());
+									
+									celulas.add(new CelulaExcel(linha, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getExecutante(), "String"));
+									celulas.add(new CelulaExcel(linha, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_TIPO_OFERTA.getIndice(), tipoDeBusca, "String"));
+									celulas.add(new CelulaExcel(linha, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_GRUPO.getIndice(), elemento.getText().trim(), "String"));
+									celulas.add(new CelulaExcel(linha, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_EQUIPAMENTO.getIndice(), linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).trim().toUpperCase(), "String"));
+									
+									linha++;
+								}
+							}							
+						}
+					}
+
+				}
+			}
+		}
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
 		
 		return "";
 	}
@@ -995,6 +1350,30 @@ public class OfertaDemandaDeAcessoR1 {
 
 	}
 	
+	private ArrayList<RelacaoOfertasEmBloqueio> lerRelacaoOfertasParaBloqueio(String nomeArquivo, String planilha, int linhaCabecalho)
+	{		
+		ArrayList<RelacaoOfertasEmBloqueio> ofertas;
+		
+		try (FileInputStream in = new FileInputStream(nomeArquivo)) {
+			ofertas = ExcelBinder.readSheet(
+                    in,
+                    RelacaoOfertasEmBloqueio.class,
+                    planilha,     // ou null para a primeira
+                    linhaCabecalho,           // linha do cabeçalho (0-based)
+                    true         // pular linhas totalmente vazias
+            );
+
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		return ofertas;
+
+	}
 
 	private static String normalizarDataParaMesAno(String valor) {
 	    if (valor == null || valor.isBlank())

@@ -90,6 +90,9 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Recepção Fechada")
     private String recepcaoFechada;
     
+    @ExcelColumn(header = "Observação")
+    private String observacao;
+    
     private int linhaExcel;
 
 	public String getUnidade() {
@@ -322,6 +325,14 @@ public class OfertaEDemanda {
 
 	public void setRecepcaoFechada(String recepcaoFechada) {
 		this.recepcaoFechada = recepcaoFechada;
+	}
+	
+	public String getObservacao() {
+		return observacao;
+	}
+
+	public void setObservacao(String observacao) {
+		this.observacao = observacao;
 	}
 
 	public int getLinhaExcel() {

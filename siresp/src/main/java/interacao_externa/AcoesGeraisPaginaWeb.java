@@ -43,6 +43,13 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean voltarAoFramePai(WebDriver driverPagina)
+	{
+		driverPagina.switchTo().parentFrame();
+		
+		return true;
+	}
+	
 	public boolean clicarMenuUL(WebDriver driverPagina, String iframe, String idInicial, List<String> SequenciaMenus)
 	{
 		try
@@ -387,7 +394,27 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{		
 			WebElement item = driverPagina.findElement(By.name(name));
+			
+			item.sendKeys(texto);
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
 	
+	public boolean preencherInputTextByNameComEventos(WebDriver driverPagina, String name, String texto)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.name(name));
+
+			item.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+			item.sendKeys(Keys.DELETE);
+
 			item.sendKeys(texto);
 			
 		}catch(Error e) {
@@ -700,6 +727,26 @@ public class AcoesGeraisPaginaWeb {
 		return tabela;
 	}
 	
+	public String obterConteudoDeUmTDPeloXPATH(WebDriver driverPagina, String xpath)
+	{
+		String conteudo = "";
+		
+		try
+		{		
+			WebElement elemento = driverPagina.findElement(By.xpath(xpath));
+			
+			conteudo = elemento.getAttribute("textContent");
+
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			System.out.println("Chegou aqui");
+			return null;
+		}
+		
+		return conteudo;
+	}
+	
 	public List<WebElement> obterSubmits(WebDriver driverPagina, String className)
 	{
 		List<WebElement> submits;
@@ -751,6 +798,22 @@ public class AcoesGeraisPaginaWeb {
 		{	
 			WebElement radio = driverPagina.findElement(By.xpath("//input[@type='radio' and @value='" + value + "']"));
 			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			radio.click();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean clicarRadioInputPeloId(WebDriver driverPagina, String id)
+	{
+		try
+		{	
+			WebElement radio = driverPagina.findElement(By.id(id));
 	
 			radio.click();
 			
@@ -860,6 +923,28 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{		
 			WebElement item = driverPagina.findElement(By.id(id));
+	
+			Select select = new Select(item);
+			List<WebElement> options = select.getOptions();
+			
+			for(WebElement option : options)
+				opcoes.add(new ElementoSelecao(option.getText(), option.getAttribute("value")));
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return null;
+		}
+				
+		return opcoes;
+	}
+	
+	public ArrayList<ElementoSelecao> obterItensDeUmSelectPeloNome(WebDriver driverPagina, String name)
+	{
+		ArrayList<ElementoSelecao> opcoes = new ArrayList<ElementoSelecao>();
+		
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.name(name));
 	
 			Select select = new Select(item);
 			List<WebElement> options = select.getOptions();
