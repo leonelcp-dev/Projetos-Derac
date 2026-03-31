@@ -37,7 +37,7 @@ import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import interacao_externa.ConversaoHMTL_XLSX;
 import modelosDados.CelulaExcel;
-import modelosDados.CorrelacaoColunasArquivosAbsenteismo;
+import modelosDados.CorrelacaoColunasArquivos;
 import modelosDados.ElementoSelecao;
 import modelosDados.EntidadeAbsenteismo;
 import modelosDados.EntidadeCDRNaoRegulada;
@@ -410,10 +410,10 @@ public class Absenteismo {
 					
 					CorrelacaoArquivosAbsenteismo correlacoes = new CorrelacaoArquivosAbsenteismo();
 					
-					ArrayList<CorrelacaoColunasArquivosAbsenteismo> colunasConsolidado = correlacoes.obterCorrelacaoEntreArquivos(tiposDeBusca[i]);
+					ArrayList<CorrelacaoColunasArquivos> colunasConsolidado = correlacoes.obterCorrelacaoEntreArquivos(tiposDeBusca[i]);
 					
 					
-					for(CorrelacaoColunasArquivosAbsenteismo coluna : colunasConsolidado)
+					for(CorrelacaoColunasArquivos coluna : colunasConsolidado)
 					{
 						//System.out.println("ColunaSIRESP: " + coluna.getColunaSIRESP() + " Coluna Consolidado: " + coluna.getColunaConsolidado() + " Formato: " + coluna.getFormato());
 						

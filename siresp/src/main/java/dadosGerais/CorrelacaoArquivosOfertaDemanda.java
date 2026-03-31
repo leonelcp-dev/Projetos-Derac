@@ -2,7 +2,7 @@ package dadosGerais;
 
 import java.util.ArrayList;
 
-import modelosDados.CorrelacaoColunasArquivosAbsenteismo;
+import modelosDados.CorrelacaoColunasArquivos;
 import modelosDados.CorrelacaoColunasOfertasDemandas;
 
 public class CorrelacaoArquivosOfertaDemanda {

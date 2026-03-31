@@ -43,7 +43,7 @@ import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import interacao_externa.ConversaoHMTL_XLSX;
 import interacao_externa.ExcelBinder;
 import modelosDados.CelulaExcel;
-import modelosDados.CorrelacaoColunasArquivosAbsenteismo;
+import modelosDados.CorrelacaoColunasArquivos;
 import modelosDados.ElementoSelecao;
 import modelosDados.EntidadeAbsenteismo;
 import modelosDados.EntidadeCDRNaoRegulada;

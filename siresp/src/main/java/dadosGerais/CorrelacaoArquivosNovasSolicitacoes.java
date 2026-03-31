@@ -1,0 +1,33 @@
+package dadosGerais;
+
+import java.util.ArrayList;
+
+import modelosDados.CorrelacaoColunasArquivos;
+
+public class CorrelacaoArquivosNovasSolicitacoes {
+
+	public ArrayList<CorrelacaoColunasArquivos> obterCorrelacaoEntreArquivos(String consultaOuExame)
+	{
+		ArrayList<CorrelacaoColunasArquivos> correlacao = new ArrayList<CorrelacaoColunasArquivos>();
+		
+		if(consultaOuExame.equals("Exame"))
+		{
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_COD_PACIENTE.getIndice(), ParametrosArquivoNovasSolicitacoesExame.INDICE_COLUNA_COD_PACIENTE.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_COD_PACIENTE.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_COD_PACIENTE.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), ParametrosArquivoNovasSolicitacoesExame.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), ParametrosArquivoNovasSolicitacoesExame.INDICE_COLUNA_CID.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_DATA_INCLUSAO.getIndice(), ParametrosArquivoNovasSolicitacoesExame.INDICE_COLUNA_DATA_INCLUSAO.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_DATA_INCLUSAO.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_DATA_INCLUSAO.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), ParametrosArquivoNovasSolicitacoesExame.INDICE_COLUNA_UNIDADE_SOLICITANTE.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getFormato()));
+		}
+		else if(consultaOuExame.equals("Consulta"))
+		{
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_COD_PACIENTE.getIndice(), ParametrosArquivoNovasSolicitacoesConsulta.INDICE_COLUNA_COD_PACIENTE.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_COD_PACIENTE.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_COD_PACIENTE.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), ParametrosArquivoNovasSolicitacoesConsulta.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), ParametrosArquivoNovasSolicitacoesConsulta.INDICE_COLUNA_CID.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_DATA_INCLUSAO.getIndice(), ParametrosArquivoNovasSolicitacoesConsulta.INDICE_COLUNA_DATA_INCLUSAO.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_DATA_INCLUSAO.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_DATA_INCLUSAO.getFormato()));
+			correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), ParametrosArquivoNovasSolicitacoesConsulta.INDICE_COLUNA_UNIDADE_SOLICITANTE.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getFormato()));
+		}
+		
+		return correlacao;
+	}
+	
+}

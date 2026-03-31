@@ -1,13 +1,13 @@
 package modelosDados;
 
-public class CorrelacaoColunasArquivosAbsenteismo {
+public class CorrelacaoColunasArquivos {
 	
 	private int colunaConsolidado;
 	private int colunaSIRESP;
 	private String tipo;
 	private String formato;
 	
-	public CorrelacaoColunasArquivosAbsenteismo(int colunaConsolidado, int colunaSIRESP, String tipo, String formato)
+	public CorrelacaoColunasArquivos(int colunaConsolidado, int colunaSIRESP, String tipo, String formato)
 	{
 		this.colunaConsolidado = colunaConsolidado;
 		this.colunaSIRESP = colunaSIRESP;
