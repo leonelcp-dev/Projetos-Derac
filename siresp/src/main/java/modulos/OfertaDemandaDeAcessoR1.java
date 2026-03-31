@@ -3,7 +3,10 @@ package modulos;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +39,8 @@ import dadosGerais.ParametrosArquivoAbsenteismoConsultaBaixado;
 import dadosGerais.ParametrosArquivoAbsenteismoExameBaixado;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
+import dadosGerais.ParametrosArquivoMapaDeOfertasFPO;
+import dadosGerais.ParametrosArquivoNomenclaturas;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
 import dadosGerais.ParametrosArquivoOfertasParaBloqueio;
 import dadosGerais.ParametrosTabelaAgendaHorarioConsultas;
@@ -61,8 +66,10 @@ import modelosDados.EntidadeCDRNaoRegulada;
 import modelosDados.EntidadeExecutante;
 import modelosDados.EntidadeExecutanteR1;
 import modelosDados.EntidadeLeito;
+import modelosDados.EntradaFPO;
 import modelosDados.LinhaCensoLeitos;
 import modelosDados.MesFormatado;
+import modelosDados.NomenclaturaPadronizada;
 import modelosDados.OfertaEDemanda;
 import modelosDados.RelacaoOfertasEmBloqueio;
 import modelosDados.UsuarioSIRESP;
@@ -77,7 +84,7 @@ public class OfertaDemandaDeAcessoR1 {
 	private int anoReferencia;
 	private String pastaDestinoArquivos;
 	private String pastaDownloads;
-	private MesesFormatados meses;	
+	private MesesFormatados meses;
 	private DateTimeFormatter formatoDataPaginaWeb;
 	private DateTimeFormatter formatoDataArquivo;
 	LocalDate dataInicioReferencia;
@@ -91,6 +98,8 @@ public class OfertaDemandaDeAcessoR1 {
 	
 	HashMap<String, HashMap<String, OfertaEDemanda>> ofertasDemandasProcessadas;
 	HashMap<String, String> relacoesOfertaEmBloqueios;
+	HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas;
+	HashMap<String, EntradaFPO> mapaDeOfertasFPO;
 
 	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal)
 	{			
@@ -158,9 +167,12 @@ public class OfertaDemandaDeAcessoR1 {
 			relacoesOfertaEmBloqueios.put(relacao.getUnidade() + relacao.getTipoDeOferta() + relacao.getEquipamento().trim(), relacao.getGrupo().trim());
 		}
 		
-		for(String texto : relacoesOfertaEmBloqueios.keySet())
+		ArrayList<NomenclaturaPadronizada> nomenclaturas = lerPadronizacaoDeNomenclaturas(pastaDestinoArquivos + "\\BANCO DE DADOS - 2025.xlsx", ParametrosArquivoNomenclaturas.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoNomenclaturas.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
+		
+		nomenclaturasPadronizadas = new HashMap<String, NomenclaturaPadronizada>();
+		for(NomenclaturaPadronizada nomenclatura : nomenclaturas)
 		{
-			System.out.println(texto);
+			nomenclaturasPadronizadas.put(nomenclatura.getInsercao().trim().toUpperCase(), nomenclatura);
 		}
 		
 		String mesInicio;
@@ -228,6 +240,23 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
 			dataFormatadaFinalCompetencia = dataFinalCompetencia.format(formatoDataArquivo);
+			
+			
+			String caminhoArquivoFPO = pastaDestinoArquivos + "\\FPO\\" + anoCompetencia + "\\" + ParametrosArquivoMapaDeOfertasFPO.NOME_PADRAO_ARQUIVO.getDescricao();
+			String complementoNomePlanilha = meses.getMeses().get(mesCompetencia - 1).getMesNumero() + "." + anoCompetencia;
+			String nomePlanilha = ParametrosArquivoMapaDeOfertasFPO.NOME_PLANILHA_CONSOLIDADA.getDescricao().replace(ParametrosArquivoMapaDeOfertasFPO.VALOR_DINAMICO.getDescricao(), complementoNomePlanilha);
+			
+			ArrayList<EntradaFPO> mapaDeOfertas = lerMapaDeOfertasFPO(caminhoArquivoFPO, nomePlanilha, ParametrosArquivoNomenclaturas.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
+			
+			mapaDeOfertasFPO = new HashMap<String, EntradaFPO>();
+			
+			if(mapaDeOfertas != null)
+			{
+				for(EntradaFPO oferta : mapaDeOfertas)
+				{
+					mapaDeOfertasFPO.put(oferta.getExecutante().trim().toUpperCase() + oferta.getEspecialidades().trim().toUpperCase(), oferta);
+				}
+			}
 			
 			//definindo entidades para o censo de leitos
 			ArrayList<EntidadeExecutanteR1> entidades = lerEntidadesR1(pastaDestinoArquivos + "\\unidadesExecutantes.csv");
@@ -337,7 +366,7 @@ public class OfertaDemandaDeAcessoR1 {
 	{
 		ArrayList<EntidadeExecutanteR1> entidades = new ArrayList<EntidadeExecutanteR1>();
 		
-        try (Reader reader = new FileReader(nomeArquivo);
+        try (Reader reader = new InputStreamReader(new FileInputStream(nomeArquivo),StandardCharsets.ISO_8859_1);
              CSVParser csvParser = new CSVParser(reader, CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").setHeader().setSkipHeaderRecord(true).build())) {
 
             // Itera sobre cada linha do arquivo CSV
@@ -347,8 +376,9 @@ public class OfertaDemandaDeAcessoR1 {
             	String vinculo = registro.get("VINCULO");
                 String unidade = registro.get("EXECUTANTE");
                 String nomeSIRESP = registro.get("NOME SIRESP");
+                String nomeFPO = registro.get("NOME FPO");
                
-                entidades.add(new EntidadeExecutanteR1(cnes, vinculo, unidade, nomeSIRESP));
+                entidades.add(new EntidadeExecutanteR1(cnes, vinculo, unidade, nomeSIRESP, nomeFPO));
             }
             
             return entidades;
@@ -362,7 +392,11 @@ public class OfertaDemandaDeAcessoR1 {
 	
 	private String montarOfertaDemanda(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade) 
 	{
-
+		ArrayList<String> tiposDeVinculoComFPO = new ArrayList<String>();
+		tiposDeVinculoComFPO.add("CONVÊNIO");
+		tiposDeVinculoComFPO.add("CONTRATO");
+		tiposDeVinculoComFPO.add("CONVÊNIO - SUBCONTRATADA");
+				
 		String[] tiposDeBusca = new String[2];
 		
 		if(entidade.getVinculo().equals(IdentificadoresPaginaWebSIRESP.TEXTO_VINCULO_ESTADUAL.getTextoIdentificador()))
@@ -374,10 +408,135 @@ public class OfertaDemandaDeAcessoR1 {
 			montarRelatorioDeProdutividadeOutros(driver, paginaWeb, entidade);
 		}
 		
-
+		preencherInformacoesDeNomenclatura(entidade);
+		
+		if(tiposDeVinculoComFPO.contains(entidade.getVinculo()))
+		{
+			montarInformacoesDeFPOComPlanoDeTrabalho(entidade);
+		}
+		else
+		{
+			montarInformacoesDeFPOPorMediaDeOfertas(entidade);
+		}
 		
 		return "";
 		
+	}
+	
+	private String montarInformacoesDeFPOComPlanoDeTrabalho(EntidadeExecutanteR1 entidade)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				if(mapaDeOfertasFPO.containsKey(entidade.getNomeFPO().trim().toUpperCase() + oferta.getEspecialidade().trim().toUpperCase()))
+				{
+					EntradaFPO fpo = mapaDeOfertasFPO.get(entidade.getNomeFPO().trim().toUpperCase() + oferta.getEspecialidade().trim().toUpperCase());
+					
+					if(fpo.getFPO().trim().equals(""))
+					{
+						oferta.setFPO("Não informado");
+					}
+					else
+					{
+						oferta.setFPO(fpo.getFPO());
+					}
+					
+				}
+				else
+				{
+					oferta.setFPO("-");
+				}
+
+				try
+				{
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_FPO.getIndice(), Integer.parseInt(oferta.getFPO()), "Int"));
+				}
+				catch(NumberFormatException e)
+				{
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_FPO.getIndice(), oferta.getFPO(), "String"));
+				}
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
+		
+		return "";
+	}
+	
+	private String montarInformacoesDeFPOPorMediaDeOfertas(EntidadeExecutanteR1 entidade)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+		
+		if(mapaEspecialidades != null)
+		{
+			for(OfertaEDemanda oferta : mapaEspecialidades.values())
+			{
+				int somaDasOfertas = 0;
+				int quantidadeDeOfertas = 0;
+				
+				if(!oferta.getOfertaTotal().equals(""))
+				{
+					somaDasOfertas += Integer.parseInt(oferta.getOfertaTotal());
+					quantidadeDeOfertas++;
+				}
+				
+				LocalDate mesDeAnalise = dataInicioCompetencia.minusMonths(0).withDayOfMonth(1);
+				
+				for(int mes = 1; mes <= 11; mes++)
+				{
+					mesDeAnalise = mesDeAnalise.minusMonths(1).withDayOfMonth(1);
+					String competencia = mesDeAnalise.format(formatter);
+					
+					HashMap<String, OfertaEDemanda> mapaEspecialidadesDeAnalise = ofertasDemandasProcessadas.get(entidade.getExecutante() + competencia);
+					
+					if(mapaEspecialidadesDeAnalise != null)
+					{
+						if(mapaEspecialidadesDeAnalise.containsKey(oferta.getTipoDeOferta() + oferta.getEspecialidade()))
+						{
+							OfertaEDemanda ofertaDeAnalise = mapaEspecialidadesDeAnalise.get(oferta.getTipoDeOferta() + oferta.getEspecialidade());
+							if(!ofertaDeAnalise.getOfertaTotal().equals(""))
+							{
+								somaDasOfertas += Integer.parseInt(ofertaDeAnalise.getOfertaTotal());
+								quantidadeDeOfertas++;
+							}
+						}
+					}
+				}
+				
+				if(quantidadeDeOfertas == 0)
+				{
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_FPO.getIndice(), "-", "String"));
+				}
+				else
+				{
+					int fpo = (int)Math.ceil(1.0 * somaDasOfertas / quantidadeDeOfertas);
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_FPO.getIndice(), fpo, "Int"));					
+				}
+			}
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		}
+		
+		return "";
 	}
 	
 	private String montarRelatorioDeProdutividadeEstadual(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade) 
@@ -704,50 +863,12 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	private String preencherInformacoesDeBloqueioEmExames(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String tipoDeBusca)
+	private String preencherInformacoesDeNomenclatura(EntidadeExecutanteR1 entidade)
 	{
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
-		
-		ArrayList<String> opcoes = new ArrayList<>();
-		opcoes.add("Manutenção");
-		opcoes.add("Distribuição de Cota");
-		
 		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		boolean visivel;
-		do
-		{
-		
-			visivel = acessarMenu(driver, paginaWeb, opcoes);
-			
-		
-		}while(!visivel);
-		
-		//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tipoDeBusca);
-		while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-		
-		paginaWeb.preencherInputTextByNameComEventos(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
-		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_ARVORE.getTextoIdentificador(), entidade.getExecutante());
-		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_ATIVOS.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_ATIVOS_TODAS.getTextoIdentificador());
-		paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
-
 		Locale localeBR = Locale.of("pt", "BR");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
 		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
@@ -758,96 +879,21 @@ public class OfertaDemandaDeAcessoR1 {
 		{
 			for(OfertaEDemanda oferta : mapaEspecialidades.values())
 			{
-				if(oferta.getTipoDeOferta().equals(tipoDeBusca))
+				if(nomenclaturasPadronizadas.containsKey(oferta.getEspecialidade().trim().toUpperCase()))
 				{
-					oferta.setOfertaBloqueada("0");
-					System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
+					NomenclaturaPadronizada nomenclatura = nomenclaturasPadronizadas.get(oferta.getEspecialidade().trim().toUpperCase());
+					
+					oferta.setProcedimento(nomenclatura.getNomenclatura());
+					oferta.setClassificacao(nomenclatura.getFluxo());
 				}
-			}
-			
-			for(OfertaEDemanda oferta : mapaEspecialidades.values())
-			{
-				if(oferta.getTipoDeOferta().equals(tipoDeBusca))
+				else
 				{
-					System.out.println("|" + oferta.getEspecialidade() + "|");
-					
-					paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_GRUPO_DE_COTA.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_VALOR_PADRAO_GRUPO_DE_COTA.getTextoIdentificador());
-					
-					boolean selecionado = paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_DISTRIBUICAO_DE_COTA_FILTRO_GRUPO_DE_COTA.getTextoIdentificador(), oferta.getEspecialidade());
-					
-					if(selecionado)
-					{
-						oferta.setObservacao(oferta.getObservacao() + "");
-						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OBSERVACAO.getIndice(), oferta.getObservacao(), "String"));
-						
-						paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_DISTRIBUICAO_DE_COTA_BOTAO_BUSCAR.getTextoIdentificador(), "name");
-			
-						while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
-						
-						if(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_DISTRIBUICAO_DE_COTA_ARVORE_PRINCIPAL.getTextoIdentificador())) 
-						{
-							paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_DISTRIBUICAO_DE_COTA_ARVORE_PRINCIPAL.getTextoIdentificador());
-							
-							paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_DISTRIBUICAO_COTAS_TABELA_RESULTADOS.getTextoIdentificador());
-							
-							String resumoOfertas;
-							do
-							{
-								resumoOfertas = paginaWeb.obterConteudoDeUmTDPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_DISTRIBUICAO_DE_COTA_TABELA_RESULTADO.getTextoIdentificador());
-							}while(resumoOfertas == null);
-							
-							System.out.println(resumoOfertas);
-							
-							try {
-								Thread.sleep(1000);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-							if(resumoOfertas.contains(IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_RESULTADO_BLOQUEADOS.getTextoIdentificador()))
-							{
-								String ofertasBloqueadas = resumoOfertas.substring(resumoOfertas.indexOf(IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_RESULTADO_BLOQUEADOS.getTextoIdentificador()) + IdentificadoresPaginaWebSIRESP.TEXTO_DISTRIBUICAO_DE_COTA_RESULTADO_BLOQUEADOS.getTextoIdentificador().length(), resumoOfertas.length()).trim();
-								
-								int ofertaTotal;
-								if(oferta.getOfertaTotal().trim().equals(""))
-									ofertaTotal = 0;
-								else
-									ofertaTotal = Integer.parseInt(oferta.getOfertaTotal().trim());
-								
-								int agendamentoTotal;
-								if(oferta.getAgendamentoTotal().trim().equals(""))
-									agendamentoTotal = 0;
-								else
-									agendamentoTotal = Integer.parseInt(oferta.getAgendamentoTotal().trim());
-								
-								int bloqueado;
-								if(ofertasBloqueadas.equals(("")))
-									bloqueado = 0;
-								else
-									bloqueado = Integer.parseInt(ofertasBloqueadas);
-								
-								//System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
-								
-								int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
-								
-								oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
-							}
-							
-							paginaWeb.voltarAoFramePai(driver);
-						}
-					}
-					else
-					{
-						oferta.setObservacao(oferta.getObservacao() + ParametrosArquivoOfertaDemanda.TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA.getDescricao() +";");
-						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OBSERVACAO.getIndice(), oferta.getObservacao(), "String"));
-					}
+					oferta.setProcedimento("-");
+					oferta.setClassificacao("-");
 				}
-			}
-			for(OfertaEDemanda oferta : mapaEspecialidades.values())
-			{
-				if(oferta.getTipoDeOferta().equals(tipoDeBusca))
-					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
+
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getIndice(), oferta.getProcedimento(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getTipo()));
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CLASSIFICACAO.getIndice(), oferta.getClassificacao(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CLASSIFICACAO.getTipo()));
 			}
 			
 			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
@@ -1358,6 +1404,55 @@ public class OfertaDemandaDeAcessoR1 {
 			ofertas = ExcelBinder.readSheet(
                     in,
                     RelacaoOfertasEmBloqueio.class,
+                    planilha,     // ou null para a primeira
+                    linhaCabecalho,           // linha do cabeçalho (0-based)
+                    true         // pular linhas totalmente vazias
+            );
+
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		return ofertas;
+
+	}
+	
+	private ArrayList<EntradaFPO> lerMapaDeOfertasFPO(String nomeArquivo, String planilha, int linhaCabecalho)
+	{		
+		ArrayList<EntradaFPO> ofertas;
+		
+		try (FileInputStream in = new FileInputStream(nomeArquivo)) {
+			ofertas = ExcelBinder.readSheet(
+                    in,
+                    EntradaFPO.class,
+                    planilha,     // ou null para a primeira
+                    linhaCabecalho,           // linha do cabeçalho (0-based)
+                    true         // pular linhas totalmente vazias
+            );
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		return ofertas;
+
+	}
+	
+	private ArrayList<NomenclaturaPadronizada> lerPadronizacaoDeNomenclaturas(String nomeArquivo, String planilha, int linhaCabecalho)
+	{		
+		ArrayList<NomenclaturaPadronizada> ofertas;
+		
+		try (FileInputStream in = new FileInputStream(nomeArquivo)) {
+			ofertas = ExcelBinder.readSheet(
+                    in,
+                    NomenclaturaPadronizada.class,
                     planilha,     // ou null para a primeira
                     linhaCabecalho,           // linha do cabeçalho (0-based)
                     true         // pular linhas totalmente vazias

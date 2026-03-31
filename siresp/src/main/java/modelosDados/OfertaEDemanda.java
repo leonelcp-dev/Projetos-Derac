@@ -151,11 +151,11 @@ public class OfertaEDemanda {
 		this.classificacao = classificacao;
 	}
 
-	public String getFpo() {
+	public String getFPO() {
 		return fpo;
 	}
 
-	public void setFpo(String fpo) {
+	public void setFPO(String fpo) {
 		this.fpo = fpo;
 	}
 
