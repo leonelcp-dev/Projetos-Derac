@@ -1,5 +1,6 @@
 package interacao_externa;
 
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -24,6 +25,13 @@ public class ExcelBinder {
             int headerRowIndex,
             boolean skipEmptyRows
     ) {
+
+			ZipSecureFile.setMinInflateRatio(0.001);
+			
+			// (Opcional) limite total de bytes descompactados
+			ZipSecureFile.setMaxEntrySize(500 * 1024 * 1024); // 500 MB
+			ZipSecureFile.setMaxTextSize(200 * 1024 * 1024);  // 200 MB
+    	
         try (Workbook wb = new XSSFWorkbook(in)) {
             Sheet sheet = (sheetName != null && !sheetName.isBlank())
                     ? wb.getSheet(sheetName)

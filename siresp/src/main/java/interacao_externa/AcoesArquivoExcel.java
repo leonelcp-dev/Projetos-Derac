@@ -489,6 +489,54 @@ public class AcoesArquivoExcel {
 	public int getPrimeiraLinhaVazia() {
 		return primeiraLinhaVazia;
 	}
+	
+	public int getUlimtaLinhaPreenchidaEmUmaColuna(int primeiraLinha, int coluna) {
+		int contadorLinha = primeiraLinha;
+		boolean celulaVazia = false;
+		
+		Row linha = planilhaAtiva.getRow(contadorLinha);
+		Cell celula = linha.getCell(coluna);
+		
+		try
+		{
+			String valor = celula.getStringCellValue();
+			
+			if(valor.trim().equals(""))
+				celulaVazia = true;
+				
+		}catch(Exception e)
+		{
+			
+		}
+		
+		while(celula != null && !celulaVazia)
+		{
+			contadorLinha++;
+			
+			linha = planilhaAtiva.getRow(contadorLinha);
+			
+			if(linha != null)
+			{
+				celula = linha.getCell(coluna);
+				
+				try
+				{
+					String valor = celula.getStringCellValue();
+					
+					if(valor.trim().equals(""))
+						celulaVazia = true;
+						
+				}catch(Exception e)
+				{
+					
+				}
+			}
+			else
+				celulaVazia = true;
+		}
+		
+		return contadorLinha - 1;
+	}
 
 	public void setPrimeiraLinhaVazia(int primeiraLinhaVazia) {
 		this.primeiraLinhaVazia = primeiraLinhaVazia;
@@ -945,9 +993,13 @@ public class AcoesArquivoExcel {
 	        for(int linha = linhaInicial; linha < primeiraLinhaVazia; linha++)
 	        {
 	        	row = planilhaAtiva.getRow(linha);     // linha 2 (0-based)
-	            cell = row.getCell(coluna);
-	            if(cell != null)
-	            	cell.setCellStyle(dateStyle);
+	        	
+	        	if(row != null)
+	        	{
+		            cell = row.getCell(coluna);
+		            if(cell != null)
+		            	cell.setCellStyle(dateStyle);
+	        	}
 	        }
 	        try (FileOutputStream fos = new FileOutputStream(caminho.toFile())) {
 	            arquivoXLSX.write(fos);

@@ -379,7 +379,7 @@ public class Absenteismo {
 				
 				try
 				{
-					conversor.converterArquivo(entidade.getCaminhoCompletoArquivoBaixadoXLS(), entidade.getCaminhoCompletoArquivoBaixadoXLSX());
+					conversor.converterArquivo(entidade.getCaminhoCompletoArquivoBaixadoXLS(), entidade.getCaminhoCompletoArquivoBaixadoXLSX(), true);
 				}catch(Exception e)
 				{
 					e.printStackTrace();

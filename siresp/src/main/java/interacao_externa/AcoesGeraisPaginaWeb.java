@@ -224,6 +224,42 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean selecionarItemSelectPeloValueByName(WebDriver driverPagina, String name, String valueASelecionar)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.name(name));
+	
+			Select select = new Select(item);
+			select.selectByValue(valueASelecionar);
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+	public boolean selecionarItemSelectPeloTextByName(WebDriver driverPagina, String name, String valueASelecionar)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.name(name));
+	
+			Select select = new Select(item);
+			select.selectByVisibleText(valueASelecionar);
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 
 	public void escolherEmSelect2(WebDriver driver, String idDiv, String idText, String idOpcoes, String textoParaDigitar, String opcaoExata) {
 	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));

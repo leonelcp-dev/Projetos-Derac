@@ -246,7 +246,7 @@ public class CensoLeitos {
 			
 			try
 			{
-				conversor.converterArquivo(entidade.getCaminhoCompletoArquivoBaixadoXLS(), entidade.getCaminhoCompletoArquivoBaixadoXLSX());
+				conversor.converterArquivo(entidade.getCaminhoCompletoArquivoBaixadoXLS(), entidade.getCaminhoCompletoArquivoBaixadoXLSX(), true);
 			}catch(Exception e)
 			{
 				e.printStackTrace();
@@ -493,14 +493,15 @@ public class CensoLeitos {
 		
 		ArrayList<LocalDate> datasProcessadas = new ArrayList();
 		
-		int primeiraLinhaVaziaArquivoCenso = arquivoConsolidado.getPrimeiraLinhaVazia();
-		System.out.println("Última Linha preenchida: " + primeiraLinhaVaziaArquivoCenso);
+		//int primeiraLinhaVaziaArquivoCenso = arquivoConsolidado.getPrimeiraLinhaVazia();
+		int ultimaLinhaPreenchidaDoArquivoCenso = arquivoConsolidado.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(), ParametrosArquivoCenso.INDICE_COLUNA_DATA_RELATORIO.getIndice());
+		System.out.println("Última Linha preenchida: " + (ultimaLinhaPreenchidaDoArquivoCenso + 1));
 		
 		int linhaCenso;
 		
-		if(primeiraLinhaVaziaArquivoCenso != ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice())
+		if(ultimaLinhaPreenchidaDoArquivoCenso != ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice() - 1)
 		{
-			for(linhaCenso = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(); linhaCenso < primeiraLinhaVaziaArquivoCenso; linhaCenso++)
+			for(linhaCenso = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(); linhaCenso < ultimaLinhaPreenchidaDoArquivoCenso; linhaCenso++)
 			{
 				LocalDate data = arquivoConsolidado.getValorDaCelulaDate(linhaCenso, ParametrosArquivoCenso.INDICE_COLUNA_DATA_RELATORIO.getIndice());
 				
@@ -513,7 +514,7 @@ public class CensoLeitos {
 			linhaCenso++;
 		}
 		else
-			linhaCenso = primeiraLinhaVaziaArquivoCenso;
+			linhaCenso = ultimaLinhaPreenchidaDoArquivoCenso + 1;
 		
 		Pasta pastaCensoEntidade = new Pasta(pastaEntidade, false);
 				

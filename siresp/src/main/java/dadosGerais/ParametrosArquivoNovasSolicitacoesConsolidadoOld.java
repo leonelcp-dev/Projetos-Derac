@@ -5,15 +5,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoNovasSolicitacoesConsolidado {
+public enum ParametrosArquivoNovasSolicitacoesConsolidadoOld {
 	
-	INDICE_COLUNA_TIPO_SOLICITACAO(0, 0, "Tipo Solicitação", "String", ""),
-	INDICE_COLUNA_ESPECIALIDADE_EXAME(1, 1, "Especialidade/Exame", "String", ""),
-	INDICE_COLUNA_CID(2, 2, "CID", "String", ""),
-	INDICE_COLUNA_UNIDADES_CAMPINAS(3, 3, "Unidades Campinas", "String", ""),
-	INDICE_COLUNA_MES_INCLUSAO(4, 4, "Mês Inclusão", "Int", ""),
-	INDICE_COLUNA_ANO_INCLUSAO(5, 5, "Ano Inclusão", "Int", ""),
-	INDICE_COLUNA_NOVAS_SOLICITACOES(6, 6, "Novas Solicitacões", "Int", ""),
+	INDICE_COLUNA_COD_PACIENTE(0, 0, "Cod Paciente", "String", ""),
+	INDICE_COLUNA_TIPO_SOLICITACAO(1, 1, "Tipo Solicitação", "String", ""),
+	INDICE_COLUNA_ESPECIALIDADE_EXAME(2, 2, "Especialidade/Exame", "String", ""),
+	INDICE_COLUNA_CID(3, 3, "CID", "String", ""),
+	INDICE_COLUNA_DATA_INCLUSAO(4, 4, "Data Inclusão", "Date", "dd/MM/yyyy"),
+	INDICE_COLUNA_UNIDADES_CAMPINAS(5, 5, "Unidades Campinas", "String", ""),
+	INDICE_COLUNA_ANO_INCLUSAO(6, 6, "Ano Inclusão", "Int", ""),
 
 	ARQUIVO_MUNICIPAL_NOME(7, 6,"BD Demanda Reprimida - CDR.xlsx", "", ""),
 	ARQUIVO_MUNICIPAL_VAZIO(8, 6,"ARQUIVO MENSAL VAZIO.xlsx", "", ""),
@@ -33,7 +33,7 @@ public enum ParametrosArquivoNovasSolicitacoesConsolidado {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoNovasSolicitacoesConsolidado(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoNovasSolicitacoesConsolidadoOld(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);
@@ -82,10 +82,10 @@ public enum ParametrosArquivoNovasSolicitacoesConsolidado {
 		this.formato = formato;
 	}	
 	
-    private static final Map<Integer, ParametrosArquivoNovasSolicitacoesConsolidado> POR_ID_UNICO =
-        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoNovasSolicitacoesConsolidado::getIdUnico, Function.identity()));
+    private static final Map<Integer, ParametrosArquivoNovasSolicitacoesConsolidadoOld> POR_ID_UNICO =
+        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoNovasSolicitacoesConsolidadoOld::getIdUnico, Function.identity()));
 
-    public static ParametrosArquivoNovasSolicitacoesConsolidado poIdUnico(int idUnico) {
+    public static ParametrosArquivoNovasSolicitacoesConsolidadoOld poIdUnico(int idUnico) {
         return POR_ID_UNICO.get(idUnico); // pode retornar null se não existir
     }
 

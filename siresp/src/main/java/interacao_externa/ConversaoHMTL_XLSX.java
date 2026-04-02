@@ -34,6 +34,10 @@ public class ConversaoHMTL_XLSX {
 	String nomeDoArquivo;
 	Document doc;
 	Element container;
+	XSSFCellStyle generalCellStyle;
+	XSSFCellStyle dateCellStyle;
+	XSSFCellStyle percentCellStyle;
+	
 	
 //    public static void main(String[] args) throws Exception {
 //        
@@ -45,7 +49,7 @@ public class ConversaoHMTL_XLSX {
 //        System.out.println("Conversão concluída: " + output);
 //    }
 
-    public void converterArquivo(String nomeDoAquivoHTML, String nomeDoArquivoXLSX) throws Exception {
+    public void converterArquivo(String nomeDoAquivoHTML, String nomeDoArquivoXLSX, boolean preservarFormatacao) throws Exception {
     	//nomeDoArquivo = "C:\\Users\\PMC514991-2\\Downloads\\CAPS AD SUDOESTE relatoriosTemp_lista_leitos-13_01_2026_13-28-49.xls";
     	
     	Path outXLSX = Path.of(nomeDoArquivoXLSX);
@@ -90,7 +94,11 @@ public class ConversaoHMTL_XLSX {
             int rowIndex = 0;
             int colIndex = 0;
             
-           
+            StyleCache styleCache = new StyleCache(wb);
+            generalCellStyle = wb.createCellStyle();
+            dateCellStyle = styleCache.cloneWithDataFormat(generalCellStyle, "dd/MM/yyyy");
+            percentCellStyle = styleCache.cloneWithDataFormat(generalCellStyle, "0%");
+                      
             
             Referencia referencia = new Referencia(rowIndex, colIndex);
             
@@ -98,7 +106,7 @@ public class ConversaoHMTL_XLSX {
             
             for (Element table : tables) {
                      
-                referencia = converterTable(wb, doc, sheet, table, referencia.linha, colIndex, itemDeBusca);
+                referencia = converterTable(wb, doc, sheet, table, referencia.linha, colIndex, itemDeBusca, preservarFormatacao);
                 referencia.linha++;
                 
                 if(!table.equals(tables.get(tables.size()-1)))
@@ -117,9 +125,80 @@ public class ConversaoHMTL_XLSX {
         }
     }
     
-    private Referencia converterTable(XSSFWorkbook wb, Node node, XSSFSheet sheet, Element table, int rowIndex, int colIndex, String itemDeBusca)
+    public void converterArquivoHTML(String nomeDoAquivoHTML, String nomeDoArquivoXLSX, boolean preservarFormatacao) throws Exception {
+    	//nomeDoArquivo = "C:\\Users\\PMC514991-2\\Downloads\\CAPS AD SUDOESTE relatoriosTemp_lista_leitos-13_01_2026_13-28-49.xls";
+    	
+    	Path outXLSX = Path.of(nomeDoArquivoXLSX);
+    	
+    	this.nomeDoArquivo = nomeDoAquivoHTML;
+    	doc = Jsoup.parse(new File(nomeDoArquivo), "ISO-8859-1");
+    	container = doc.body();
+
+		Map<Integer, List<Element>> mapa = mapByDepth(doc.body());
+		mapa.forEach((lvl, list) -> {
+		    System.out.println("Nível " + lvl + " -> " + list.size() + " elementos");
+		});
+    	
+        // Uma planilha por <table>; se quiser apenas a primeira, pegue tables.first()
+    	
+    	String itemDeBusca = "html > body > div > table";
+    	
+        Elements tables = doc.select("html > body > div > table");
+        
+//        ArrayList<composicaoTabela> tabelasArquivo = new ArrayList();
+//        
+//       tabelasArquivo.add(new composicaoTabela());
+//       
+//       tabelasArquivo.get(0).tabela = tables.get(0);
+//       tabelasArquivo.get(0).tabelasFilhas = new ArrayList<composicaoTabela>();
+//       
+//       tabelasArquivo.get(0).tabelasFilhas.add(new composicaoTabela());
+//       
+//       tabelasArquivo.get(0).tabelasFilhas.get(0).tabela = tables.get(1);
+//       
+//       
+//       tabelasArquivo.get(1).tabela = tables.get(6);
+//       tabelasArquivo.get(1).tabelasFilhas = new ArrayList<composicaoTabela>();
+        
+        if (tables.isEmpty()) {
+            throw new IllegalArgumentException("Nenhuma <table> encontrada no HTML.");
+        }
+
+        try (XSSFWorkbook wb = new XSSFWorkbook()) {
+            int sheetIndex = 1;
+            String sheetName = "teste";
+            int rowIndex = 0;
+            int colIndex = 0;
+            
+           
+            
+            Referencia referencia = new Referencia(rowIndex, colIndex);
+            
+            XSSFSheet sheet = wb.createSheet(sheetName);
+            
+            for (Element table : tables) {
+                     
+                referencia = converterTable(wb, doc, sheet, table, referencia.linha, colIndex, itemDeBusca, preservarFormatacao);
+                referencia.linha++;
+                
+                if(!table.equals(tables.get(tables.size()-1)))
+                {
+	                criarNovaLinha(wb, sheet, referencia.linha);
+	                referencia.linha++;
+                }
+              
+                autoSizeColumnsSafe(sheet);
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(outXLSX.toFile())) {
+                wb.write(fos);
+            }
+        }
+    }
+    
+    private Referencia converterTable(XSSFWorkbook wb, Node node, XSSFSheet sheet, Element table, int rowIndex, int colIndex, String itemDeBusca, boolean preservarFormatacao)
     {
-    	Referencia referencia = buildSheetFromTable(wb, node, sheet, table, rowIndex, colIndex, itemDeBusca, true, 1, 3);
+    	Referencia referencia = buildSheetFromTable(wb, node, sheet, table, rowIndex, colIndex, itemDeBusca, true, 1, 3, preservarFormatacao);
     	
     	return referencia;
     }
@@ -131,7 +210,7 @@ public class ConversaoHMTL_XLSX {
     	sheet.createRow(numLinha);
     }
    
-    private Referencia buildSheetFromTable(XSSFWorkbook wb, Node node, XSSFSheet sheet, Element table, int rowIndex, int colIndex, String itemDeBusca, boolean criarLinha, int iteracao, int nivel) {
+    private Referencia buildSheetFromTable(XSSFWorkbook wb, Node node, XSSFSheet sheet, Element table, int rowIndex, int colIndex, String itemDeBusca, boolean criarLinha, int iteracao, int nivel, boolean preservarFormatacao) {
         // Cache de estilos para não criar estilos duplicados (limit ~64k)
     	 StyleCache styleCache = new StyleCache(wb);
 
@@ -251,7 +330,7 @@ public class ConversaoHMTL_XLSX {
 				                		{
 				                			if(((Element)elementoTD).tagName().equals("table"))
 				                			{
-				                				Referencia ref = buildSheetFromTable(wb, node, sheet, (Element)elementoTD, linhaAtual, colunaAtual, itemDeBusca + " > table", false, iteracao++, nivel + 4);
+				                				Referencia ref = buildSheetFromTable(wb, node, sheet, (Element)elementoTD, linhaAtual, colunaAtual, itemDeBusca + " > table", false, iteracao++, nivel + 4, preservarFormatacao);
 						                		
 						                		linhaFinal = Math.max(linhaFinal, ref.linha);
 						                		colunaFinal = Math.max(colunaFinal, ref.coluna);
@@ -287,19 +366,40 @@ public class ConversaoHMTL_XLSX {
 					                
 				                	applyValue(wb, excelCell, rawText.trim(), type);
 				                
-				
+
 					                // Estilo
 					                Map<String, String> css = extractCss(cell);
 					                boolean isHeader = cell.tagName().equalsIgnoreCase("th");
-					                XSSFCellStyle style = styleCache.getOrCreateStyle(css, isHeader);
+					                XSSFCellStyle style;
 					
-					                // Ajusta data/percentual via data format se necessário
-					                if (type == CellValueType.DATE) {
-					                    style = styleCache.cloneWithDataFormat(style, "dd/MM/yyyy");
-					                } else if (type == CellValueType.PERCENT) {
-					                    style = styleCache.cloneWithDataFormat(style, "0%");
+					                if(preservarFormatacao)
+					                {
+						                style = styleCache.getOrCreateStyle(css, isHeader);
+						                // Ajusta data/percentual via data format se necessário
+						                if (type == CellValueType.DATE) {
+						                    style = styleCache.cloneWithDataFormat(style, "dd/MM/yyyy");
+						                } else if (type == CellValueType.PERCENT) {
+						                    style = styleCache.cloneWithDataFormat(style, "0%");
+						                }
+						                
+						                excelCell.setCellStyle(style);
 					                }
-					                excelCell.setCellStyle(style);
+					                else
+					                {
+					                	
+						                // Ajusta data/percentual via data format se necessário
+						                if (type == CellValueType.DATE) {
+						                    style = dateCellStyle;
+						                } else if (type == CellValueType.PERCENT) {
+						                    style = percentCellStyle;
+						                }
+						                else
+						                {
+						                	style = generalCellStyle;
+						                }
+					                }
+					                
+					                
 					                
 					                // Mesclagem (se colspan/rowspan > 1)
 					                if (colspan > 1 || rowspan > 1) {
@@ -648,7 +748,7 @@ public class ConversaoHMTL_XLSX {
             	
             	System.out.println("Data: " + raw);
             	
-            	CellStyle dateStyle = wb.createCellStyle();
+            	CellStyle dateStyle = cell.getCellStyle();
                 CreationHelper creationHelper = wb.getCreationHelper();
                 short dateFormat = creationHelper.createDataFormat().getFormat("dd/MM/yyyy");
                 dateStyle.setDataFormat(dateFormat);

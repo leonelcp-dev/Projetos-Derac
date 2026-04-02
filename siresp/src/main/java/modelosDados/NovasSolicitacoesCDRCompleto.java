@@ -1,9 +1,12 @@
 package modelosDados;
 
 
-public class NovasSolicitacoesCDR {
+public class NovasSolicitacoesCDRCompleto {
 
-	@ExcelColumn(header = "Tipo Solicitação")
+	@ExcelColumn(header = "Cod Paciente")
+    private String codPaciente;
+
+    @ExcelColumn(header = "Tipo Solicitação")
     private String tipoSolicitacao;
 
     @ExcelColumn(header = "Especialidade/Exame")
@@ -12,20 +15,22 @@ public class NovasSolicitacoesCDR {
     @ExcelColumn(header = "CID")
     private String cid;
     
+    @ExcelColumn(header = "Data Inclusão")
+    private String dataInclusao;
+    
     @ExcelColumn(header = "Unidades Campinas")
     private String unidadesCampinas;
     
-    @ExcelColumn(header = "Mês Inclusão")
-    private String mesInclusao;
-    
     @ExcelColumn(header = "Ano Inclusão")
     private String anoInclusao;
-    
-    @ExcelColumn(header = "Novas Solicitações")
-    private String novasSolicitacoes;
-    
-    private int qtdeSolicitacoes;
-    private int linhaExcel;
+
+	public String getCodPaciente() {
+		return codPaciente;
+	}
+
+	public void setCodPaciente(String codPaciente) {
+		this.codPaciente = codPaciente;
+	}
 
 	public String getTipoSolicitacao() {
 		return tipoSolicitacao;
@@ -51,6 +56,14 @@ public class NovasSolicitacoesCDR {
 		this.cid = cid;
 	}
 
+	public String getDataInclusao() {
+		return dataInclusao;
+	}
+
+	public void setDataInclusao(String dataInclusao) {
+		this.dataInclusao = dataInclusao;
+	}
+
 	public String getUnidadesCampinas() {
 		return unidadesCampinas;
 	}
@@ -59,44 +72,12 @@ public class NovasSolicitacoesCDR {
 		this.unidadesCampinas = unidadesCampinas;
 	}
 
-	public String getMesInclusao() {
-		return mesInclusao;
-	}
-
-	public void setMesInclusao(String mesInclusao) {
-		this.mesInclusao = mesInclusao;
-	}
-	
 	public String getAnoInclusao() {
 		return anoInclusao;
 	}
 
 	public void setAnoInclusao(String anoInclusao) {
 		this.anoInclusao = anoInclusao;
-	}
-	
-	public String getNovasSolicitacoes() {
-		return novasSolicitacoes;
-	}
-
-	public void setNovasSolicitacoes(String novasSolicitacoes) {
-		this.novasSolicitacoes = novasSolicitacoes;
-	}
-
-	public int getQtdeSolicitacoes() {
-		return qtdeSolicitacoes;
-	}
-
-	public void setQtdeSolicitacoes(int qtdeSolicitacoes) {
-		this.qtdeSolicitacoes = qtdeSolicitacoes;
-	}
-
-	public int getLinhaExcel() {
-		return linhaExcel;
-	}
-
-	public void setLinhaExcel(int linhaExcel) {
-		this.linhaExcel = linhaExcel;
 	}
 
 
