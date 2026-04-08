@@ -15,7 +15,14 @@ public class Arquivo {
 		this.caminho = caminho;
 		this.nomeDoArquivo = nomeDoArquivo;
 		
-		arquivo = Paths.get(caminho + "\\" + nomeDoArquivo);
+		try
+		{
+			arquivo = Paths.get(caminho + "\\" + nomeDoArquivo);
+		}
+		catch(Exception e)
+		{
+			arquivo = null;
+		}
 	}
 	
 	public boolean mover(String caminhoDoDestino)
@@ -97,6 +104,14 @@ public class Arquivo {
 	public String getNomeDoArquivo()
 	{
 		return nomeDoArquivo;
+	}
+	
+	public boolean existe()
+	{
+		if(arquivo == null)
+			return false;
+		
+		return true;
 	}
 	
 

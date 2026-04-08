@@ -7,6 +7,7 @@ public class EntidadesFilaCentralReg {
 	private String Unidade;
 	private String NomeArquivo;
 	private String Distrito;
+	private String nomeSIRESP;
 	private ArrayList<UsuarioFilaCentralReg> pacientes;
 	private ArrayList<String> outrosNomes;
 	
@@ -66,6 +67,14 @@ public class EntidadesFilaCentralReg {
 
 	public void setOutrosNomes(ArrayList<String> outrosNomes) {
 		this.outrosNomes = outrosNomes;
+	}
+
+	public String getNomeSIRESP() {
+		return nomeSIRESP;
+	}
+
+	public void setNomeSIRESP(String nomeSIRESP) {
+		this.nomeSIRESP = nomeSIRESP;
 	}
 	
 }

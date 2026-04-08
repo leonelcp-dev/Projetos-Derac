@@ -78,6 +78,13 @@ public class AcoesArquivoExcel {
 
 	}
 	
+	public String getNomePlanilhaDaPosicao(int posicao)
+	{
+		Sheet planilha = arquivoXLSX.getSheetAt(0);
+		
+		return planilha.getSheetName();
+	}
+	
 	public void converterXLS_to_XLSX(String caminhoXlsx) {
 		
 		if(this.arquivoXLS == null)

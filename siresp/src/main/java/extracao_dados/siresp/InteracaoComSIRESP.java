@@ -152,7 +152,7 @@ public class InteracaoComSIRESP
         else if(escolha == 8)
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false);
         	ofertaDemanda.calcularOfertaEDemanda(driver, "12/2025", "12/2025", true);
         }
         

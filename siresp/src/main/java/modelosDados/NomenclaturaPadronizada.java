@@ -36,5 +36,4 @@ public class NomenclaturaPadronizada {
 		this.fluxo = fluxo;
 	}
 	
-
 }

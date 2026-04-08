@@ -226,7 +226,7 @@ public class ConversaoHMTL_XLSX {
         // Opcional: margin superior, pode haver <thead> / <tbody>
         itemDeBusca += " > tr";
         
-        printIteracao(iteracao, itemDeBusca);
+       // printIteracao(iteracao, itemDeBusca);
         
         //Elements rows = container.select(itemDeBusca);
         
@@ -241,7 +241,7 @@ public class ConversaoHMTL_XLSX {
         
         int cont = 1;
         
-        printIteracao(iteracao, "Entrando com : " + rowIndex + " " + colIndex);
+        //printIteracao(iteracao, "Entrando com : " + rowIndex + " " + colIndex);
         
         for (Node childTable : table.childNodes())
         {
@@ -349,7 +349,7 @@ public class ConversaoHMTL_XLSX {
 
 				                
 				                
-				                printIteracao(iteracao, "Antes: " + rawText);
+				                //printIteracao(iteracao, "Antes: " + rawText);
 				                
 				                //printIteracao(iteracao, "Buscar por: " + itemDeBusca);
 				                
@@ -423,11 +423,11 @@ public class ConversaoHMTL_XLSX {
 					                        }
 					                    }
 					
-					                    printIteracao(iteracao, "Tentativa de merge: [" + firstRow + ", " + lastRow +"] - [" + firstCol + ", " + lastCol + "]");
+					                    //printIteracao(iteracao, "Tentativa de merge: [" + firstRow + ", " + lastRow +"] - [" + firstCol + ", " + lastCol + "]");
 					                    
 					                    sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, firstCol, lastCol));
 					
-					                    printIteracao(iteracao, "Merge: [" + firstRow + ", " + lastRow +"] - [" + firstCol + ", " + lastCol + "]");
+					                    //printIteracao(iteracao, "Merge: [" + firstRow + ", " + lastRow +"] - [" + firstCol + ", " + lastCol + "]");
 					                    
 					                    // Atualiza remainingRowSpans para colunas ocupadas
 					                    ensureSize(remainingRowSpans, lastCol + 1);
@@ -462,7 +462,7 @@ public class ConversaoHMTL_XLSX {
         	}
     	}
         
-        printIteracao(iteracao, "Saindo com : " + linhaFinal + " " + colunaFinal);
+        //printIteracao(iteracao, "Saindo com : " + linhaFinal + " " + colunaFinal);
         Referencia referencia = new Referencia(linhaFinal, colunaFinal);
         
         return referencia;
@@ -726,18 +726,18 @@ public class ConversaoHMTL_XLSX {
 
     private void applyValue(XSSFWorkbook wb, XSSFCell cell, String raw, CellValueType type) {
     	
-    	System.out.println("Valor inserido: " + raw);
+    	//System.out.println("Valor inserido: " + raw);
     	//cell.setCellValue(raw);
     	
         switch (type) {
             case NUMBER: {
-            	System.out.println("Number: " + raw);
+            	//System.out.println("Number: " + raw);
             	
                 double val = parseDoubleFlexible(raw);
                 cell.setCellValue(val);
             }
             case PERCENT: {
-            	System.out.println("Percent: " + raw);
+            	//System.out.println("Percent: " + raw);
             	
                 String s = raw.trim().replace("%", "").trim();
                 double val = parseDoubleFlexible(s) / 100.0;
@@ -746,7 +746,7 @@ public class ConversaoHMTL_XLSX {
             case DATE: {
             	raw = raw.replace('-', '/');
             	
-            	System.out.println("Data: " + raw);
+            	//System.out.println("Data: " + raw);
             	
             	CellStyle dateStyle = cell.getCellStyle();
                 CreationHelper creationHelper = wb.getCreationHelper();

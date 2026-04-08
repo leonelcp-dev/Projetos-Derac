@@ -5,14 +5,17 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoFilasNominais {
+public enum ParametrosArquivoFilasNominaisRegulada {
 		
 	
 	EXTENSAO_ARQUIVO_REGULADA_AGENDAMENTO(0, 0, "xls", "", ""),
 	EXTENSAO_ARQUIVO_REGULADA_SOLICITACOES(1, 0, "xls", "", ""),
 	EXTENSAO_ARQUIVO_CDR(2, 0, "csv", "", ""),
 	PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO(3, 0, "AGENDAMENTO PENDENTE", "", ""),
-	PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES(4, 0, "SOLICITACOES PENDENTES", "", "");
+	PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES(4, 0, "SOLICITACOES PENDENTES", "", ""),
+	TEXTO_REGULADA(5, 0, "REGULADA", "", ""),
+	EXTENSAO_ARQUIVO_XLSX(6, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_XLS(7, 0, "xls", "", "");
 
 	private int idUnico;
 	private int indice;
@@ -20,7 +23,7 @@ public enum ParametrosArquivoFilasNominais {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoFilasNominais(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoFilasNominaisRegulada(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);

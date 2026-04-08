@@ -9,10 +9,12 @@ public class Pasta {
 
 	private File pasta;
 	private boolean existe;
+	private String caminhoDaPasta;
 	
 	public Pasta(String caminhoDaPasta, boolean criar)
 	{
 		pasta = new File(caminhoDaPasta);
+		this.caminhoDaPasta = caminhoDaPasta;
 		
 		if(!pasta.exists() && criar)
 		{
@@ -23,6 +25,11 @@ public class Pasta {
 			setExiste(false);
 	}
 
+	public String getCaminhoDaPasta()
+	{
+		return caminhoDaPasta;
+	}
+	
 	public File getPasta() {
 		return pasta;
 	}
@@ -68,6 +75,24 @@ public class Pasta {
 		}
 		
 		return listaArquivos;
+	}
+	
+	public File[] listarDiretorio()
+	{
+		System.out.println(caminhoDaPasta);
+		File[] arquivos = pasta.listFiles();
+		
+		return arquivos;
+	}
+	
+	public boolean ehPasta(String caminho)
+	{
+		File item = new File(caminho);
+		
+		if(item.isDirectory())
+			return true;
+		
+		return false;
 	}
 	
 }

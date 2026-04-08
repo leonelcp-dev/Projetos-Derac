@@ -1,6 +1,7 @@
 package extracao_dados.siresp;
 
 import java.awt.image.WritableRenderedImage;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -8,12 +9,17 @@ import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
+import dominiosSIRESP.UnidadeSIRESP;
 import interacao_externa.AcoesArquivoExcel;
+import interacao_externa.ExcelBinder;
+import modelosDados.AgendamentosPendentesRegulada;
 import modelosDados.CelulaExcel;
 import modelosDados.EntidadeCDRNaoRegulada;
 import modelosDados.EntidadesFilaCentralReg;
@@ -21,55 +27,34 @@ import modelosDados.UsuarioFilaCentralReg;
 import tratamentoDeArquivos.Arquivo;
 import tratamentoDeArquivos.Pasta;
 
-public class DistribuirFilaCentralReg {
+public class CriarImportacaoFilaCentralReg {
 
 	public static void main( String[] args )
     {
-		String caminhoArquivos = "C:\\Users\\PMC514991-2\\Documents\\Fila Unica\\";
-		String arquivoBase = "arquivoBase.xlsx";
+		String caminhoArquivos = "C:\\Users\\PMC514991-2\\Documents\\Importacao\\";
+		String arquivoBase = "modelo_padrao_cdr.csv";
+		String arquivoUnidades = "Dados XLSX\\UNIDADES.xlsx";
+		String arquivoEspecialidades = "Dados XLSX\\ESPECIALIDADE.xlsx";
+		String arquivoExames = "Dados XLSX\\EXAMES.xlsx";
+		String arquivoStatusAgendamento = "Dados XLSX\\STATUS_AGENDAMENTO.xlsx";
 		
-		DistribuirFilaCentralReg filaCentralReg = new DistribuirFilaCentralReg();
+		CriarImportacaoFilaCentralReg filaCentralReg = new CriarImportacaoFilaCentralReg();
 		
 		ArrayList<EntidadesFilaCentralReg> entidades = filaCentralReg.lerEntidades(caminhoArquivos + "unidades.csv");
 		entidades.add(new EntidadesFilaCentralReg("Outros", "Outros", ""));
 		
-		ArrayList<UsuarioFilaCentralReg> usuarios = filaCentralReg.lerArquivo(caminhoArquivos + "Consulta.csv", "Consulta");
-		usuarios.addAll(filaCentralReg.lerArquivo(caminhoArquivos + "Exame.csv", "Exame"));
+		//Lendo tabelas de Domínio - Unidades
+		ArrayList<UnidadeSIRESP> unidades;
+		HashMap<String, ArrayList<UnidadeSIRESP>> unidadesSIRESP = new HashMap<String, ArrayList<UnidadeSIRESP>>();
 		
-		for(UsuarioFilaCentralReg usuario : usuarios)
+		try (FileInputStream in = new FileInputStream(caminhoArquivos + arquivoUnidades)) { 
+			//unidades = ExcelBinder.readSheet(in, AgendamentosPendentesRegulada.class, nomePlanilha, ParametrosArquivoAgendamentosPendentesRegulada.ARQUIVO_BAIXADO_LINHA_INICIAL.getIndice(), true);
+        }
+		catch(Exception e)
 		{
-			int indiceEntidade = 0;
-			boolean encontrado = false;
-			
-			while(indiceEntidade < entidades.size() && !encontrado)
-			{
-				String observacao = removerAcentos(usuario.observacao).toUpperCase();
-				if(observacao.contains(entidades.get(indiceEntidade).getUnidade()))
-				{
-					encontrado = true;
-				}
-				
-				if(!encontrado)
-					for(String nome : entidades.get(indiceEntidade).getOutrosNomes())
-					{
-						//System.out.println(nome);
-						if(observacao.contains(nome))
-							encontrado = true;
-					}
-				
-				if(!encontrado)
-					indiceEntidade ++;
-			}
-			
-			if(indiceEntidade == entidades.size())
-			{
-				entidades.get(indiceEntidade -1).getPacientes().add(usuario);
-			}
-			else
-			{
-				entidades.get(indiceEntidade).getPacientes().add(usuario);
-			}
+			e.printStackTrace();
 		}
+		
 		
 		for(EntidadesFilaCentralReg entidade : entidades)
 		{
