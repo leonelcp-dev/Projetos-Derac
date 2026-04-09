@@ -3,6 +3,7 @@ package extracao_dados.siresp;
 import java.awt.image.WritableRenderedImage;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -13,9 +14,13 @@ import java.util.HashMap;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
+import dominiosSIRESP.EspecialidadesSIRESP;
+import dominiosSIRESP.ExamesSIRESP;
+import dominiosSIRESP.StatusAgendamentoSIRESP;
 import dominiosSIRESP.UnidadeSIRESP;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.ExcelBinder;
@@ -23,6 +28,7 @@ import modelosDados.AgendamentosPendentesRegulada;
 import modelosDados.CelulaExcel;
 import modelosDados.EntidadeCDRNaoRegulada;
 import modelosDados.EntidadesFilaCentralReg;
+import modelosDados.LinhaImportacaoSIRESP;
 import modelosDados.UsuarioFilaCentralReg;
 import tratamentoDeArquivos.Arquivo;
 import tratamentoDeArquivos.Pasta;
@@ -31,7 +37,8 @@ public class CriarImportacaoFilaCentralReg {
 
 	public static void main( String[] args )
     {
-		String caminhoArquivos = "C:\\Users\\PMC514991-2\\Documents\\Importacao\\";
+		String caminhoArquivosImportados = "C:\\Users\\PMC514991-2\\Documents\\Importacao\\";
+		String caminhoArquivosUnidades = "C:\\Users\\PMC514991-2\\Documents\\Fila Unica\\";
 		String arquivoBase = "modelo_padrao_cdr.csv";
 		String arquivoUnidades = "Dados XLSX\\UNIDADES.xlsx";
 		String arquivoEspecialidades = "Dados XLSX\\ESPECIALIDADE.xlsx";
@@ -40,81 +47,288 @@ public class CriarImportacaoFilaCentralReg {
 		
 		CriarImportacaoFilaCentralReg filaCentralReg = new CriarImportacaoFilaCentralReg();
 		
-		ArrayList<EntidadesFilaCentralReg> entidades = filaCentralReg.lerEntidades(caminhoArquivos + "unidades.csv");
-		entidades.add(new EntidadesFilaCentralReg("Outros", "Outros", ""));
+		ArrayList<EntidadesFilaCentralReg> entidades = filaCentralReg.lerEntidades(caminhoArquivosImportados + "unidades.csv");
 		
 		//Lendo tabelas de Domínio - Unidades
-		ArrayList<UnidadeSIRESP> unidades;
-		HashMap<String, ArrayList<UnidadeSIRESP>> unidadesSIRESP = new HashMap<String, ArrayList<UnidadeSIRESP>>();
+		ArrayList<UnidadeSIRESP> unidades = null;
+		HashMap<String, UnidadeSIRESP> unidadesSIRESP = new HashMap<String, UnidadeSIRESP>();
 		
-		try (FileInputStream in = new FileInputStream(caminhoArquivos + arquivoUnidades)) { 
-			//unidades = ExcelBinder.readSheet(in, AgendamentosPendentesRegulada.class, nomePlanilha, ParametrosArquivoAgendamentosPendentesRegulada.ARQUIVO_BAIXADO_LINHA_INICIAL.getIndice(), true);
+		try (FileInputStream in = new FileInputStream(caminhoArquivosImportados + arquivoUnidades)) { 
+			unidades = ExcelBinder.readSheet(in, UnidadeSIRESP.class, 0, 0, true);
         }
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 		
+		if(unidades != null)
+			for(UnidadeSIRESP unidade : unidades)
+				unidadesSIRESP.put(unidade.getUnidadeFantasia().toUpperCase().replaceAll("\u00A0", "").trim(), unidade);
+		
+		//Lendo tabelas de Domínio - Especialidades
+		ArrayList<EspecialidadesSIRESP> especialidades = null;
+		HashMap<String, EspecialidadesSIRESP> especialidadesSIRESP = new HashMap<String, EspecialidadesSIRESP>();
+		
+		try (FileInputStream in = new FileInputStream(caminhoArquivosImportados + arquivoEspecialidades)) { 
+			especialidades = ExcelBinder.readSheet(in, EspecialidadesSIRESP.class, 0, 0, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		if(especialidades != null)
+			for(EspecialidadesSIRESP especialidade : especialidades)
+				especialidadesSIRESP.put(especialidade.getNomeEspecialidade().toUpperCase().replaceAll("\u00A0", "").trim(), especialidade);
+		
+		//Lendo tabelas de Domínio - Exames
+		ArrayList<ExamesSIRESP> exames = null;
+		HashMap<String, ExamesSIRESP> examesSIRESP = new HashMap<String, ExamesSIRESP>();
+		
+		try (FileInputStream in = new FileInputStream(caminhoArquivosImportados + arquivoExames)) { 
+			exames = ExcelBinder.readSheet(in, ExamesSIRESP.class, 0, 0, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		if(exames != null)
+			for(ExamesSIRESP exame : exames)
+				examesSIRESP.put(exame.getNomeExame().toUpperCase().replaceAll("\u00A0", "").trim(), exame);
+		
+		//Lendo tabelas de Domínio - Status Agendamento
+		ArrayList<StatusAgendamentoSIRESP> statusAgendamento = null;
+		HashMap<String, StatusAgendamentoSIRESP> statusAgendamentoSIRESP = new HashMap<String, StatusAgendamentoSIRESP>();
+		
+		try (FileInputStream in = new FileInputStream(caminhoArquivosImportados + arquivoStatusAgendamento)) { 
+			statusAgendamento = ExcelBinder.readSheet(in, StatusAgendamentoSIRESP.class, 0, 0, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		if(statusAgendamento != null)
+			for(StatusAgendamentoSIRESP status : statusAgendamento)
+				statusAgendamentoSIRESP.put(status.getStatus().toUpperCase(), status);
+		//Fim da leitura das tabelas de domínio
+		
+		AcoesArquivoExcel estatisticas = new AcoesArquivoExcel(caminhoArquivosImportados + "\\Estatisticas Importacao.xlsx", 0);
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		int linhaArquivoEstatisticas = 1;
 		
 		for(EntidadesFilaCentralReg entidade : entidades)
 		{
-			String caminho = caminhoArquivos + entidade.getDistrito();
+			String caminho = caminhoArquivosUnidades + entidade.getDistrito() + "\\" + entidade.getNomeArquivo();
 			
-			Pasta pasta = new Pasta(caminho, true);
+			System.out.println(caminho);
 			
-			Arquivo arquivo = new Arquivo(caminhoArquivos, arquivoBase);
-			arquivo.CopiarArquivo(caminho + "\\" + entidade.getNomeArquivo());
+			ArrayList<UsuarioFilaCentralReg> entradasFilaCentralReg = null;
 			
-			AcoesArquivoExcel arquivoExcel = new AcoesArquivoExcel(caminho + "\\" + entidade.getNomeArquivo(), 0);
-			ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
-			
-			int linha =  1;
-			for(UsuarioFilaCentralReg usuario : entidade.getPacientes())
+			try (FileInputStream in = new FileInputStream(caminho)) { 
+				entradasFilaCentralReg = ExcelBinder.readSheet(in, UsuarioFilaCentralReg.class, 0, 0, true);
+	        }
+			catch(Exception e)
 			{
-				celulas.add(new CelulaExcel(linha, 0, usuario.exameOuConsulta, "String"));
-				celulas.add(new CelulaExcel(linha, 1, usuario.codigo, "String"));
-				celulas.add(new CelulaExcel(linha, 2, usuario.nome, "String"));
-				celulas.add(new CelulaExcel(linha, 3, usuario.telefone, "String"));
-				celulas.add(new CelulaExcel(linha, 4, usuario.municipio, "String"));
-				celulas.add(new CelulaExcel(linha, 5, usuario.especialidade, "String"));
-				celulas.add(new CelulaExcel(linha, 6, usuario.cid, "String"));
-				celulas.add(new CelulaExcel(linha, 7, usuario.tipo, "String"));
-				celulas.add(new CelulaExcel(linha, 8, usuario.profissional, "String"));
-				celulas.add(new CelulaExcel(linha, 9, usuario.idade, "String"));
-				celulas.add(new CelulaExcel(linha, 10, usuario.mesAnoPretendido, "String"));
-				celulas.add(new CelulaExcel(linha, 11, usuario.turno, "String"));
-				celulas.add(new CelulaExcel(linha, 12, usuario.dataAgenda, "String"));
-				celulas.add(new CelulaExcel(linha, 13, usuario.Horario, "String"));
-				celulas.add(new CelulaExcel(linha, 14, usuario.dataEntrada, "String"));
-				celulas.add(new CelulaExcel(linha, 15, usuario.status, "String"));
-				celulas.add(new CelulaExcel(linha, 16, usuario.filipeta, "String"));
-				celulas.add(new CelulaExcel(linha, 17, usuario.retFilipeta, "String"));
-				celulas.add(new CelulaExcel(linha, 18, usuario.prioridade, "String"));
-				celulas.add(new CelulaExcel(linha, 19, usuario.aceitaTeleconsulta, "String"));
-				celulas.add(new CelulaExcel(linha, 20, usuario.observacao, "String"));
-				celulas.add(new CelulaExcel(linha, 21, usuario.observacaoStatus, "String"));
-				celulas.add(new CelulaExcel(linha, 22, usuario.alteracaoEspecialidadeExameDe, "String"));
-				celulas.add(new CelulaExcel(linha, 23, usuario.alteracaoEspecialidadeExamePara, "String"));
-				celulas.add(new CelulaExcel(linha, 24, usuario.observacao2, "String"));
-				celulas.add(new CelulaExcel(linha, 25, usuario.usuario2, "String"));
-				celulas.add(new CelulaExcel(linha, 26, usuario.dataDeAlteracao, "String"));
-				celulas.add(new CelulaExcel(linha, 27, usuario.alteracaoCIDDe, "String"));
-				celulas.add(new CelulaExcel(linha, 28, usuario.alteracaoCIDPara, "String"));
-				celulas.add(new CelulaExcel(linha, 29, usuario.observacao3, "String"));
-				celulas.add(new CelulaExcel(linha, 30, usuario.usuario3, "String"));
-				celulas.add(new CelulaExcel(linha, 31, usuario.dataAlteracao3, "String"));
-				
-				linha++;
+				e.printStackTrace();
 			}
 			
-			arquivoExcel.gravarDadosEmCelula(0, celulas);
-		}
-		
-		for(EntidadesFilaCentralReg entidade : entidades)
-		{
-			System.out.println(entidade.getUnidade() + "\t" + entidade.getPacientes().size());
+			ArrayList<LinhaImportacaoSIRESP> importar = new ArrayList<LinhaImportacaoSIRESP>();
+			ArrayList<LinhaImportacaoSIRESP> naoImportar = new ArrayList<LinhaImportacaoSIRESP>();
+			
+			if(entradasFilaCentralReg != null)
+			{
+				for(UsuarioFilaCentralReg entradaFila : entradasFilaCentralReg)
+				{
+					LinhaImportacaoSIRESP linha = new LinhaImportacaoSIRESP();
+					
+					linha.setObservacao("");
+					
+					//Codigo e nome da Unidade
+					if(unidadesSIRESP.containsKey(entidade.getNomeSIRESP().toUpperCase()))
+					{
+						linha.setUnidadeSolicitanteCodigo(unidadesSIRESP.get(entidade.getNomeSIRESP().toUpperCase()).getCodUnidade().replaceAll("\u00A0", "").trim());
+						linha.setUnidadeSolicitanteNome(unidadesSIRESP.get(entidade.getNomeSIRESP().toUpperCase()).getUnidadeFantasia().replaceAll("\u00A0", "").trim());
+					}
+					else
+					{
+						linha.setUnidadeSolicitanteCodigo("");
+						linha.setUnidadeSolicitanteNome("");
+						linha.setObservacao(linha.getObservacao() + "Unidade não encontrada;");
+					}
+					
+					//Codigo e nome do paciente
+					linha.setCodPaciente(entradaFila.codigo.trim());
+					linha.setNomePaciente(entradaFila.nome.trim());
+					
+					//Data de entrada do paciente
+					linha.setDataEntrada(entradaFila.dataEntrada.substring(0, 10));
+					
+					//Tipo - Consulta ou Exame
+					if(entradaFila.exameOuConsulta.equals("Consulta"))
+					{
+						linha.setTipo("C");
+						
+						if(especialidadesSIRESP.containsKey(entradaFila.especialidade.toUpperCase()))
+						{
+							linha.setId_ConsultaExame(especialidadesSIRESP.get(entradaFila.especialidade.trim().toUpperCase()).getIdEspecialidade().replaceAll("\u00A0", "").trim());
+							linha.setNomeExameEspecialidade(especialidadesSIRESP.get(entradaFila.especialidade.trim().toUpperCase()).getNomeEspecialidade().replaceAll("\u00A0", "").trim());
+						}
+						else
+						{
+							linha.setId_ConsultaExame("");
+							linha.setNomeExameEspecialidade("");	
+							linha.setObservacao(linha.getObservacao() + "Não foi encontrada a especialidade da consulta;");
+						}
+							
+					}
+					else if(entradaFila.exameOuConsulta.equals("Exame"))
+					{
+						linha.setTipo("E");
+						
+						if(examesSIRESP.containsKey(entradaFila.especialidade.toUpperCase()))
+						{
+							linha.setId_ConsultaExame(examesSIRESP.get(entradaFila.especialidade.trim().toUpperCase()).getIdExame().replaceAll("\u00A0", "").trim());
+							linha.setNomeExameEspecialidade(examesSIRESP.get(entradaFila.especialidade.trim().toUpperCase()).getNomeExame().replaceAll("\u00A0", "").trim());
+						}
+						else
+						{
+							linha.setId_ConsultaExame("");
+							linha.setNomeExameEspecialidade("");			
+							linha.setObservacao(linha.getObservacao() + "Não foi encontrado o nome do exame;");
+						}
+					}
+					else
+					{
+						linha.setTipo("");
+						linha.setId_ConsultaExame("");
+						linha.setNomeExameEspecialidade("");
+						linha.setObservacao(linha.getObservacao() + "Tipo não encontrado;");
+					}
+					
+					//Tipo da Consulta ou Exame
+					switch(entradaFila.tipo.toUpperCase().trim())
+					{
+						case "1ª CONSULTA": linha.setTipoConsultaExame("1"); break;
+						case "INTERCONSULTA": linha.setTipoConsultaExame("I"); break;
+						case "RETORNO": linha.setTipoConsultaExame("R"); break;
+						case "INTERNO": linha.setTipoConsultaExame("IN"); break;
+						case "EXTERNO": linha.setTipoConsultaExame("EX"); break;
+						default: linha.setTipoConsultaExame(""); linha.setObservacao(linha.getObservacao() + "Tipo Consulta Exame Não Encontrado;"); break;
+					}
+					
+					//Prioridade
+					if(entradaFila.prioridade.trim().toUpperCase().equals("X"))
+						linha.setPrioridade("S");
+					else if(entradaFila.prioridade.trim().equals(""))
+						linha.setPrioridade("N");
+					else
+					{
+						linha.setPrioridade("");
+						linha.setObservacao(linha.getObservacao() + "Valor inesperado no campo prioridade;");
+					}
+					
+					if(!entradaFila.status.trim().toUpperCase().equals("AGENDADO"))
+						linha.setStatus("0");
+					else
+					{
+						linha.setStatus("");
+						linha.setObservacao(linha.getObservacao() + "Usuário já agendado;");
+					}
+					
+					linha.setCid(entradaFila.cid.trim());
+					
+					//CRM Profissional Retorno
+					linha.setCrmProfissionalRetorno("");
+					linha.setUnidadeIndicadaAgendamento("");
+					linha.setAnoPretendido("");
+					linha.setMes_pretendido("");
+					linha.setTurno("");
+					
+					if(linha.getObservacao().equals(""))
+					{
+						linha.setObservacao("Paciente transferido da unidade Central Reg Campinas");
+						importar.add(linha);
+					}
+					else
+					{
+						naoImportar.add(linha);
+					}
+				}
+				
+				if(importar.size() > 0)
+				{
+					
+					filaCentralReg.gravarCSVDeImportacao("Importar", entidade, caminhoArquivosImportados, arquivoBase, importar);
+				}
+				
+				if(naoImportar.size() > 0)
+				{
+					
+					filaCentralReg.gravarCSVDeImportacao("Não Importar", entidade, caminhoArquivosImportados, arquivoBase, naoImportar);
+				}
+				
+				celulas.add(new CelulaExcel(linhaArquivoEstatisticas, 0, entidade.getDistrito(), "String"));
+				celulas.add(new CelulaExcel(linhaArquivoEstatisticas, 1, entidade.getNomeSIRESP(), "String"));
+				celulas.add(new CelulaExcel(linhaArquivoEstatisticas, 2, importar.size(), "Int"));
+				celulas.add(new CelulaExcel(linhaArquivoEstatisticas, 3, naoImportar.size(), "Int"));
+				
+				linhaArquivoEstatisticas++;
+				
+				estatisticas.gravarDadosEmCelula("Plan1", celulas, false, false, 0, null);
+			}
 		}
     }
+	
+	private void gravarCSVDeImportacao(String pastaIntermediaria, EntidadesFilaCentralReg entidade, String caminhoArquivosImportados, String arquivoBase, ArrayList<LinhaImportacaoSIRESP> listaImportacao)
+	{
+		Pasta pasta = new Pasta(caminhoArquivosImportados + "\\" + pastaIntermediaria + "\\" + entidade.getDistrito(), true);
+		
+		Arquivo arquivo = new Arquivo(caminhoArquivosImportados, arquivoBase);
+		String caminhoArquivoCSV = caminhoArquivosImportados + "\\" + pastaIntermediaria + "\\" + entidade.getDistrito() + "\\" + entidade.getNomeArquivo();
+		caminhoArquivoCSV = caminhoArquivoCSV.replaceAll(".xlsx", ".csv");
+		arquivo.CopiarArquivo(caminhoArquivoCSV);
+		
+
+		FileWriter writer;
+		Charset charset = Charset.forName("Windows-1252");
+		try {
+			writer = new FileWriter(caminhoArquivoCSV, charset, true);
+
+		
+			CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").build());
+		
+			for(LinhaImportacaoSIRESP linha : listaImportacao)
+			{
+				csvPrinter.printRecord(linha.getUnidadeSolicitanteCodigo(), 
+									   linha.getUnidadeSolicitanteNome(), 
+									   linha.getCodPaciente(), 
+									   linha.getNomePaciente(), 
+									   linha.getDataEntrada(), 
+									   linha.getTipo(), 
+									   linha.getTipoConsultaExame(), 
+									   linha.getId_ConsultaExame(), 
+									   linha.getNomeExameEspecialidade(), 
+									   linha.getPrioridade(), 
+									   linha.getCrmProfissionalRetorno(), 
+									   linha.getStatus(), 
+									   linha.getUnidadeIndicadaAgendamento(), 
+									   linha.getAnoPretendido(), 
+									   linha.getMes_pretendido(), 
+									   linha.getTurno(), 
+									   linha.getCid(), 
+									   linha.getObservacao());
+			}
+		    
+		    csvPrinter.flush();
+		    csvPrinter.close();		
+		        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
 	
 	private ArrayList<EntidadesFilaCentralReg> lerEntidades(String nomeArquivo)
 	{
@@ -128,9 +342,9 @@ public class CriarImportacaoFilaCentralReg {
                 // Acessa os valores pelos nomes dos cabeçalhos
                 String unidade = registro.get("Unidade");
                 String distrito = registro.get("Distrito");
-                String escritoComo = registro.get("Escrito como");
+                String nomeSIRESP = registro.get("Nome SIRESP");
                 
-                entidades.add(new EntidadesFilaCentralReg(unidade, distrito, escritoComo));
+                entidades.add(new EntidadesFilaCentralReg(unidade, distrito, "", nomeSIRESP, ".xlsx"));
             }
             
             return entidades;

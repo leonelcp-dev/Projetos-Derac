@@ -31,7 +31,7 @@ public class DistribuirFilaCentralReg {
 		DistribuirFilaCentralReg filaCentralReg = new DistribuirFilaCentralReg();
 		
 		ArrayList<EntidadesFilaCentralReg> entidades = filaCentralReg.lerEntidades(caminhoArquivos + "unidades.csv");
-		entidades.add(new EntidadesFilaCentralReg("Outros", "Outros", ""));
+		entidades.add(new EntidadesFilaCentralReg("Outros", "Outros", "", "", ".xlsx"));
 		
 		ArrayList<UsuarioFilaCentralReg> usuarios = filaCentralReg.lerArquivo(caminhoArquivos + "Consulta.csv", "Consulta");
 		usuarios.addAll(filaCentralReg.lerArquivo(caminhoArquivos + "Exame.csv", "Exame"));
@@ -145,7 +145,7 @@ public class DistribuirFilaCentralReg {
                 String distrito = registro.get("Distrito");
                 String escritoComo = registro.get("Escrito como");
                 
-                entidades.add(new EntidadesFilaCentralReg(unidade, distrito, escritoComo));
+                entidades.add(new EntidadesFilaCentralReg(unidade, distrito, escritoComo, "", ".xlsx"));
             }
             
             return entidades;

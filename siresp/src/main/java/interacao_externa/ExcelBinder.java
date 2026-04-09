@@ -18,6 +18,80 @@ import java.util.function.Function;
 
 public class ExcelBinder {
 
+	
+	public static <T> ArrayList<T> readSheet(
+            InputStream in,
+            Class<T> type,
+            int sheetPosition,
+            int headerRowIndex,
+            boolean skipEmptyRows
+    ) {
+		try (Workbook wb = new XSSFWorkbook(in)) {
+            Sheet sheet = wb.getSheetAt(0);
+            
+           
+            if (sheet == null) {
+                throw new IllegalArgumentException("Planilha não encontrada: " + sheetPosition);
+            }
+
+            // Mapear cabeçalho -> índice
+            Row headerRow = sheet.getRow(headerRowIndex);
+            if (headerRow == null) {
+                throw new IllegalArgumentException("Linha de cabeçalho não encontrada no índice " + headerRowIndex);
+            }
+            Map<String, Integer> headerIndex = readHeaderIndex(headerRow);
+
+            // Preparar metadados dos campos anotados
+            List<FieldBinding> bindings = prepareBindings(type, headerIndex);
+
+            FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
+            DataFormatter formatter = new DataFormatter(Locale.getDefault());
+
+            ArrayList<T> result = new ArrayList<>();
+            for (int r = headerRowIndex + 1; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) {
+                    if (!skipEmptyRows) result.add(type.getDeclaredConstructor().newInstance());
+                    continue;
+                }
+
+                // Se quiser pular linhas completamente vazias:
+                if (skipEmptyRows && isRowCompletelyEmpty(row)) continue;
+
+                T instance = type.getDeclaredConstructor().newInstance();
+
+                for (FieldBinding fb : bindings) {
+                    Cell cell = getCell(row, fb.colIndex);
+                    Object value = convertCellValue(cell, evaluator, formatter, fb);
+                    if (value == null && fb.required) {
+                        throw new IllegalStateException(
+                                "Campo obrigatório vazio: " + fb.field.getName() +
+                                " (linha " + (r + 1) + ", coluna " + (fb.colIndex + 1) + ")"
+                        );
+                    }
+                    if (value != null) {
+                        fb.field.setAccessible(true);
+                        fb.field.set(instance, value);
+                    }
+                    else
+                    {
+                        fb.field.setAccessible(true);
+                        fb.field.set(instance, "");
+                    }
+                }
+
+                result.add(instance);
+            }
+
+            return result;
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException("Falha ao ler a planilha: " + e.getMessage(), e);
+        }
+
+	}
+	
     public static <T> ArrayList<T> readSheet(
             InputStream in,
             Class<T> type,

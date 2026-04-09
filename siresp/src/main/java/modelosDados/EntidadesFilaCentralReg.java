@@ -11,11 +11,15 @@ public class EntidadesFilaCentralReg {
 	private ArrayList<UsuarioFilaCentralReg> pacientes;
 	private ArrayList<String> outrosNomes;
 	
-	public EntidadesFilaCentralReg(String unidade, String distrito, String escritoComo)
+	private ArrayList<LinhaImportacaoSIRESP> importar;
+	private ArrayList<LinhaImportacaoSIRESP> naoImportar;
+	
+	public EntidadesFilaCentralReg(String unidade, String distrito, String escritoComo, String nomeSIRESP, String extensao)
 	{
 		this.Unidade = unidade;
 		this.Distrito = distrito;
-		this.NomeArquivo = unidade.replaceAll("[\\\\/:*?\"<>|]", "_") + ".xlsx";
+		this.nomeSIRESP = nomeSIRESP;
+		this.NomeArquivo = unidade.replaceAll("[\\\\/:*?\"<>|]", "_") + extensao;
 		setPacientes(new ArrayList<UsuarioFilaCentralReg>());
 		
 		outrosNomes = new ArrayList<String>();
