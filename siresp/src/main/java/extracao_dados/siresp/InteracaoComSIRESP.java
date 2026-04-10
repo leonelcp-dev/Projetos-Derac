@@ -18,6 +18,7 @@ import modulos.FilaNominalSolicitacoesPendentes;
 import modulos.LoginsSirespDigital;
 import modulos.OfertaDemandaDeAcesso;
 import modulos.OfertaDemandaDeAcessoR1;
+import modulos.RemoverDaFilaCentralReg;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -32,7 +33,7 @@ public class InteracaoComSIRESP
     	//ChromeOptions options = new ChromeOptions();
     	
     	int escolha = -1;
-    	int maximoEscolha = 8;
+    	int maximoEscolha = 9;
     	boolean abrirMenuInicial = false;
     	
     	if(args.length == 0)
@@ -154,6 +155,13 @@ public class InteracaoComSIRESP
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
         	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false);
         	ofertaDemanda.calcularOfertaEDemanda(driver, "12/2025", "12/2025", true);
+        }
+        
+        else if(escolha == 9)
+        {
+        	RemoverDaFilaCentralReg filaCentralReg = new RemoverDaFilaCentralReg();
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false);
+        	filaCentralReg.remvoverRegistrosCentralReg(driver);
         }
         
         driver.quit();

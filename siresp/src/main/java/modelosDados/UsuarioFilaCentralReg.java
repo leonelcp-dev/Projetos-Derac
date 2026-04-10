@@ -98,4 +98,8 @@ public class UsuarioFilaCentralReg {
 	@ExcelColumn(header = "Data de alteração 3")
 	public String dataAlteracao3;
 	
+	@ExcelColumn(header = "Observação Automatização")
+	public String observacaoAutomatizacao;
+	
+	
 }

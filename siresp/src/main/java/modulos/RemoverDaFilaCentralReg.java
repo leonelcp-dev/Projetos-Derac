@@ -25,6 +25,10 @@ import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
+import dadosGerais.ParametrosTabelaCDRRegulacoesConsulta;
+import dadosGerais.ParametrosTabelaCDRRegulacoesExames;
+import dadosGerais.ParametrosTabelaCDRResultadosConsulta;
+import dadosGerais.ParametrosTabelaCDRResultadosExame;
 import dominiosSIRESP.EspecialidadesSIRESP;
 import dominiosSIRESP.ExamesSIRESP;
 import dominiosSIRESP.StatusAgendamentoSIRESP;
@@ -56,7 +60,7 @@ public class RemoverDaFilaCentralReg {
 	LocalDate dataProcessamento;
 	String dataFormatadaPasta;
 
-	public String remvoerRegistrosCentralReg(WebDriver driver)
+	public String remvoverRegistrosCentralReg(WebDriver driver)
 	{			
 		formatoDataPasta = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 				
@@ -66,6 +70,21 @@ public class RemoverDaFilaCentralReg {
 		opcoes.add("Agendamento");
 		opcoes.add("Cadastro Demanda por Recurso");
 		
+		
+		driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String opcoesSimNao[] = {"Sim", "Não"};
+		int iniciar = JOptionPane.showOptionDialog(null, "Iniciar?", "Iniciar Processo", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		
+		if(iniciar == 1)
+			return "Finalizado";
 		
 		driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
 		
@@ -116,13 +135,13 @@ public class RemoverDaFilaCentralReg {
 		
 		if(value != null)
 		{
-			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
+			//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
 		
 			boolean visivel;
 			do
 			{
 
-				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+				//paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 				
 				boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
 				
@@ -155,6 +174,10 @@ public class RemoverDaFilaCentralReg {
 			
 			paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_CDR_ABA_LISTAR.getTextoIdentificador());
 			
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+			
+			iniciarRemocoesDeEntradaNaFila(driver, paginaWeb);
+			
 		}
 		else
 			System.out.println("Unidade não encontrada: " + centralReg.getCNES() + " - " + centralReg.getUnidade() + "(" + centralReg.getDistrito() + ")");
@@ -163,6 +186,248 @@ public class RemoverDaFilaCentralReg {
 		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";	
+	}
+	
+	private String iniciarRemocoesDeEntradaNaFila(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb)
+	{
+		String caminhoArquivosImportados = "C:\\Users\\PMC514991-2\\Documents\\Importacao\\";
+		String caminhoArquivosUnidades = "C:\\Users\\PMC514991-2\\Documents\\Fila Unica\\";
+		
+		ArrayList<EntidadesFilaCentralReg> entidades = lerEntidades(caminhoArquivosImportados + "unidades.csv");
+		
+		for(EntidadesFilaCentralReg entidade : entidades)
+		{
+			String caminho = caminhoArquivosUnidades + entidade.getDistrito() + "\\" + entidade.getNomeArquivo();
+			
+			System.out.println(caminho);
+			
+			ArrayList<UsuarioFilaCentralReg> entradasFilaCentralReg = null;
+			
+			try (FileInputStream in = new FileInputStream(caminho)) { 
+				entradasFilaCentralReg = ExcelBinder.readSheet(in, UsuarioFilaCentralReg.class, 0, 0, true);
+	        }
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			if(entradasFilaCentralReg != null)
+			{
+				for(UsuarioFilaCentralReg entrada : entradasFilaCentralReg)
+				{
+					String retorno;
+					
+					if(!entrada.status.toUpperCase().equals("AGENDADO") && entrada.observacaoAutomatizacao.trim().equals(""))
+					{
+						paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_FILTRO_TIPO_DEMANDA.getTextoIdentificador(), entrada.exameOuConsulta);
+						while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+						
+						paginaWeb.limparInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_TEXT_CODIGO_PACIENTE.getTextoIdentificador());
+						paginaWeb.preencherInputTextByName(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_TEXT_CODIGO_PACIENTE.getTextoIdentificador(), entrada.codigo);
+						
+						paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
+						while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+						
+						if(entrada.exameOuConsulta.equals("Consulta"))
+						{
+							retorno = removerEntradaDeConsulta(driver, paginaWeb, entrada, entidade.getNomeSIRESP());
+						}
+						else if(entrada.exameOuConsulta.equals("Exame"))
+						{
+							retorno = removerEntradaDeExame(driver, paginaWeb, entrada, entidade.getNomeSIRESP());
+						}
+					}
+				}
+			}
+		}
+		
+		
+		return "";
+	}
+	
+	private String removerEntradaDeConsulta(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, UsuarioFilaCentralReg entradaDeFila, String nomeSIRESP)
+	{
+		String retornoProcesso = "";
+		
+		if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
+		{
+			ArrayList<ArrayList<String>> tabelaDeResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_TABELA_RESULTADO.getTextoIdentificador());
+			
+			if(tabelaDeResultados != null)
+			{
+				int linhaDaTabelaResultados = 1;
+				for(ArrayList<String> linhaDaTabela : tabelaDeResultados)
+				{
+					if(linhaDaTabela.size() >= ParametrosTabelaCDRResultadosConsulta.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice())
+					{
+						String codigoPaciente = linhaDaTabela.get(ParametrosTabelaCDRResultadosConsulta.INDICE_COLUNA_CODIGO.getIndice()).trim();
+						if(codigoPaciente.equals(entradaDeFila.codigo))
+						{
+							String idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_RESULTADO.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(linhaDaTabelaResultados));
+							
+							paginaWeb.clicarLinkPeloXPath(driver, idAcao);
+							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+							
+							paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_LISTAR_CDR_REGULACOES.getTextoIdentificador());
+							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+							
+							ArrayList<ArrayList<String>> tabelaDeResultadosConsultas = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_TABELA_REGULACAO_CONSULTA.getTextoIdentificador());
+							int numeroLinhaDaTabelaConsultas = 1;
+							for(ArrayList<String> linhaDaTabelaConsulta : tabelaDeResultadosConsultas)
+							{
+								System.out.println("Colunas: " + linhaDaTabelaConsulta.size());
+								if(linhaDaTabelaConsulta.size() >= ParametrosTabelaCDRRegulacoesConsulta.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice())
+								{
+									String unidade = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_UNIDADE_SOLICITANTE.getIndice()).trim();
+									String especialidade = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_ESPECIALIDADE.getIndice()).trim();
+									String cid = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_CID.getIndice()).trim();
+									String status = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_STATUS.getIndice()).trim();
+									String dataEntrada = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_DATA_ENTRADA.getIndice()).trim().replace("-", "/");
+									
+									System.out.println(especialidade + "|" + entradaDeFila.especialidade + "|");
+									System.out.println(cid + "|" + entradaDeFila.cid + "|");
+									System.out.println(status + "|" + entradaDeFila.status + "|");
+									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
+									
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_REG_DE_CAMPINAS.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									   entradaDeFila.especialidade.toUpperCase().equals(especialidade.toUpperCase()) && 
+									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
+									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
+									   entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									{
+										idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_REGULACAO_CONSULTA.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(numeroLinhaDaTabelaConsultas));
+										
+										paginaWeb.clicarLinkPeloXPath(driver, idAcao);
+										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+										
+										paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_ALTERACAO_HISTORICO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_CADASTRO_DEMANDA_POR_MOTIVO_ALTERACAO_HISTORICO.getTextoIdentificador());
+										
+										paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_OBSERVACAO_ALTERACAO_HISTORICO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_CADASTRO_DEMANDA_POR_RECURSO_OBSERVACAO_ALTERACAO_HISTORICO.getTextoIdentificador() + nomeSIRESP);
+										
+										try {
+											Thread.sleep(5000);
+										} catch (InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										
+										paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_CANCELAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+										
+										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS";
+									}
+								}
+								
+								numeroLinhaDaTabelaConsultas++;
+							}
+							
+							paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_VOLTAR_HISTORICO.getTextoIdentificador(), "name");
+							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+							
+							break;
+						}
+					}
+					linhaDaTabelaResultados++;
+				}
+			}
+		}
+		
+		if(retornoProcesso.equals(""))
+			retornoProcesso = "Erro ao encontrar correspondência para remoção da fila";
+		
+		return retornoProcesso;
+	}
+	
+	private String removerEntradaDeExame(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, UsuarioFilaCentralReg entradaDeFila, String nomeSIRESP)
+	{
+		String retornoProcesso = "";
+		
+		if(!paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_NENHUM_RESULTADO_ENCONTRADO.getTextoIdentificador()))
+		{
+			ArrayList<ArrayList<String>> tabelaDeResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_TABELA_RESULTADO.getTextoIdentificador());
+			
+			if(tabelaDeResultados != null)
+			{
+				int linhaDaTabelaResultados = 1;
+				for(ArrayList<String> linhaDaTabela : tabelaDeResultados)
+				{
+					if(linhaDaTabela.size() >= ParametrosTabelaCDRResultadosExame.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice())
+					{
+						String codigoPaciente = linhaDaTabela.get(ParametrosTabelaCDRResultadosExame.INDICE_COLUNA_CODIGO.getIndice()).trim();
+						if(codigoPaciente.equals(entradaDeFila.codigo))
+						{
+							String idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_RESULTADO.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(linhaDaTabelaResultados));
+							
+							paginaWeb.clicarLinkPeloXPath(driver, idAcao);
+							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+							
+							paginaWeb.clicarElementoPeloId(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_LISTAR_CDR_REGULACOES.getTextoIdentificador());
+							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+							
+							ArrayList<ArrayList<String>> tabelaDeResultadosExames = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_TABELA_REGULACAO_EXAME.getTextoIdentificador());
+							int numeroLinhaDaTabelaExames = 1;
+							for(ArrayList<String> linhaDaTabelaExame : tabelaDeResultadosExames)
+							{
+								if(linhaDaTabelaExame.size() >= ParametrosTabelaCDRRegulacoesExames.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice())
+								{
+									String unidade = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_UNIDADE_SOLICITANTE.getIndice()).trim();
+									String exame = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_EXAME.getIndice()).trim();
+									String cid = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_CID.getIndice()).trim();
+									String status = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_STATUS.getIndice()).trim();
+									String dataEntrada = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_DATA_ENTRADA.getIndice()).trim().replace("-", "/");
+									
+									System.out.println(exame + "|" + entradaDeFila.especialidade + "|");
+									System.out.println(cid + "|" + entradaDeFila.cid + "|");
+									System.out.println(status + "|" + entradaDeFila.status + "|");
+									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
+									
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_REG_DE_CAMPINAS.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									   entradaDeFila.especialidade.toUpperCase().equals(exame.toUpperCase()) &&
+									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
+									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
+									   entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									{
+										idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_REGULACAO_EXAME.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(numeroLinhaDaTabelaExames));
+										
+										paginaWeb.clicarLinkPeloXPath(driver, idAcao);
+										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+										
+										paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_ALTERACAO_HISTORICO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_CADASTRO_DEMANDA_POR_MOTIVO_ALTERACAO_HISTORICO.getTextoIdentificador());
+										
+										paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_CADASTRO_DEMANDA_POR_RECURSO_OBSERVACAO_ALTERACAO_HISTORICO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.TEXTO_CADASTRO_DEMANDA_POR_RECURSO_OBSERVACAO_ALTERACAO_HISTORICO.getTextoIdentificador() + nomeSIRESP);
+										
+										try {
+											Thread.sleep(5000);
+										} catch (InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										
+										paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_CANCELAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+										
+										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS";
+									}
+								}
+								
+								numeroLinhaDaTabelaExames++;
+							}
+							
+							paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_VOLTAR_HISTORICO.getTextoIdentificador(), "name");
+							while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+							
+							break;
+						}
+					}
+					linhaDaTabelaResultados++;
+				}
+			}
+		}
+		
+		if(retornoProcesso.equals(""))
+			retornoProcesso = "Erro ao encontrar correspondência para remoção da fila";
+		
+		return retornoProcesso;
 	}
 	
 	private ArrayList<EntidadesFilaCentralReg> lerEntidades(String nomeArquivo)
