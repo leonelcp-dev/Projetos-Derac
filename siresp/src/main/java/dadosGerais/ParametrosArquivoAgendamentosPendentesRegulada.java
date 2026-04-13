@@ -19,12 +19,13 @@ public enum ParametrosArquivoAgendamentosPendentesRegulada {
 	ARQUIVO_FINAL_LINHA_INICIAL(8, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
 	ARQUIVO_BAIXADO_LINHA_INICIAL(9, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
 	
-	NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA(10, 8,"CONSULTA - AGENDAMENTOS PENDENT", "", ""),
-	NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME(11, 8,"EXAME - AGENDAMENTOS PENDENTES", "", ""),
-	NOME_PLANILHA_ARQUIVO_FORMATADO(12, 8,"BD - CDR", "", ""),
+	LINHA_CABECALHO(10, 5, "Ajustado de acordo com o Java, no arquivo é a Linha 5", "", ""),
+	NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA(11, 8,"CONSULTA - AGENDAMENTOS PENDENT", "", ""),
+	NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME(12, 8,"EXAME - AGENDAMENTOS PENDENTES", "", ""),
+	NOME_PLANILHA_ARQUIVO_FORMATADO(13, 8,"BD - CDR", "", ""),
 	
-	EXTENSAO_ARQUIVO_BAIXADO(13, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_FORMATADO(14, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_BAIXADO(14, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_FORMATADO(15, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;

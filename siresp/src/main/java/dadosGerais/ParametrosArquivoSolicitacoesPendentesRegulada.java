@@ -18,15 +18,16 @@ public enum ParametrosArquivoSolicitacoesPendentesRegulada {
 	INDICE_COLUNA_ASSUMIDO_EM(8, 8, "Assumido em:", "DateTime", "dd/MM/yyyy HH:mm:ss"),
 	INDICE_COLUNA_HIPOTESE(9, 9, "Hipótese", "String", ""),
 
-	ARQUIVO_FINAL_LINHA_INICIAL(10, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
-	ARQUIVO_BAIXADO_LINHA_INICIAL(11, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
+	LINHA_CABECALHO(10, 4, "Ajustado de acordo com o Java, no arquivo é a Linha 5", "", ""),
+	ARQUIVO_FINAL_LINHA_INICIAL(11, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
+	ARQUIVO_BAIXADO_LINHA_INICIAL(12, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
 	
-	NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA(12, 8,"CONSULTA - SOLICITACOES PENDENT", "", ""),
-	NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME(13, 8,"EXAME - SOLICITACOES PENDENTES", "", ""),
-	NOME_PLANILHA_ARQUIVO_FORMATADO(14, 8,"BD - CDR", "", ""),
+	NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA(13, 8,"CONSULTA - SOLICITACOES PENDENT", "", ""),
+	NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME(14, 8,"EXAME - SOLICITACOES PENDENTES", "", ""),
+	NOME_PLANILHA_ARQUIVO_FORMATADO(15, 8,"BD - CDR", "", ""),
 	
-	EXTENSAO_ARQUIVO_BAIXADO(15, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_FORMATADO(16, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_BAIXADO(16, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_FORMATADO(17, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;

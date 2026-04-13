@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -359,6 +360,15 @@ public class AcoesGeraisPaginaWeb {
 		}
 				
 		return true;
+	}
+	
+	public void confirmarAlertaJS(WebDriver driverPagina)
+	{
+
+		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+		Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+		alert.accept();
+
 	}
 	
 	public boolean preencherInputText(WebDriver driverPagina, String id, String texto)

@@ -111,7 +111,7 @@ public class Arquivo {
 		if(arquivo == null)
 			return false;
 		
-		return true;
+		return Files.exists(arquivo);
 	}
 	
 

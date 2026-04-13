@@ -24,6 +24,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoCenso;
+import dadosGerais.ParametrosArquivoDistribuicaoFilaCentralReg;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import dadosGerais.ParametrosTabelaCDRRegulacoesConsulta;
 import dadosGerais.ParametrosTabelaCDRRegulacoesExames;
@@ -211,11 +212,16 @@ public class RemoverDaFilaCentralReg {
 				e.printStackTrace();
 			}
 			
+			AcoesArquivoExcel arquivoUnidade = new AcoesArquivoExcel(caminho, 1);
+			
 			if(entradasFilaCentralReg != null)
 			{
+				int linhaExcel = ParametrosArquivoDistribuicaoFilaCentralReg.LINHA_INICIAL_ARQUIVO_UNIDADE.getIndice();
 				for(UsuarioFilaCentralReg entrada : entradasFilaCentralReg)
 				{
-					String retorno;
+					String retorno = "";
+					
+					ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 					
 					if(!entrada.status.toUpperCase().equals("AGENDADO") && entrada.observacaoAutomatizacao.trim().equals(""))
 					{
@@ -237,6 +243,18 @@ public class RemoverDaFilaCentralReg {
 							retorno = removerEntradaDeExame(driver, paginaWeb, entrada, entidade.getNomeSIRESP());
 						}
 					}
+					else
+					{
+						retorno = "Usuário já agendado";
+					}
+					
+					if(entrada.observacaoAutomatizacao.trim().equals(""))
+					{
+						celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoDistribuicaoFilaCentralReg.INDICE_COLUNA_OBSERVACAO_AUTOMATIZACAO.getIndice(), retorno, "String"));
+						arquivoUnidade.gravarDadosEmCelula(0, celulas);
+					}
+					
+					linhaExcel++;
 				}
 			}
 		}
@@ -311,10 +329,13 @@ public class RemoverDaFilaCentralReg {
 											e.printStackTrace();
 										}
 										
-										paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_CANCELAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_REGISTRAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										
+										paginaWeb.confirmarAlertaJS(driver);
+										
 										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 										
-										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS";
+										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS para ser transferido para a unidade " + nomeSIRESP;
 									}
 								}
 								
@@ -403,10 +424,15 @@ public class RemoverDaFilaCentralReg {
 											e.printStackTrace();
 										}
 										
-										paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_CANCELAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										//paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_CANCELAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										
+										paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_REGISTRAR_ALTERACAO_HISTORICO.getTextoIdentificador(), "name");
+										
+										paginaWeb.confirmarAlertaJS(driver);
+										
 										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 										
-										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS";
+										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS para ser transferido para a unidade " + nomeSIRESP;
 									}
 								}
 								

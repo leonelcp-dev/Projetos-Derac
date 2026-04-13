@@ -83,7 +83,7 @@ public class InteracaoComSIRESP
 			}
         }
     	
-		System.setProperty("webdriver.chrome.driver", "C:\\chromedriver-win64\\chromedriver.exe"); 
+		//System.setProperty("webdriver.chrome.driver", "C:\\chromedriver-win64\\chromedriver.exe"); 
 		ChromeOptions options = new ChromeOptions(); 
 		options.addArguments("user-data-dir=C:\\chrome-temp"); 
 		options.addArguments("profile-directory=Default"); // ou "Profile 1" 
@@ -131,8 +131,8 @@ public class InteracaoComSIRESP
         else if(escolha == 4)
         {
         	Absenteismo absenteismo = new Absenteismo();
-        	//absenteismo.verificarAbsenteismo(driver, null, null);
-        	absenteismo.verificarAbsenteismo(driver, "12/2024", "12/2024");
+        	absenteismo.verificarAbsenteismo(driver, null, null);
+        	//absenteismo.verificarAbsenteismo(driver, "12/2024", "12/2024");
         	//absenteismo.parametrizarArquivosVazios(driver);
         }
         else if(escolha == 5)

@@ -19,14 +19,14 @@ public enum ParametrosArquivoReguladaConsolidado {
 	ARQUIVO_FINAL_LINHA_INICIAL(8, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
 	ARQUIVO_BAIXADO_LINHA_INICIAL(9, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
 	
-	ARQUIVO_MUNICIPAL_NOME(7, 6,"BD Demanda Reprimida - Regulada.xlsx", "", ""),
-	ARQUIVO_MUNICIPAL_VAZIO(8, 6,"ARQUIVO REGULADA VAZIO.xlsx", "", ""),
+	ARQUIVO_MUNICIPAL_NOME(10, 6,"BD Demanda Reprimida - Regulada.xlsx", "", ""),
+	ARQUIVO_MUNICIPAL_VAZIO(11, 6,"ARQUIVO REGULADA VAZIO.xlsx", "", ""),
 	
-	NOME_PLANILHA_ARQUIVO_DOWNLOAD(10, 8,"demanda_por_recurso_qualitativo", "", ""),
-	NOME_PLANILHA_ARQUIVO_FORMATADO(11, 8,"BD - Regulada", "", ""),
+	NOME_PLANILHA_ARQUIVO_DOWNLOAD(12, 8,"demanda_por_recurso_qualitativo", "", ""),
+	NOME_PLANILHA_ARQUIVO_FORMATADO(13, 8,"BD - Regulada", "", ""),
 	
-	EXTENSAO_ARQUIVO_BAIXADO(12, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_FORMATADO(13, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_BAIXADO(14, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_FORMATADO(15, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;

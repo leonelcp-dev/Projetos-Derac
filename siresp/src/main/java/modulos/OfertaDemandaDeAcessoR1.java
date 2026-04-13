@@ -564,7 +564,7 @@ public class OfertaDemandaDeAcessoR1 {
 		HashMap<String, ArrayList<AgendamentosPendentesRegulada>> dadosDoArquivoOriginal = new HashMap<String, ArrayList<AgendamentosPendentesRegulada>>();
 		
 		try (FileInputStream in = new FileInputStream(arquivo)) { 
-			agendamentos = ExcelBinder.readSheet(in, AgendamentosPendentesRegulada.class, nomePlanilha, ParametrosArquivoAgendamentosPendentesRegulada.ARQUIVO_BAIXADO_LINHA_INICIAL.getIndice(), true);
+			agendamentos = ExcelBinder.readSheet(in, AgendamentosPendentesRegulada.class, nomePlanilha, ParametrosArquivoAgendamentosPendentesRegulada.LINHA_CABECALHO.getIndice(), true);
         }
 		catch(Exception e)
 		{
@@ -574,8 +574,8 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		for(AgendamentosPendentesRegulada agendamento : agendamentos)
 		{
-			LocalDate data = LocalDate.parse(agendamento.getSolicitadoEm(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-			String textoData = data.getMonth() + "-" + data.getYear();
+			LocalDate data = LocalDate.parse(agendamento.getSolicitadoEm().substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			String textoData = data.getMonthValue() + "-" + data.getYear();
 			
 			if(dadosDoArquivoOriginal.containsKey(textoData))
 			{
@@ -603,16 +603,22 @@ public class OfertaDemandaDeAcessoR1 {
 			pastaDestino = new Pasta(pastaArquivosBaixados, true);
 			
 			String nomeArquivo = meses.getMeses().get(mes - 1).getMesNumero() + "." + String.valueOf(ano).substring(2) + " - " + meses.getMeses().get(mes - 1).getMesDescricao() + "_Regulada_Consultas e Exames." + ParametrosArquivoReguladaConsolidado.EXTENSAO_ARQUIVO_FORMATADO.getDescricao();
-			Arquivo arquivoFinal = new Arquivo(pastaArquivosBaixados, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
+			Arquivo arquivoFinal = new Arquivo(pastaArquivosBaixados, nomeArquivo);
+			
+			System.out.println("Verificando a existência do arquivo " + pastaArquivosBaixados + "\\" + nomeArquivo);
 			
 			if(!arquivoFinal.existe())
 			{
 				arquivoFinal = new Arquivo(pastaDestinoArquivosNovasSolicitacoes, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
 				
+				System.out.println("Copiar como: " + pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao()); 
 				arquivoFinal.CopiarArquivo(pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
 				
 				nomeArquivo = meses.getMeses().get(mes - 1).getMesNumero() + "." + String.valueOf(ano).substring(2) + " - " + meses.getMeses().get(mes - 1).getMesDescricao() + "_Regulada_Consultas e Exames." + ParametrosArquivoReguladaConsolidado.EXTENSAO_ARQUIVO_FORMATADO.getDescricao();
 				arquivoFinal = new Arquivo(pastaArquivosBaixados, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
+				
+				System.out.println("Criado: " + pastaArquivosBaixados + "\\" + nomeArquivo); 
+				
 				arquivoFinal.renomear(nomeArquivo);
 			}
 			
@@ -625,7 +631,7 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			for(AgendamentosPendentesRegulada agendamento : dadosDoArquivoOriginal.get(competencia))
 			{
-				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getIndice(), LocalDate.parse(agendamento.getSolicitadoEm(), DateTimeFormatter.ofPattern("dd/MM/yyyy")), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getTipo()));
+				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getIndice(), LocalDate.parse(agendamento.getSolicitadoEm().substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy")), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getTipo()));
 				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_FICHA.getIndice(), agendamento.getFicha(), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_FICHA.getTipo()));
 				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_CODIGO_PACIENTE.getIndice(), agendamento.getCodigoPaciente(), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_CODIGO_PACIENTE.getTipo()));
 				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_UNIDADE_SOLICITANTE.getIndice(), agendamento.getUnidadeSolicitante(), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_UNIDADE_SOLICITANTE.getTipo()));
@@ -637,7 +643,7 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 			
 			arquivoDoMes.forcarCalculos();
-			arquivoDoMes.gravarDadosEmCelula(nomePlanilha, celulasArquivoMensal, false, false, 0, null);
+			arquivoDoMes.gravarDadosEmCelula(0, celulasArquivoMensal);
 		}
 		
 		return "";
@@ -649,7 +655,7 @@ public class OfertaDemandaDeAcessoR1 {
 		HashMap<String, ArrayList<SolicitacoesPendentesRegulada>> dadosDoArquivoOriginal = new HashMap<String, ArrayList<SolicitacoesPendentesRegulada>>();
 		
 		try (FileInputStream in = new FileInputStream(arquivo)) { 
-			solicitacoes = ExcelBinder.readSheet(in, SolicitacoesPendentesRegulada.class, nomePlanilha, ParametrosArquivoSolicitacoesPendentesRegulada.ARQUIVO_BAIXADO_LINHA_INICIAL.getIndice(), true);
+			solicitacoes = ExcelBinder.readSheet(in, SolicitacoesPendentesRegulada.class, 0, ParametrosArquivoSolicitacoesPendentesRegulada.LINHA_CABECALHO.getIndice(), true);
         }
 		catch(Exception e)
 		{
@@ -659,8 +665,8 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		for(SolicitacoesPendentesRegulada solicitacao : solicitacoes)
 		{
-			LocalDate data = LocalDate.parse(solicitacao.getSolicitadoEm(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-			String textoData = data.getMonth() + "-" + data.getYear();
+			LocalDate data = LocalDate.parse(solicitacao.getSolicitadoEm().substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			String textoData = data.getMonthValue() + "-" + data.getYear();
 			
 			if(dadosDoArquivoOriginal.containsKey(textoData))
 			{
@@ -688,16 +694,22 @@ public class OfertaDemandaDeAcessoR1 {
 			pastaDestino = new Pasta(pastaArquivosBaixados, true);
 			
 			String nomeArquivo = meses.getMeses().get(mes - 1).getMesNumero() + "." + String.valueOf(ano).substring(2) + " - " + meses.getMeses().get(mes - 1).getMesDescricao() + "_Regulada_Consultas e Exames." + ParametrosArquivoReguladaConsolidado.EXTENSAO_ARQUIVO_FORMATADO.getDescricao();
-			Arquivo arquivoFinal = new Arquivo(pastaArquivosBaixados, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
+			Arquivo arquivoFinal = new Arquivo(pastaArquivosBaixados, nomeArquivo);
+			
+			System.out.println("Verificando a existência do arquivo " + pastaArquivosBaixados + "\\" + nomeArquivo);
 			
 			if(!arquivoFinal.existe())
 			{
 				arquivoFinal = new Arquivo(pastaDestinoArquivosNovasSolicitacoes, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
 				
+				System.out.println("Copiar como: " + pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao()); 
 				arquivoFinal.CopiarArquivo(pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
 				
 				nomeArquivo = meses.getMeses().get(mes - 1).getMesNumero() + "." + String.valueOf(ano).substring(2) + " - " + meses.getMeses().get(mes - 1).getMesDescricao() + "_Regulada_Consultas e Exames." + ParametrosArquivoReguladaConsolidado.EXTENSAO_ARQUIVO_FORMATADO.getDescricao();
 				arquivoFinal = new Arquivo(pastaArquivosBaixados, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
+				
+				System.out.println("Criado: " + pastaArquivosBaixados + "\\" + nomeArquivo); 
+				
 				arquivoFinal.renomear(nomeArquivo);
 			}
 			
@@ -710,7 +722,7 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			for(SolicitacoesPendentesRegulada solicitacao : dadosDoArquivoOriginal.get(competencia))
 			{
-				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getIndice(), LocalDate.parse(solicitacao.getSolicitadoEm(), DateTimeFormatter.ofPattern("dd/MM/yyyy")), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getTipo()));
+				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getIndice(), LocalDate.parse(solicitacao.getSolicitadoEm().substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy")), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_SOLICITADO_EM.getTipo()));
 				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_FICHA.getIndice(), solicitacao.getFicha(), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_FICHA.getTipo()));
 				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_CODIGO_PACIENTE.getIndice(), solicitacao.getCodigoPaciente(), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_CODIGO_PACIENTE.getTipo()));
 				celulasArquivoMensal.add(new CelulaExcel(ultimaLinhaPreenchida, ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_UNIDADE_SOLICITANTE.getIndice(), solicitacao.getUnidadeSolicitante(), ParametrosArquivoReguladaConsolidado.INDICE_COLUNA_UNIDADE_SOLICITANTE.getTipo()));
@@ -722,7 +734,7 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 			
 			arquivoDoMes.forcarCalculos();
-			arquivoDoMes.gravarDadosEmCelula(nomePlanilha, celulasArquivoMensal, false, false, 0, null);
+			arquivoDoMes.gravarDadosEmCelula(0, celulasArquivoMensal);
 		}
 		
 		return "";
