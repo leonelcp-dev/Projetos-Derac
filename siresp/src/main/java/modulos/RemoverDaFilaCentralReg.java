@@ -54,7 +54,7 @@ public class RemoverDaFilaCentralReg {
 	
 	private int mesCompetencia;
 	private int anoCompetencia;
-	private String pastaDestinoArquivos;
+	private String pastaRaizDosArquivos;
 	private String pastaDownloads;
 	private MesesFormatados meses;	
 	private DateTimeFormatter formatoDataPasta;
@@ -83,6 +83,8 @@ public class RemoverDaFilaCentralReg {
 		
 		String opcoesSimNao[] = {"Sim", "Não"};
 		int iniciar = JOptionPane.showOptionDialog(null, "Iniciar?", "Iniciar Processo", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		
+		pastaRaizDosArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram as filas a serem importadas", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 		
 		if(iniciar == 1)
 			return "Finalizado";
@@ -191,8 +193,8 @@ public class RemoverDaFilaCentralReg {
 	
 	private String iniciarRemocoesDeEntradaNaFila(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb)
 	{
-		String caminhoArquivosImportados = "C:\\Users\\PMC514991-2\\Documents\\Importacao\\";
-		String caminhoArquivosUnidades = "C:\\Users\\PMC514991-2\\Documents\\Fila Unica\\";
+		String caminhoArquivosImportados = pastaRaizDosArquivos + "\\Importacao\\";
+		String caminhoArquivosUnidades = pastaRaizDosArquivos + "\\Fila Unica\\";
 		
 		ArrayList<EntidadesFilaCentralReg> entidades = lerEntidades(caminhoArquivosImportados + "unidades.csv");
 		
