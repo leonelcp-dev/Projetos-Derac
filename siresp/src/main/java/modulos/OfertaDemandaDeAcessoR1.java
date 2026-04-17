@@ -83,7 +83,7 @@ import modelosDados.EntradaFPO;
 import modelosDados.LinhaCensoLeitos;
 import modelosDados.MesFormatado;
 import modelosDados.NomenclaturaPadronizada;
-import modelosDados.NovasSolicitacoesCDR;
+import modelosDados.NovasSolicitacoes;
 import modelosDados.NovasSolicitacoesRegulada;
 import modelosDados.OfertaEDemanda;
 import modelosDados.RelacaoOfertasEmBloqueio;
@@ -118,9 +118,10 @@ public class OfertaDemandaDeAcessoR1 {
 	HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas;
 	HashMap<String, EntradaFPO> mapaDeOfertasFPO;
 	HashMap<String, ArrayList<OfertaEDemanda>> demandasProcedimentos;
-	HashMap<String, NovasSolicitacoesCDR> novasSolicitacoes;
+	HashMap<String, NovasSolicitacoes> novasSolicitacoesCDR;
+	HashMap<String, NovasSolicitacoes> novasSolicitacoesRegulada;
 
-	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal, boolean testeNovasSolicitacoes, boolean consolidar)
+	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal, boolean testeNovasSolicitacoes, boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida)
 	{			
 		formatoDataPaginaWeb = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		formatoDataArquivo = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -138,11 +139,11 @@ public class OfertaDemandaDeAcessoR1 {
 
 		unidadesSolicitantes = lerEntidadesSolicitantes(pastaDestinoArquivos + "\\unidadesSolicitantes.csv");
 		
-		novasSolicitacoes = new HashMap<String, NovasSolicitacoesCDR>();
-		ArrayList<NovasSolicitacoesCDR> novasSolicitacoesExistentes = lerEntradaDeNovaSolicitacoes(pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\BD Demanda Reprimida - CDR.xlsx", ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_CDR.getDescricao(), ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice() - 1);
+		novasSolicitacoesCDR = new HashMap<String, NovasSolicitacoes>();
+		ArrayList<NovasSolicitacoes> novasSolicitacoesExistentes = lerEntradaDeNovaSolicitacoes(pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\BD Demanda Reprimida - CDR.xlsx", ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_CDR.getDescricao(), ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice() - 1);
 		int linhaExcel = ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice();
 		
-		for(NovasSolicitacoesCDR entrada : novasSolicitacoesExistentes)
+		for(NovasSolicitacoes entrada : novasSolicitacoesExistentes)
 		{
 			if(!entrada.getTipoSolicitacao().trim().equals(""))
 			{
@@ -158,7 +159,34 @@ public class OfertaDemandaDeAcessoR1 {
 				
 				String valorConcatenadoConsolidado = tipoSolicitacao + especialidade + cid + unidade + mes + ano;
 				
-				novasSolicitacoes.put(valorConcatenadoConsolidado, entrada);
+				novasSolicitacoesCDR.put(valorConcatenadoConsolidado, entrada);
+			}
+
+			linhaExcel++;
+
+		}
+		
+		novasSolicitacoesRegulada = new HashMap<String, NovasSolicitacoes>();
+		novasSolicitacoesExistentes = lerEntradaDeNovaSolicitacoes(pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\BD Demanda Reprimida - Regulada.xlsx", ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_REGULADA.getDescricao(), ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice() - 1);
+		linhaExcel = ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice();
+		
+		for(NovasSolicitacoes entrada : novasSolicitacoesExistentes)
+		{
+			if(!entrada.getTipoSolicitacao().trim().equals(""))
+			{
+				String tipoSolicitacao = entrada.getTipoSolicitacao().trim();
+				String especialidade = entrada.getEspecialidadeExame().toUpperCase().trim();
+				String cid = entrada.getCID().trim();
+				String unidade = entrada.getUnidadesCampinas().trim();
+				String mes = entrada.getMesInclusao().trim();
+				String ano = entrada.getAnoInclusao().trim();
+				
+				entrada.setQtdeSolicitacoes(0);
+				entrada.setLinhaExcel(linhaExcel);
+				
+				String valorConcatenadoConsolidado = tipoSolicitacao + especialidade + cid + unidade + mes + ano;
+				
+				novasSolicitacoesRegulada.put(valorConcatenadoConsolidado, entrada);
 			}
 
 			linhaExcel++;
@@ -411,12 +439,12 @@ public class OfertaDemandaDeAcessoR1 {
 						else
 							System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
 					}
-					preencherNovasSolicitacoes(driver, paginaWeb, elementosRadioUnidades, entidades, consolidar);
+					preencherNovasSolicitacoes(driver, paginaWeb, elementosRadioUnidades, entidades, executarNovasSolicitacoesCDR, executarNovasSolicitacoesRegulada, consolidarNovasSolicitacoesRegulada, executarDemandaReprimida);
 				}
 
 			}
 			else
-				testeArquivoNovasSolicitacoes(consolidar);
+				testeArquivoNovasSolicitacoes(executarNovasSolicitacoesCDR, executarNovasSolicitacoesRegulada, consolidarNovasSolicitacoesRegulada, executarDemandaReprimida);
 			
 			mesCompetencia++;
 			if(mesCompetencia > 12)
@@ -457,14 +485,29 @@ public class OfertaDemandaDeAcessoR1 {
         }
 	}
 	
-	private String preencherNovasSolicitacoes(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, HashMap<String, String> elementosRadioUnidades, ArrayList<EntidadeExecutanteR1> entidades, boolean consolidar)
+	private String preencherNovasSolicitacoes(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, HashMap<String, String> elementosRadioUnidades, ArrayList<EntidadeExecutanteR1> entidades, boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida)
 	{
 		HashMap<String, Integer> entradasPorOferta = new HashMap<String, Integer>();
+
+		if(executarNovasSolicitacoesCDR)
+			preencherNovasSolicitacoesCDR(driver, paginaWeb, elementosRadioUnidades, entidades, entradasPorOferta);
 		
-		preencherNovasSolicitacoesCDR(driver, paginaWeb, elementosRadioUnidades, entidades, entradasPorOferta);
-		preencherNovasSolicitacoesRegulada(entidades, consolidar, entradasPorOferta);
+		if(executarNovasSolicitacoesCDR)
+		{
+			preencherNovasSolicitacoesRegulada(entidades, consolidarNovasSolicitacoesRegulada, entradasPorOferta);
+			preencherConsolidacaoNovasSolicitacoes(entidades, entradasPorOferta);
+		}
 		
-		preecnherConsolidacaoNovasSolicitacoes(entidades, entradasPorOferta);
+		if(executarDemandaReprimida)
+		{
+			preencherDemandaReprimida();
+		}
+		
+		return "";
+	}
+	
+	private String preencherDemandaReprimida()
+	{
 		
 		return "";
 	}
@@ -504,8 +547,8 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 		}
 		
-				
 		atribuirNovasSolicitacoesRegulada(listaDeSolicitacoes, entidades, entradasPorOferta);
+		preencherConsolidacaoDeNovasSolicitacoes(pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\" + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_REGULADA_NOME.getDescricao(), listaDeSolicitacoes);
 		
 		return "";
 	}
@@ -955,8 +998,8 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		int linhaArquivoConsolidadoMensal = ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_VAZIO_LINHA_INICIAL.getIndice();
 		
-		System.out.println(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_NOME.getDescricao());
-		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_NOME.getDescricao(), 0);
+		System.out.println(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_CDR_NOME.getDescricao());
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_CDR_NOME.getDescricao(), 0);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_CDR.getDescricao(), ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice());
 		int proximaLinhaVaziaConsolidadoMunicipal = arquivoConsolidado.getPrimeiraLinhaVazia() + 1;
 		
@@ -1055,23 +1098,36 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	public String testeArquivoNovasSolicitacoes(boolean consolidar)
+	public String testeArquivoNovasSolicitacoes(boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida)
 	{
 		String pastaDestinoArquivosNovasSolicitacoes = pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\";
-		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_NOME.getDescricao(), 0);
-		
+
+		HashMap<String, Integer> entradasPorOferta = new HashMap<String, Integer>();
 		ArrayList<EntidadeExecutanteR1> entidades = lerEntidadesR1(pastaDestinoArquivos + "\\unidadesExecutantes.csv");
 		EntidadeExecutanteR1 entidade = new EntidadeExecutanteR1("5416655", "PRÓPRIO", "SMS - CAMPINAS", "SMS - CAMPINAS", "SMS - CAMPINAS");
 		
-		Arquivo arquivoConsulta = new Arquivo("C:\\Users\\PMC514991-2\\Downloads", "demanda_por_recurso_qualitativo-16_04_2026_16-58-50.xls");
-		Arquivo arquivoExame = new Arquivo("C:\\Users\\PMC514991-2\\Downloads", "demanda_por_recurso_qualitativo-16_04_2026_16-52-42.xls");
+		if(executarNovasSolicitacoesCDR)
+		{
+			AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_CDR_NOME.getDescricao(), 0);
+			
+			Arquivo arquivoConsulta = new Arquivo("C:\\Users\\PMC514991-2\\Downloads", "demanda_por_recurso_qualitativo-16_04_2026_16-22-06.xls");
+			Arquivo arquivoExame = new Arquivo("C:\\Users\\PMC514991-2\\Downloads", "demanda_por_recurso_qualitativo-16_04_2026_16-22-23.xls");
 
-		HashMap<String, Integer> entradasPorOferta = new HashMap<String, Integer>();
-		manipularArquivosDeNovasSolicitacoes(arquivoConsolidado, entidade, "Consulta", pastaDestinoArquivosNovasSolicitacoes, arquivoConsulta, entidades, entradasPorOferta);
-		manipularArquivosDeNovasSolicitacoes(arquivoConsolidado, entidade, "Exame", pastaDestinoArquivosNovasSolicitacoes, arquivoExame, entidades, entradasPorOferta);
-		preencherNovasSolicitacoesRegulada(entidades, consolidar, entradasPorOferta);
+			manipularArquivosDeNovasSolicitacoes(arquivoConsolidado, entidade, "Consulta", pastaDestinoArquivosNovasSolicitacoes, arquivoConsulta, entidades, entradasPorOferta);
+			manipularArquivosDeNovasSolicitacoes(arquivoConsolidado, entidade, "Exame", pastaDestinoArquivosNovasSolicitacoes, arquivoExame, entidades, entradasPorOferta);
+		}
 		
-		preecnherConsolidacaoNovasSolicitacoes(entidades, entradasPorOferta);
+		if(executarNovasSolicitacoesRegulada)
+		{
+			preencherNovasSolicitacoesRegulada(entidades, consolidarNovasSolicitacoesRegulada, entradasPorOferta);
+			preencherConsolidacaoNovasSolicitacoes(entidades, entradasPorOferta);
+		}
+		
+		if(executarDemandaReprimida)
+		{
+			preencherDemandaReprimida();
+		}
+		
 		
 		return "";
 	}
@@ -1150,7 +1206,7 @@ public class OfertaDemandaDeAcessoR1 {
 		else if(tipoDeBusca.equals("Consulta"))
 			nomePlanilhaArquivoMensal = ParametrosArquivoNovasSolicitacoesConsulta.NOME_PLANILHA_ARQUIVO_FORMATADO.getDescricao();
 		
-		ArrayList<NovasSolicitacoesCDR> solicitacoesDaCompetencia = new ArrayList<NovasSolicitacoesCDR>();
+		ArrayList<NovasSolicitacoes> solicitacoesDaCompetencia = new ArrayList<NovasSolicitacoes>();
 		
 		for(int linha = primeiraLinhaArquivoSIRESP; linha <= ultimaLinhaArquivoSIRESP; linha++)
 		{
@@ -1225,14 +1281,14 @@ public class OfertaDemandaDeAcessoR1 {
 
 				//System.out.println(valorConcatenadoConsolidado);
 				
-				if(novasSolicitacoes.containsKey(valorConcatenadoConsolidado))
+				if(novasSolicitacoesCDR.containsKey(valorConcatenadoConsolidado))
 				{
-					NovasSolicitacoesCDR entradaNovaSolicitacao = novasSolicitacoes.get(valorConcatenadoConsolidado);
+					NovasSolicitacoes entradaNovaSolicitacao = novasSolicitacoesCDR.get(valorConcatenadoConsolidado);
 					entradaNovaSolicitacao.setQtdeSolicitacoes(entradaNovaSolicitacao.getQtdeSolicitacoes() + 1);
 				}
 				else
 				{
-					NovasSolicitacoesCDR entradaNovaSolicitacao = new NovasSolicitacoesCDR();
+					NovasSolicitacoes entradaNovaSolicitacao = new NovasSolicitacoes();
 					entradaNovaSolicitacao.setTipoSolicitacao(tipoDeBusca);
 					entradaNovaSolicitacao.setEspecialidadeExame(especialidade);
 					entradaNovaSolicitacao.setCID(cid);
@@ -1242,7 +1298,7 @@ public class OfertaDemandaDeAcessoR1 {
 					entradaNovaSolicitacao.setQtdeSolicitacoes(1);
 					entradaNovaSolicitacao.setLinhaExcel(proximaLinhaVaziaConsolidadoMunicipal);
 					
-					novasSolicitacoes.put(valorConcatenadoConsolidado, entradaNovaSolicitacao);
+					novasSolicitacoesCDR.put(valorConcatenadoConsolidado, entradaNovaSolicitacao);
 					
 					proximaLinhaVaziaConsolidadoMunicipal++;
 				}
@@ -1287,20 +1343,23 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 		}
 		
-		for(NovasSolicitacoesCDR entrada : novasSolicitacoes.values())
+		for(NovasSolicitacoes entrada : novasSolicitacoesCDR.values())
 			solicitacoesDaCompetencia.add(entrada);
 		
 		System.out.println(solicitacoesDaCompetencia.size());
 		
-		for(NovasSolicitacoesCDR entrada : solicitacoesDaCompetencia)
+		for(NovasSolicitacoes entrada : solicitacoesDaCompetencia)
 		{
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice(), entrada.getTipoSolicitacao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getTipo()));
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), entrada.getEspecialidadeExame(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo()));
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), entrada.getCID(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo()));
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), entrada.getUnidadesCampinas(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo()));
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getIndice(), entrada.getMesInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getTipo()));
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ANO_INCLUSAO.getIndice(), entrada.getAnoInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ANO_INCLUSAO.getTipo()));
-			celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOVAS_SOLICITACOES.getIndice(), entrada.getQtdeSolicitacoes(), "Int"));
+			if(entrada.getMesInclusao().equals(meses.getMeses().get(mesCompetencia - 1).getMesDescricao()) && entrada.getAnoInclusao().equals(String.valueOf(anoCompetencia)))
+			{
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice(), entrada.getTipoSolicitacao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), entrada.getEspecialidadeExame(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), entrada.getCID(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), entrada.getUnidadesCampinas(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getIndice(), entrada.getMesInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ANO_INCLUSAO.getIndice(), entrada.getAnoInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ANO_INCLUSAO.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOVAS_SOLICITACOES.getIndice(), entrada.getQtdeSolicitacoes(), "Int"));
+			}
 		}
 		
 		arquivoConsolidado.forcarCalculos();
@@ -1320,10 +1379,10 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	private void atribuirNovasSolicitacoesCDR(ArrayList<NovasSolicitacoesCDR> entradasDeNovasSolicitacoes, ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, Integer> entradasPorOfertas)
+	private void atribuirNovasSolicitacoesCDR(ArrayList<NovasSolicitacoes> entradasDeNovasSolicitacoes, ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, Integer> entradasPorOfertas)
 	{
 		
-		for(NovasSolicitacoesCDR entrada : entradasDeNovasSolicitacoes)
+		for(NovasSolicitacoes entrada : entradasDeNovasSolicitacoes)
 		{
 			String valorNormalizado;
 			
@@ -1371,7 +1430,77 @@ public class OfertaDemandaDeAcessoR1 {
 		}
 	}
 	
-	private String preecnherConsolidacaoNovasSolicitacoes(ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, Integer> entradasPorOfertas)
+	private void preencherConsolidacaoDeNovasSolicitacoes(String nomeArquivo, ArrayList<NovasSolicitacoesRegulada> entradasDeNovasSolicitacoes)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(nomeArquivo, 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_REGULADA.getDescricao(), ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice());
+		int proximaLinhaVaziaConsolidadoMunicipal = arquivoConsolidado.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice()) + 1;
+	
+		//String tipoSolicitacao = arquivoSIRESP.getValorDaCelulaString(linha, ParametrosArquivoNovasSolicitacoesConsulta.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice()).trim();
+		
+		for(NovasSolicitacoesRegulada solicitacao : entradasDeNovasSolicitacoes)
+		{
+			String tipoSolicitacao = solicitacao.getTipoDeOferta();
+			String especialidade = solicitacao.getEspecialidadeExame();
+			String cid = solicitacao.getHipotese();
+			String unidade = solicitacao.getUnidadeSolicitante();
+			
+			//solicitacao.setSolicitadoEm(converterData(solicitacao.getSolicitadoEm()));
+			//System.out.println(solicitacao.getSolicitadoEm());
+			//LocalDateTime dataInclusao = LocalDateTime.parse(solicitacao.getSolicitadoEm().substring(0, 10), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			//String mes = meses.getMeses().get(dataInclusao.getMonthValue() - 1).getMesDescricao();
+			//String ano = String.valueOf(dataInclusao.getYear());
+			String mes = meses.getMeses().get(mesCompetencia - 1).getMesDescricao();
+			String ano = String.valueOf(anoCompetencia);
+			
+			String valorConcatenadoConsolidado = tipoSolicitacao + especialidade + cid + unidade + mes + ano;
+	
+			//System.out.println(valorConcatenadoConsolidado);
+			
+			if(novasSolicitacoesRegulada.containsKey(valorConcatenadoConsolidado))
+			{
+				NovasSolicitacoes entradaNovaSolicitacao = novasSolicitacoesRegulada.get(valorConcatenadoConsolidado);
+				entradaNovaSolicitacao.setQtdeSolicitacoes(entradaNovaSolicitacao.getQtdeSolicitacoes() + 1);
+			}
+			else
+			{
+				NovasSolicitacoes entradaNovaSolicitacao = new NovasSolicitacoes();
+				entradaNovaSolicitacao.setTipoSolicitacao(tipoSolicitacao);
+				entradaNovaSolicitacao.setEspecialidadeExame(especialidade);
+				entradaNovaSolicitacao.setCID(cid);
+				entradaNovaSolicitacao.setUnidadesCampinas(unidade);
+				entradaNovaSolicitacao.setMesInclusao(mes);
+				entradaNovaSolicitacao.setAnoInclusao(ano);
+				entradaNovaSolicitacao.setQtdeSolicitacoes(1);
+				entradaNovaSolicitacao.setLinhaExcel(proximaLinhaVaziaConsolidadoMunicipal);
+				
+				novasSolicitacoesRegulada.put(valorConcatenadoConsolidado, entradaNovaSolicitacao);
+				
+				proximaLinhaVaziaConsolidadoMunicipal++;
+			}
+		}
+		
+		ArrayList<CelulaExcel> celulasArquivoConsolidado = new ArrayList<CelulaExcel>();
+		
+		for(NovasSolicitacoes entrada : novasSolicitacoesRegulada.values())
+		{
+			if(entrada.getMesInclusao().equals(meses.getMeses().get(mesCompetencia - 1).getMesDescricao()) && entrada.getAnoInclusao().equals(String.valueOf(anoCompetencia)))
+			{
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice(), entrada.getTipoSolicitacao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), entrada.getEspecialidadeExame(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), entrada.getCID(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), entrada.getUnidadesCampinas(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getIndice(), entrada.getMesInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ANO_INCLUSAO.getIndice(), entrada.getAnoInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ANO_INCLUSAO.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOVAS_SOLICITACOES.getIndice(), entrada.getQtdeSolicitacoes(), "Int"));
+			}
+		}
+		
+		arquivoConsolidado.forcarCalculos();
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_REGULADA.getDescricao(), celulasArquivoConsolidado, true, false, ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice(), null);
+	}
+	
+	private String preencherConsolidacaoNovasSolicitacoes(ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, Integer> entradasPorOfertas)
 	{
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
@@ -2425,14 +2554,14 @@ public class OfertaDemandaDeAcessoR1 {
 
 	}
 	
-	private ArrayList<NovasSolicitacoesCDR> lerEntradaDeNovaSolicitacoes(String nomeArquivo, String planilha, int linhaCabecalho)
+	private ArrayList<NovasSolicitacoes> lerEntradaDeNovaSolicitacoes(String nomeArquivo, String planilha, int linhaCabecalho)
 	{		
-		ArrayList<NovasSolicitacoesCDR> ofertas;
+		ArrayList<NovasSolicitacoes> ofertas;
 		
 		try (FileInputStream in = new FileInputStream(nomeArquivo)) {
 			ofertas = ExcelBinder.readSheet(
                     in,
-                    NovasSolicitacoesCDR.class,
+                    NovasSolicitacoes.class,
                     planilha,     // ou null para a primeira
                     linhaCabecalho,           // linha do cabeçalho (0-based)
                     true         // pular linhas totalmente vazias
@@ -2552,7 +2681,7 @@ public class OfertaDemandaDeAcessoR1 {
 
 	    Locale localeBR = Locale.of("pt", "BR"); // Java 21
 	    DateTimeFormatter fmtDataCompleta = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-	    DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy", localeBR);
+	    DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		
 	    try {
 	    	
@@ -2584,6 +2713,7 @@ public class OfertaDemandaDeAcessoR1 {
 	        // ignora e vai para erro final
 	    }
 	    
+	      
 	    try {
 	    	
 	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("M/d/yy H:mm");
@@ -2596,7 +2726,7 @@ public class OfertaDemandaDeAcessoR1 {
 	    
 	    try {
 	    	
-	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("M/d/yy");
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("M/d/yy", Locale.US);
 	        LocalDateTime data = LocalDateTime.parse(Data, fmtEntradaAbrev);
 	        
 	        return fmtData.format(data) + " 00:00";

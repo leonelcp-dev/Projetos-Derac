@@ -1,7 +1,7 @@
 package modelosDados;
 
 
-public class NovasSolicitacoesCDR {
+public class NovasSolicitacoes {
 
 	@ExcelColumn(header = "Tipo Solicitação")
     private String tipoSolicitacao;

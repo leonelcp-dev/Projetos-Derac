@@ -15,17 +15,20 @@ public enum ParametrosArquivoNovasSolicitacoesConsolidado {
 	INDICE_COLUNA_ANO_INCLUSAO(5, 5, "Ano Inclusão", "Int", ""),
 	INDICE_COLUNA_NOVAS_SOLICITACOES(6, 6, "Novas Solicitacões", "Int", ""),
 
-	ARQUIVO_MUNICIPAL_NOME(7, 6,"BD Demanda Reprimida - CDR.xlsx", "", ""),
-	ARQUIVO_MUNICIPAL_VAZIO(8, 6,"ARQUIVO MENSAL VAZIO.xlsx", "", ""),
+	ARQUIVO_MUNICIPAL_CDR_NOME(7, 6,"BD Demanda Reprimida - CDR.xlsx", "", ""),
+	ARQUIVO_MUNICIPAL_REGULADA_NOME(8, 6,"BD Demanda Reprimida - Regulada.xlsx", "", ""),
+	ARQUIVO_MUNICIPAL_VAZIO(9, 6,"ARQUIVO MENSAL VAZIO.xlsx", "", ""),
 	
-	ARQUIVO_MUNICIPAL_LINHA_INICIAL(9, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
-	ARQUIVO_MUNICIPAL_VAZIO_LINHA_INICIAL(10, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
+	ARQUIVO_MUNICIPAL_LINHA_INICIAL(10, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
+	ARQUIVO_MUNICIPAL_VAZIO_LINHA_INICIAL(11, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
 	
-	NOME_PLANILHA_BD_CDR(11, 8,"BD - CDR", "", ""),
-	NOME_PLANILHA_DINAMICA(12, 8,"Dinamica BD - CDR", "", ""),
+	NOME_PLANILHA_BD_CDR(12, 8,"BD - CDR", "", ""),
+	NOME_PLANILHA_DINAMICA(13, 8,"Dinamica BD - CDR", "", ""),
 	
-	EXTENSAO_ARQUIVO_BAIXADO(13, 0, "xls", "", ""),
-	EXTENSAO_ARQUIVO_CONSOLIDADO(14, 0, "xlsx", "", "");
+	NOME_PLANILHA_BD_REGULADA(14, 8,"BD - Regulada", "", ""),
+	
+	EXTENSAO_ARQUIVO_BAIXADO(15, 0, "xls", "", ""),
+	EXTENSAO_ARQUIVO_CONSOLIDADO(16, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;
