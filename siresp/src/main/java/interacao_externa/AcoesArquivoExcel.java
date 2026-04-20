@@ -544,6 +544,60 @@ public class AcoesArquivoExcel {
 		
 		return contadorLinha - 1;
 	}
+	
+	public int getPrimeiraLinhaPreenchidaComValorEmUmaColuna(String texto, int coluna, int maxBusca) {
+		int contadorLinha = 0;
+		boolean celulaEncontrada = false;
+		
+		Row linha = planilhaAtiva.getRow(contadorLinha);
+		Cell celula;
+		
+		if(linha != null)
+		{
+			celula = linha.getCell(coluna);
+			
+			try
+			{
+				String valor = celula.getStringCellValue();
+				
+				if(valor.trim().equals(texto))
+					celulaEncontrada = true;
+					
+			}catch(Exception e)
+			{
+				
+			}
+		}	
+		
+		while(!celulaEncontrada && contadorLinha <= maxBusca)
+		{
+			contadorLinha++;
+			
+			linha = planilhaAtiva.getRow(contadorLinha);
+			
+			if(linha != null)
+			{
+				celula = linha.getCell(coluna);
+				
+				try
+				{
+					String valor = celula.getStringCellValue();
+					
+					if(valor.trim().equals(texto))
+						celulaEncontrada = true;
+						
+				}catch(Exception e)
+				{
+					
+				}
+			}
+		}
+		
+		if(contadorLinha > maxBusca)
+			contadorLinha = -1;
+		
+		return contadorLinha;
+	}
 
 	public void setPrimeiraLinhaVazia(int primeiraLinhaVazia) {
 		this.primeiraLinhaVazia = primeiraLinhaVazia;

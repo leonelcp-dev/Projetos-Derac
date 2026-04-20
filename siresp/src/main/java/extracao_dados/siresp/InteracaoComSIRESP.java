@@ -2,6 +2,8 @@ package extracao_dados.siresp;
 
 import javax.swing.JOptionPane;
 
+import org.openqa.selenium.BuildInfo;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.bidi.network.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -91,8 +93,16 @@ public class InteracaoComSIRESP
 
     	WebDriver driver = new ChromeDriver(options);
 
+    	driver.get("about:blank");
+    	((JavascriptExecutor) driver).executeScript("window.focus();");
+    	
         driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
-       
+        
+        driver.navigate().refresh();
+        
+        BuildInfo buildInfo = new BuildInfo();
+        System.out.println(buildInfo.getReleaseLabel());
+
         System.out.println("Page Title: " + driver.getTitle());
         
         if(abrirMenuInicial)
@@ -154,7 +164,7 @@ public class InteracaoComSIRESP
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
         	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, false, true);
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "01/2026", "01/2026", true, true, true, false, true);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "03/2026", "03/2026", true, false, false, false, true);
         }
         
         else if(escolha == 9)

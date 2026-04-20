@@ -12,6 +12,8 @@ public class AbrirGoogleChrome {
         pb.redirectErrorStream(true);   // junta stderr em stdout (facilita leitura)
 
         Process p = pb.start();
+        
+        //Thread.sleep(5000);
 
 //        // Leitura assíncrona da saída para evitar deadlock
 //        String output = readStream(p.getInputStream());

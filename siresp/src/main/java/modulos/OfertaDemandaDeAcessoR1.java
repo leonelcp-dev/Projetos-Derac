@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
@@ -43,6 +45,7 @@ import dadosGerais.ParametrosArquivoAbsenteismoConsultaBaixado;
 import dadosGerais.ParametrosArquivoAbsenteismoExameBaixado;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
 import dadosGerais.ParametrosArquivoCenso;
+import dadosGerais.ParametrosArquivoDemandaReprimida;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import dadosGerais.ParametrosArquivoFilasNominaisRegulada;
 import dadosGerais.ParametrosArquivoMapaDeOfertasFPO;
@@ -73,12 +76,14 @@ import modelosDados.AgendamentosPendentesRegulada;
 import modelosDados.CelulaExcel;
 import modelosDados.CorrelacaoColunasArquivos;
 import modelosDados.CorrelacaoColunasOfertasDemandas;
+import modelosDados.DeParaEspecialidadesPadronizadas;
 import modelosDados.ElementoSelecao;
 import modelosDados.EntidadeAbsenteismo;
 import modelosDados.EntidadeCDRNaoRegulada;
 import modelosDados.EntidadeExecutante;
 import modelosDados.EntidadeExecutanteR1;
 import modelosDados.EntidadeLeito;
+import modelosDados.EntidadesFilaCentralReg;
 import modelosDados.EntradaFPO;
 import modelosDados.LinhaCensoLeitos;
 import modelosDados.MesFormatado;
@@ -439,7 +444,11 @@ public class OfertaDemandaDeAcessoR1 {
 						else
 							System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
 					}
+					
 					preencherNovasSolicitacoes(driver, paginaWeb, elementosRadioUnidades, entidades, executarNovasSolicitacoesCDR, executarNovasSolicitacoesRegulada, consolidarNovasSolicitacoesRegulada, executarDemandaReprimida);
+					
+					if(executarDemandaReprimida)
+						preencherDemandaReprimida(entidades);
 				}
 
 			}
@@ -500,14 +509,218 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		if(executarDemandaReprimida)
 		{
-			preencherDemandaReprimida();
+			preencherDemandaReprimida(entidades);
 		}
 		
 		return "";
 	}
 	
-	private String preencherDemandaReprimida()
+	private String preencherDemandaReprimida(ArrayList<EntidadeExecutanteR1> entidades)
 	{
+		String caminhoDeParaEspecialidades = pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\" + "Demanda Reprimida\\de-para Especialidades.xlsx";
+		
+		ArrayList<DeParaEspecialidadesPadronizadas> listaDePara = new ArrayList<DeParaEspecialidadesPadronizadas>();
+		try (FileInputStream in = new FileInputStream(caminhoDeParaEspecialidades)) { 
+			listaDePara = ExcelBinder.readSheet(in, DeParaEspecialidadesPadronizadas.class, 0, 0, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		HashMap <String, String> deParaEspecialidades = new HashMap<String, String>();
+		for(DeParaEspecialidadesPadronizadas dePara : listaDePara)
+			deParaEspecialidades.put(dePara.getDe().toUpperCase().trim(), dePara.getPara().toUpperCase().trim());
+		
+		String pastaComFilasNominais = "Demanda Reprimida\\" + anoCompetencia + "\\" + meses.getMeses().get(mesCompetencia - 1).getMesNumero() + " " + meses.getMeses().get(mesCompetencia - 1).getMesDescricao() + " " + anoCompetencia;
+			
+		Pasta pasta = new Pasta(pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\" + pastaComFilasNominais, false);
+		
+		File[] conteudoDaPasta = pasta.listarDiretorio();
+			
+		//Encontrando arquivo mais recente pelo nome
+		String arquivoMaisRecente = "";
+		LocalDate dataMaisRecente = null;
+		for(File itemDaPasta : conteudoDaPasta)
+		{
+			
+			if(!itemDaPasta.isDirectory())
+			{
+				if(itemDaPasta.getAbsolutePath().endsWith(".xlsx")) 
+				{
+					System.out.println(itemDaPasta.getAbsolutePath());
+					LocalDate dataExtraida = extrairData(itemDaPasta.getAbsolutePath(), "\\b\\d{2}\\.\\d{2}\\.\\d{4}\\b", "dd.MM.yyyy");
+					
+					if(dataExtraida != null)
+					{
+						System.out.println(itemDaPasta.getAbsolutePath());
+						if(dataMaisRecente == null)
+						{
+							dataMaisRecente = dataExtraida;
+							arquivoMaisRecente = itemDaPasta.getAbsolutePath();
+						}
+						else if(dataExtraida.isAfter(dataMaisRecente))
+						{
+							dataMaisRecente = dataExtraida;
+							arquivoMaisRecente = itemDaPasta.getAbsolutePath();
+						}
+					}
+				}
+			}
+		}
+		
+		if(!arquivoMaisRecente.equals(""))
+		{
+			AcoesArquivoExcel arquivoDeParaEspecialidades = new AcoesArquivoExcel(caminhoDeParaEspecialidades, 0);
+			int proximaLinhaVaziaDeParaEspecialidades = arquivoDeParaEspecialidades.getPrimeiraLinhaVazia() + 1;
+			
+			AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(arquivoMaisRecente, 0);
+			
+			HashMap <String, Integer> demandaPorEspecialidade = new HashMap<String, Integer>();
+			
+			String[] planilhasDemandaReprimida = new String[2];
+			planilhasDemandaReprimida[0] = ParametrosArquivoDemandaReprimida.NOME_PLANILHA_DINAMICA_CDR.getDescricao();
+			planilhasDemandaReprimida[1] = ParametrosArquivoDemandaReprimida.NOME_PLANILHA_DINAMICA_REGULADA.getDescricao();
+			
+			for(String planilha : planilhasDemandaReprimida)
+			{
+				arquivoDemandaReprimida.abrirPlanilha(planilha, 0);
+				
+				int linha = arquivoDemandaReprimida.getPrimeiraLinhaPreenchidaComValorEmUmaColuna(ParametrosArquivoDemandaReprimida.TEXTO_ROTULOS_DE_LINHA.getDescricao(), ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice(), 50);
+				
+				if(linha >= 0)
+				{
+					System.out.println("Linha: " + linha);
+					
+					linha++;
+					String especialidade = arquivoDemandaReprimida.getValorDaCelulaString(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice()).toUpperCase().trim();
+					
+					while(!especialidade.equals(ParametrosArquivoDemandaReprimida.TEXTO_TOTAL_GERAL.getDescricao().trim().toUpperCase()))
+					{
+						String especialidadePadronizada;
+						
+						if(deParaEspecialidades.containsKey(especialidade))
+						{
+							especialidadePadronizada = deParaEspecialidades.get(especialidade);
+						}
+						else
+						{
+							especialidadePadronizada = especialidade;
+							
+							deParaEspecialidades.put(especialidade, especialidade);
+							
+							ArrayList<CelulaExcel> celulasDePara = new ArrayList<CelulaExcel>();
+							celulasDePara.add(new CelulaExcel(proximaLinhaVaziaDeParaEspecialidades, 0, especialidade, "String"));
+							celulasDePara.add(new CelulaExcel(proximaLinhaVaziaDeParaEspecialidades, 1, especialidade, "String"));
+							celulasDePara.add(new CelulaExcel(proximaLinhaVaziaDeParaEspecialidades, 2, "Nova Entrada", "String"));
+							
+							arquivoDeParaEspecialidades.gravarDadosEmCelula(0, celulasDePara);
+							proximaLinhaVaziaDeParaEspecialidades++;
+						}
+						
+						int soma = 0;
+						if(demandaPorEspecialidade.containsKey(especialidadePadronizada))
+						{
+							soma = demandaPorEspecialidade.get(especialidadePadronizada);
+						}
+						else
+						{
+							demandaPorEspecialidade.put(especialidadePadronizada, 0);
+						}
+						soma += arquivoDemandaReprimida.getValorDaCelulaInt(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice());
+						
+						demandaPorEspecialidade.put(especialidadePadronizada, soma);
+						
+						linha++;
+						especialidade = arquivoDemandaReprimida.getValorDaCelulaString(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice()).toUpperCase().trim();
+					}
+				}
+			}
+			
+			consolidarDemandaReprimidaEmOfertasEDemandas(entidades, demandaPorEspecialidade);
+		}
+		
+		
+		return "";
+	}
+	
+	private String consolidarDemandaReprimidaEmOfertasEDemandas(ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, Integer> demandaPorEspecialidade)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		HashMap<String, Integer> ofertaPorEspecialidade = new HashMap<String, Integer>();
+		
+		for(EntidadeExecutanteR1 entidade : entidades)
+		{
+			HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+			
+			if(mapaEspecialidades != null)
+			{
+				for(OfertaEDemanda oferta : mapaEspecialidades.values())
+				{
+					int soma = 0;
+					try
+					{
+						soma = Integer.parseInt(oferta.getOfertaTotal());
+					}catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+
+					if(ofertaPorEspecialidade.containsKey(oferta.getProcedimento()))
+					{
+						soma += ofertaPorEspecialidade.get(oferta.getProcedimento());
+					}
+					
+					ofertaPorEspecialidade.put(oferta.getProcedimento(), soma);
+				}
+			}
+		}
+		
+		for(EntidadeExecutanteR1 entidade : entidades)
+		{
+			HashMap<String, OfertaEDemanda> mapaEspecialidades = ofertasDemandasProcessadas.get(entidade.getExecutante() + inicioCompetenciaFormatado);
+			
+			if(mapaEspecialidades != null)
+			{
+				for(OfertaEDemanda oferta : mapaEspecialidades.values())
+				{
+					int ofertaTotal = 0;
+					if(ofertaPorEspecialidade.containsKey(oferta.getProcedimento()))
+						ofertaTotal = ofertaPorEspecialidade.get(oferta.getProcedimento());
+
+					int demandaTotal = 0;
+					if(demandaPorEspecialidade.containsKey(oferta.getProcedimento()))
+						demandaTotal = demandaPorEspecialidade.get(oferta.getProcedimento());
+					
+					if(demandaTotal == 0)
+					{
+						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA.getIndice(), "-", "String"));
+						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), "-", "String"));
+					}
+					else
+					{
+						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA.getIndice(), demandaTotal, "Int"));
+						
+						if(ofertaTotal == 0)
+							celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), "-", "String"));
+						else
+						{
+							int tempoDeEspera = (int)Math.ceil(1.0 * demandaTotal / ofertaTotal);
+							celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), tempoDeEspera, "Int"));
+						}
+					}
+				}
+			}
+		}
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
 		
 		return "";
 	}
@@ -1125,7 +1338,7 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		if(executarDemandaReprimida)
 		{
-			preencherDemandaReprimida();
+			preencherDemandaReprimida(entidades);
 		}
 		
 		
@@ -2674,6 +2887,34 @@ public class OfertaDemandaDeAcessoR1 {
             e.printStackTrace();
             return null;
         }
+	}
+	
+	private LocalDate extrairData(String texto, String padraoRegex, String fomatoData)
+	{
+		
+        Pattern pattern = Pattern.compile(padraoRegex);
+        Matcher matcher = pattern.matcher(texto);
+
+        LocalDate data;
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(fomatoData);
+
+        if (matcher.find()) {
+            String dataTexto = matcher.group();
+            
+            try
+            {
+            	data = LocalDate.parse(dataTexto, formatter);
+            }catch(DateTimeParseException e)
+            {
+            	e.printStackTrace();
+            	data = null;
+            }
+        }
+        else
+        	data = null;
+
+        return data;
 	}
 
 	private static String converterData(String Data)
