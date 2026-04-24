@@ -21,6 +21,7 @@ import modulos.LoginsSirespDigital;
 import modulos.OfertaDemandaDeAcesso;
 import modulos.OfertaDemandaDeAcessoR1;
 import modulos.RemoverDaFilaCentralReg;
+import modulos.RemoverDuplicadoDeFila;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -78,7 +79,7 @@ public class InteracaoComSIRESP
         {
         	AbrirGoogleChrome chrome = new AbrirGoogleChrome();
         	try {
-				chrome.abrir();
+				chrome.abrir(nomeUsuario);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -93,12 +94,12 @@ public class InteracaoComSIRESP
 
     	WebDriver driver = new ChromeDriver(options);
 
-    	driver.get("about:blank");
-    	((JavascriptExecutor) driver).executeScript("window.focus();");
+    	//driver.get("about:blank");
+    	//((JavascriptExecutor) driver).executeScript("window.focus();");
     	
         driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
         
-        driver.navigate().refresh();
+        //driver.navigate().refresh();
         
         BuildInfo buildInfo = new BuildInfo();
         System.out.println(buildInfo.getReleaseLabel());
@@ -169,8 +170,12 @@ public class InteracaoComSIRESP
         
         else if(escolha == 9)
         {
+        	/*
         	RemoverDaFilaCentralReg filaCentralReg = new RemoverDaFilaCentralReg();
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false);
+        	filaCentralReg.remvoverRegistrosCentralReg(driver);
+        	*/
+        	
+        	RemoverDuplicadoDeFila filaCentralReg = new RemoverDuplicadoDeFila();
         	filaCentralReg.remvoverRegistrosCentralReg(driver);
         }
         

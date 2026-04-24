@@ -4,10 +4,10 @@ package modulos;
 public class AbrirGoogleChrome {
 	
 	
-    public void abrir() throws Exception {
+    public void abrir(String nomeUsuario) throws Exception {
         //ProcessBuilder pb = new ProcessBuilder("cmd.exe", "\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --remote-debugging-port=9222 --user-data-dir=\"C:\\chrome-temp\"");
         
-        ProcessBuilder pb = new ProcessBuilder("\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"", "--remote-debugging-port=9222", "--user-data-dir=\"C:\\chrome-temp\"");
+        ProcessBuilder pb = new ProcessBuilder("\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"", "--remote-debugging-port=9222", "--user-data-dir=\"C:\\Users\\" + nomeUsuario + "\\chrome-temp\"");
 
         pb.redirectErrorStream(true);   // junta stderr em stdout (facilita leitura)
 

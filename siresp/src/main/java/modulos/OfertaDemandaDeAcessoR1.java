@@ -1311,6 +1311,69 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
+	private String baixarArquivos(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade, String tipoDeBusca) 
+	{
+		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
+		String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
+		
+		String[] tiposDeBusca = new String[2];
+		tiposDeBusca[0] = "Consulta";
+		tiposDeBusca[1] = "Exame";
+		
+		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AMBULATORIAL_CDR_BOTAO_DOWNLOAD.getTextoIdentificador(), "name");
+			
+		String arquivoMaisRecente;
+			
+		do
+		{
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+			
+			System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
+		}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_CDR.getDescricao()));
+			
+		Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
+		arquivo.renomear(entidade.getUnidade() + " - " + tipoDeBusca.toUpperCase() + " " + arquivoMaisRecente);
+		
+		transferirArquivos(entidade, tipoDeBusca, arquivo);
+		
+		ultimoRecente = arquivo.getNomeDoArquivo();
+			
+
+		return "";
+	}
+	
+	private String transferirArquivos(EntidadeCDRNaoRegulada entidade, String tipoDeBusca, Arquivo arquivo)
+	{
+		
+		Pasta pasta = new Pasta(pastaDestinoArquivos, true);
+			
+		String pastaEntidade = pastaDestinoArquivos + "\\" + anoCompetencia;
+		pasta = new Pasta(pastaEntidade, true);
+			
+		pastaEntidade = pastaEntidade + "\\" + meses.getMeses().get(mesCompetencia - 1).getMesNumero() + " " + meses.getMeses().get(mesCompetencia - 1).getMesDescricao() + " " + anoCompetencia;
+		pasta = new Pasta(pastaEntidade, true);
+		
+		//pastaEntidade = pastaEntidade + "\\" + dataFormatadaPasta;
+		pasta = new Pasta(pastaEntidade, true);
+		
+		pastaEntidade = pastaEntidade + "\\" + entidade.getDistrito();
+		pasta = new Pasta(pastaEntidade, true);
+		
+		pastaEntidade = pastaEntidade + "\\" + tipoDeBusca.toUpperCase();
+		pasta = new Pasta(pastaEntidade, true);
+			
+		arquivo.mover(pastaEntidade + "\\" + arquivo.getNomeDoArquivo());
+			
+				
+		return "";
+	}
+	
 	public String testeArquivoNovasSolicitacoes(boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida)
 	{
 		String pastaDestinoArquivosNovasSolicitacoes = pastaDestinoArquivos + "\\ENTRADAS MENSAIS\\";
@@ -1971,6 +2034,8 @@ public class OfertaDemandaDeAcessoR1 {
 				ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_PRODUCAO_EXECUTANTE_TABELA_RESULTADOS.getTextoIdentificador());
 				System.out.println("Tabela encontrada");
 				preencherDadosDeProdutividade(driver, paginaWeb, entidade, tipoDeBusca[0], tabelaResultados, Integer.parseInt(tipoDeBusca[1]));
+				
+				
 			}
 			else
 			{
