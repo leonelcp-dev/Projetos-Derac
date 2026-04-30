@@ -263,8 +263,29 @@ public class ExcelBinder {
                 return instant.atZone(zone).toLocalDateTime();
             } else {
                 // fallback para texto formatado
-                String txt = formatter.formatCellValue(cell);
-                return coerceFromString(txt, targetType, fb.pattern);
+            	System.out.println(cell.getNumericCellValue());
+
+            	System.out.println(cell.getCellType());
+            	System.out.println(cell.getCellStyle().getDataFormatString());
+
+            	if(fb.pattern.equals("mmm/yyyy"))
+            	{
+
+            		// converte para LocalDate
+        		    LocalDate ld = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        		    // formata explicitamente em pt-BR
+        		    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM/yyyy", Locale.of("pt", "BR"));
+
+        		    String txt = ld.format(fmt).toLowerCase(); // jan/2023
+        		    return txt;
+
+            	}
+            	else
+            	{
+                	String txt = formatter.formatCellValue(cell, evaluator);
+                    //String txt = formatter.formatCellValue(cell);
+                    return coerceFromString(txt, targetType, fb.pattern);	
+            	}
             }
         }
 
@@ -510,8 +531,9 @@ public class ExcelBinder {
 	
 
 	private static CellRead readCellValue(Cell cell, FormulaEvaluator evaluator, DataFormatter formatter) {
-	    if (cell == null) return new CellRead(null, null);
-	
+
+		if (cell == null) return new CellRead(null, null);
+		
 	    CellType t = cell.getCellType();
 	    if (t == CellType.FORMULA) t = evaluator.evaluateFormulaCell(cell);
 	

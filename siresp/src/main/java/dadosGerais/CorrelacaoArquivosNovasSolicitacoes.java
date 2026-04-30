@@ -6,6 +6,12 @@ import modelosDados.CorrelacaoColunasArquivos;
 
 public class CorrelacaoArquivosNovasSolicitacoes {
 
+	/*
+	 * Classe criada para correlacionar a posição das colunas dos arquivos baixados a partir do SIRESP.
+	 * Os arquivos de Novas Solicitações para EXAME e para CONSULTA possuem estruturas ligeiramente distintas. Portanto a ideia aqui é manter a correlação das colunas 
+	 * de forma a melhorar o processo de escrita no arquivo final do Novas Solicitações de cada uniadade. 
+	 */
+	
 	public ArrayList<CorrelacaoColunasArquivos> obterCorrelacaoEntreArquivos(String consultaOuExame)
 	{
 		ArrayList<CorrelacaoColunasArquivos> correlacao = new ArrayList<CorrelacaoColunasArquivos>();

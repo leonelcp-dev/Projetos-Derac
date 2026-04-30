@@ -9,7 +9,7 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Vínculo")
     private String vinculo;
 
-    @ExcelColumn(header = "Competência")
+    @ExcelColumn(header = "Competência", pattern = "mmm/yyyy")
     private String competencia;
 
     @ExcelColumn(header = "Tipo de oferta")
@@ -77,6 +77,9 @@ public class OfertaEDemanda {
     
     @ExcelColumn(header = "Taxa Desistência")
     private String taxaDesistencia;
+    
+    @ExcelColumn(header = "Taxa Dispensado")
+    private String taxaDispensado;
     
     @ExcelColumn(header = "Taxa Não Informado")
     private String taxaNaoInformado;
@@ -295,6 +298,14 @@ public class OfertaEDemanda {
 		this.taxaDesistencia = taxaDesistencia;
 	}
 
+	public String getTaxaDispensado() {
+		return taxaDispensado;
+	}
+
+	public void setTaxaDispensado(String taxaDispensado) {
+		this.taxaDispensado = taxaDispensado;
+	}
+	
 	public String getTaxaNaoInformado() {
 		return taxaNaoInformado;
 	}

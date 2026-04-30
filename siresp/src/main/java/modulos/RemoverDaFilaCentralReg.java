@@ -131,7 +131,8 @@ public class RemoverDaFilaCentralReg {
 
 		}
 		
-		EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("5733944", "CENTRAL REG DE CAMPINAS", "DIVERSOS", "CENTRAL REG DE CAMPINAS");
+		//EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("5733944", "CENTRAL REG DE CAMPINAS", "DIVERSOS", "CENTRAL REG DE CAMPINAS");
+		EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("2022710", "POLICLINICA II - CAMPINAS", "UR", "POLICLINICA II - CAMPINAS");
 		
 		String value = elementosRadioUnidades.get(centralReg.getCNES() + " - " + centralReg.getNomeUnidadeSIRESP());
 		//System.out.println(value);
@@ -309,7 +310,7 @@ public class RemoverDaFilaCentralReg {
 									System.out.println(status + "|" + entradaDeFila.status + "|");
 									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
 									
-									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_REG_DE_CAMPINAS.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_POLICLINICA_II.getTextoIdentificador().equals(unidade.toUpperCase()) &&
 									   entradaDeFila.especialidade.toUpperCase().equals(especialidade.toUpperCase()) && 
 									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
 									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
@@ -404,7 +405,7 @@ public class RemoverDaFilaCentralReg {
 									System.out.println(status + "|" + entradaDeFila.status + "|");
 									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
 									
-									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_REG_DE_CAMPINAS.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_POLICLINICA_II.getTextoIdentificador().equals(unidade.toUpperCase()) &&
 									   entradaDeFila.especialidade.toUpperCase().equals(exame.toUpperCase()) &&
 									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
 									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 

@@ -144,7 +144,7 @@ public class InteracaoComSIRESP
         	Absenteismo absenteismo = new Absenteismo();
         	absenteismo.verificarAbsenteismo(driver, null, null);
         	//absenteismo.verificarAbsenteismo(driver, "12/2024", "12/2024");
-        	//absenteismo.parametrizarArquivosVazios(driver);
+        	//absenteismo.parametrizarArquivosVazios(driver);C:\Users\PMC514991-2\Documents\Oferta e Demanda
         }
         else if(escolha == 5)
         {
@@ -164,19 +164,20 @@ public class InteracaoComSIRESP
         else if(escolha == 8)
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, false, true);
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "03/2026", "03/2026", true, false, false, false, true);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "04/2026", "04/2026", false, false, false, false, false, true, true, true, true, true);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, "03/2026", "03/2026", true, false, false, false, true, true, false, false, false, false);
         }
         
         else if(escolha == 9)
         {
-        	/*
+        	
         	RemoverDaFilaCentralReg filaCentralReg = new RemoverDaFilaCentralReg();
         	filaCentralReg.remvoverRegistrosCentralReg(driver);
-        	*/
         	
+        	/*
         	RemoverDuplicadoDeFila filaCentralReg = new RemoverDuplicadoDeFila();
         	filaCentralReg.remvoverRegistrosCentralReg(driver);
+        	*/
         }
         
         driver.quit();

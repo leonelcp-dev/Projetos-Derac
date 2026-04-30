@@ -126,7 +126,7 @@ public class OfertaDemandaDeAcessoR1 {
 	HashMap<String, NovasSolicitacoes> novasSolicitacoesCDR;
 	HashMap<String, NovasSolicitacoes> novasSolicitacoesRegulada;
 
-	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal, boolean testeNovasSolicitacoes, boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida)
+	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal, boolean testeNovasSolicitacoes, boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida, boolean preencherProdutividade, boolean preencherFPO, boolean preencherNomenclatura, boolean preencherBloqueio, boolean preencherRecepcao)
 	{			
 		formatoDataPaginaWeb = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		formatoDataArquivo = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -409,7 +409,10 @@ public class OfertaDemandaDeAcessoR1 {
 						
 							paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 							
-							boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
+							boolean unidadeEncontrada = false;
+							
+							while(!unidadeEncontrada)
+								unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
 							
 							paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
 							
@@ -438,14 +441,15 @@ public class OfertaDemandaDeAcessoR1 {
 								e.printStackTrace();
 							}
 						
-							montarOfertaDemanda(driver, paginaWeb, entidade);
+							montarOfertaDemanda(driver, paginaWeb, entidade, preencherProdutividade, preencherFPO, preencherNomenclatura, preencherBloqueio, preencherRecepcao);
 							
 						}
 						else
 							System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
 					}
 					
-					preencherNovasSolicitacoes(driver, paginaWeb, elementosRadioUnidades, entidades, executarNovasSolicitacoesCDR, executarNovasSolicitacoesRegulada, consolidarNovasSolicitacoesRegulada, executarDemandaReprimida);
+					if(executarNovasSolicitacoesCDR)
+						preencherNovasSolicitacoes(driver, paginaWeb, elementosRadioUnidades, entidades, executarNovasSolicitacoesCDR, executarNovasSolicitacoesRegulada, consolidarNovasSolicitacoesRegulada, executarDemandaReprimida);
 					
 					if(executarDemandaReprimida)
 						preencherDemandaReprimida(entidades);
@@ -720,7 +724,7 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 		}
 		
-		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		
 		return "";
 	}
@@ -1311,16 +1315,12 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	private String baixarArquivos(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeCDRNaoRegulada entidade, String tipoDeBusca) 
+	private String baixarArquivos(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String tipoDeBusca, String nomeBotaoSubmit) 
 	{
 		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
 		String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
 		
-		String[] tiposDeBusca = new String[2];
-		tiposDeBusca[0] = "Consulta";
-		tiposDeBusca[1] = "Exame";
-		
-		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_AMBULATORIAL_CDR_BOTAO_DOWNLOAD.getTextoIdentificador(), "name");
+		paginaWeb.clicarBotaoSubmit(driver, nomeBotaoSubmit, "name");
 			
 		String arquivoMaisRecente;
 			
@@ -1335,10 +1335,10 @@ public class OfertaDemandaDeAcessoR1 {
 			arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
 			
 			System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
-		}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_CDR.getDescricao()));
+		}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoOfertaDemanda.EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO.getDescricao()));
 			
 		Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
-		arquivo.renomear(entidade.getUnidade() + " - " + tipoDeBusca.toUpperCase() + " " + arquivoMaisRecente);
+		arquivo.renomear(entidade.getExecutante() + " - " + tipoDeBusca.toUpperCase() + " " + arquivoMaisRecente);
 		
 		transferirArquivos(entidade, tipoDeBusca, arquivo);
 		
@@ -1348,29 +1348,55 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	private String transferirArquivos(EntidadeCDRNaoRegulada entidade, String tipoDeBusca, Arquivo arquivo)
+	private String transferirArquivos(EntidadeExecutanteR1 entidade, String tipoDeBusca, Arquivo arquivo)
 	{
 		
 		Pasta pasta = new Pasta(pastaDestinoArquivos, true);
 			
-		String pastaEntidade = pastaDestinoArquivos + "\\" + anoCompetencia;
+		String pastaEntidade = pastaDestinoArquivos + "\\Arquivos Originais";
 		pasta = new Pasta(pastaEntidade, true);
 			
-		pastaEntidade = pastaEntidade + "\\" + meses.getMeses().get(mesCompetencia - 1).getMesNumero() + " " + meses.getMeses().get(mesCompetencia - 1).getMesDescricao() + " " + anoCompetencia;
+		pastaEntidade = pastaEntidade + "\\" + anoCompetencia;
 		pasta = new Pasta(pastaEntidade, true);
 		
-		//pastaEntidade = pastaEntidade + "\\" + dataFormatadaPasta;
-		pasta = new Pasta(pastaEntidade, true);
+		String mes = "";
+		if(mesCompetencia < 10)
+			mes = "0" + mesCompetencia;
+		else
+			mes = "" + mesCompetencia;
 		
-		pastaEntidade = pastaEntidade + "\\" + entidade.getDistrito();
+		pastaEntidade = pastaEntidade + "\\" + mes + " " + meses.getMeses().get(mesCompetencia - 1).getMesDescricao().toUpperCase();
 		pasta = new Pasta(pastaEntidade, true);
 		
 		pastaEntidade = pastaEntidade + "\\" + tipoDeBusca.toUpperCase();
 		pasta = new Pasta(pastaEntidade, true);
-			
+		
+		apagarArquivosDaEntidade(pastaEntidade, entidade);
+		
 		arquivo.mover(pastaEntidade + "\\" + arquivo.getNomeDoArquivo());
-			
 				
+		return "";
+	}
+	
+	private String apagarArquivosDaEntidade(String pasta, EntidadeExecutanteR1 entidade)
+	{
+		Pasta pastaFinal = new Pasta(pasta, false);
+		
+		File[] conteudoDaPasta = pastaFinal.listarDiretorio();
+		
+		//Encontrando arquivo mais recente pelo nome
+		String arquivoMaisRecente = "";
+
+		for(File itemDaPasta : conteudoDaPasta)
+		{
+			if(!itemDaPasta.isDirectory())
+			{
+				if(itemDaPasta.getName().startsWith(entidade.getExecutante()))
+					itemDaPasta.delete();
+			}
+			
+		}
+		
 		return "";
 	}
 	
@@ -1812,7 +1838,7 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	private String montarOfertaDemanda(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade) 
+	private String montarOfertaDemanda(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, boolean preencherProdutividade, boolean preencherFPO, boolean preencherNomenclaturas, boolean preencherBloqueio, boolean preencherRecepcao) 
 	{
 		ArrayList<String> tiposDeVinculoComFPO = new ArrayList<String>();
 		tiposDeVinculoComFPO.add("CONVÊNIO");
@@ -1821,24 +1847,51 @@ public class OfertaDemandaDeAcessoR1 {
 				
 		String[] tiposDeBusca = new String[2];
 		
-		if(entidade.getVinculo().equals(IdentificadoresPaginaWebSIRESP.TEXTO_VINCULO_ESTADUAL.getTextoIdentificador()))
-		{
-			montarRelatorioDeProdutividadeEstadual(driver, paginaWeb, entidade);
-		}
-		else
-		{
-			montarRelatorioDeProdutividadeOutros(driver, paginaWeb, entidade);
+		if(preencherProdutividade)
+		{	
+			if(entidade.getVinculo().equals(IdentificadoresPaginaWebSIRESP.TEXTO_VINCULO_ESTADUAL.getTextoIdentificador()))
+			{
+				montarRelatorioDeProdutividadeEstadual(driver, paginaWeb, entidade);
+			}
+			else
+			{
+				montarRelatorioDeProdutividadeOutros(driver, paginaWeb, entidade);
+			}
 		}
 		
-		preencherInformacoesDeNomenclatura(entidade);
 		
-		if(tiposDeVinculoComFPO.contains(entidade.getVinculo()))
+		if(preencherBloqueio)
 		{
-			montarInformacoesDeFPOComPlanoDeTrabalho(entidade);
+			String[] buscas = new String[2];
+			buscas[0] = "Consulta";
+			buscas[1] = "Exame";
+			
+			preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
 		}
-		else
+		
+		if(preencherRecepcao)
 		{
-			montarInformacoesDeFPOPorMediaDeOfertas(entidade);
+			String[] buscas = new String[2];
+			buscas[0] = "Consulta";
+			buscas[1] = "Exame";
+			
+			preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
+		}
+		
+		if(preencherNomenclaturas)
+			preencherInformacoesDeNomenclatura(entidade);
+		
+		if(preencherFPO)
+		{
+			if(tiposDeVinculoComFPO.contains(entidade.getVinculo()))
+			{
+				montarInformacoesDeFPOComPlanoDeTrabalho(entidade);
+			}
+			else
+			{
+				montarInformacoesDeFPOPorMediaDeOfertas(entidade);
+			
+			}
 		}
 		
 		return "";
@@ -1890,7 +1943,7 @@ public class OfertaDemandaDeAcessoR1 {
 				}
 			}
 			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		}
 		
 		return "";
@@ -1955,7 +2008,7 @@ public class OfertaDemandaDeAcessoR1 {
 				}
 			}
 			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		}
 		
 		return "";
@@ -2035,6 +2088,8 @@ public class OfertaDemandaDeAcessoR1 {
 				System.out.println("Tabela encontrada");
 				preencherDadosDeProdutividade(driver, paginaWeb, entidade, tipoDeBusca[0], tabelaResultados, Integer.parseInt(tipoDeBusca[1]));
 				
+				baixarArquivos(driver, paginaWeb, entidade, tipoDeBusca[0], IdentificadoresPaginaWebSIRESP.NAME_PRODUCAO_EXECUTANTE_BOTAO_DOWNLOAD.getTextoIdentificador());
+				
 				
 			}
 			else
@@ -2042,13 +2097,6 @@ public class OfertaDemandaDeAcessoR1 {
 				
 			}
 		}
-		
-		String[] buscas = new String[2];
-		buscas[0] = tiposDeBusca[0][0];
-		buscas[1] = tiposDeBusca[1][0];
-		
-		preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
-		preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
 		
 		return "";
 	}
@@ -2086,19 +2134,14 @@ public class OfertaDemandaDeAcessoR1 {
 				ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebSIRESP.XPATH_CONSOLIDADO_MENSAL_TABELA_RESULTADOS_CONSULTAS.getTextoIdentificador());
 				System.out.println("Tabela encontrada");
 				preencherDadosDeProdutividade(driver, paginaWeb, entidade, tipoDeBusca[0], tabelaResultados, Integer.parseInt(tipoDeBusca[1]));
+				
+				baixarArquivos(driver, paginaWeb, entidade, tipoDeBusca[0], IdentificadoresPaginaWebSIRESP.NAME_CONSOLIDADO_MENSAL_BOTAO_DOWNLOAD.getTextoIdentificador());
 			}
 			else
 			{
 				
 			}
 		}
-		
-		String[] buscas = new String[2];
-		buscas[0] = tiposDeBusca[0][0];
-		buscas[1] = tiposDeBusca[1][0];
-		
-		preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
-		preencherInformacoesDeRecepcao(driver, paginaWeb, entidade, buscas);
 		
 		return "";
 	}
@@ -2206,6 +2249,7 @@ public class OfertaDemandaDeAcessoR1 {
 					int colunaBloqueio = colunaTipoDeOferta.get(tipoDeBusca + "-Coluna Bloqueio");
 				
 					
+					boolean planilhaRelacoesAtualizada = false;
 					for(ArrayList<String> linhaDaTabela : tabelaResultados)
 					{
 						if(!linhaDaTabela.get(colunaEspecialidade).trim().equals("Especialidade") && !linhaDaTabela.get(colunaEspecialidade).trim().equals("Equipamento") && !linhaDaTabela.get(colunaEspecialidade - 1).trim().equals("Total"))
@@ -2215,7 +2259,28 @@ public class OfertaDemandaDeAcessoR1 {
 							if(!relacoesOfertaEmBloqueios.containsKey(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase()))
 							{
 								System.out.println(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim());
-								atualizarPlanilhaDeRelacoes(driver, paginaWeb, tipoDeBusca, entidade, linhaDaTabela.get(colunaEspecialidade));
+								atualizarPlanilhaDeRelacoes(driver, paginaWeb, tipoDeBusca, entidade, linhaDaTabela.get(colunaEspecialidade), planilhaRelacoesAtualizada);
+								
+								planilhaRelacoesAtualizada = true;
+							}
+							
+							System.out.println(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase());
+							if(!relacoesOfertaEmBloqueios.containsKey(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase()))
+							{
+								AcoesArquivoExcel arquivoConsolidadoBloqueio = new AcoesArquivoExcel(pastaDestinoArquivos + "\\RelacaoEspecialidadesBloqueio.xlsx", 0);
+								arquivoConsolidadoBloqueio.abrirPlanilha(ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
+								int primeiraLinhaVazia = arquivoConsolidadoBloqueio.getPrimeiraLinhaVazia() + 1;
+								
+								ArrayList<CelulaExcel> celulasDoBloqueio = new ArrayList<CelulaExcel>();
+	
+								celulasDoBloqueio.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getExecutante(), "String"));
+								celulasDoBloqueio.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_TIPO_OFERTA.getIndice(), tipoDeBusca, "String"));
+								celulasDoBloqueio.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_GRUPO.getIndice(), "Não encontrada correspondência", "String"));
+								celulasDoBloqueio.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_EQUIPAMENTO.getIndice(), linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase(), "String"));
+								
+								relacoesOfertaEmBloqueios.put(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase(), "Não encontrada correspondência");
+								
+								arquivoConsolidadoBloqueio.gravarDadosEmCelula(ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulasDoBloqueio, false, false, 0, null);
 							}
 							
 							String grupo = relacoesOfertaEmBloqueios.get(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(colunaEspecialidade).trim().toUpperCase());	
@@ -2279,7 +2344,7 @@ public class OfertaDemandaDeAcessoR1 {
 				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
 			}
 			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		}
 		
 		return "";
@@ -2332,7 +2397,7 @@ public class OfertaDemandaDeAcessoR1 {
 				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CLASSIFICACAO.getIndice(), oferta.getClassificacao(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CLASSIFICACAO.getTipo()));
 			}
 			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		}
 		
 		return "";
@@ -2476,7 +2541,7 @@ public class OfertaDemandaDeAcessoR1 {
 				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_RECEPCAO_FECHADA.getIndice(), oferta.getRecepcaoFechada(), "String"));
 			}
 			
-			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		}
 		
 		return "";
@@ -2616,6 +2681,32 @@ public class OfertaDemandaDeAcessoR1 {
 				}
 				montarObjetoOferta(oferta, entidade, tipoDeBusca, dataInicioCompetencia, linhaExcel, especialidade, dadosSequenciais);
 				
+				//gerando os dados das colunas de taxas
+				if(oferta.getTaxaAtendido().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_ATENDIDO.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_ATENDIDO.getIndice(), Double.parseDouble(oferta.getTaxaAtendido()), "Porcentagem"));
+				
+				if(oferta.getTaxaAusente().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AUSENTE.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AUSENTE.getIndice(), Double.parseDouble(oferta.getTaxaAusente()), "Porcentagem"));
+				
+				if(oferta.getTaxaDesistencia().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DESISTENCIA.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DESISTENCIA.getIndice(), Double.parseDouble(oferta.getTaxaDesistencia()), "Porcentagem"));
+				
+				if(oferta.getTaxaDispensado().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DISPENSADO.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DISPENSADO.getIndice(), Double.parseDouble(oferta.getTaxaDispensado()), "Porcentagem"));
+				
+				if(oferta.getTaxaNaoInformado().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_NAO_INFORMADO.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_NAO_INFORMADO.getIndice(), Double.parseDouble(oferta.getTaxaNaoInformado()), "Porcentagem"));
+				
 				if(mapaEspecialidade != null)
 				{
 					System.out.println("(" + oferta.getLinhaExcel() + ") " + oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim());
@@ -2651,10 +2742,71 @@ public class OfertaDemandaDeAcessoR1 {
 		oferta.setRecepcaoDispensado(dadosSequenciais.get(11));
 		oferta.setRecepcaoNaoInformado(dadosSequenciais.get(12));
 		
+		if(oferta.getAgendamentoTotal().trim().equals("0"))
+		{
+			oferta.setTaxaAtendido("-");
+			oferta.setTaxaAusente("-");
+			oferta.setTaxaDesistencia("-");
+			oferta.setTaxaDispensado("-");
+			oferta.setTaxaNaoInformado("-");
+		}
+		else
+		{
+			try
+			{
+				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoAtendido()) / Integer.parseInt(oferta.getAgendamentoTotal());
+				oferta.setTaxaAtendido(String.valueOf(valor));
+				
+			}catch(NumberFormatException e)
+			{
+				oferta.setTaxaAtendido("-");
+			}
+			
+			try
+			{
+				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoAusenteCalculado()) / Integer.parseInt(oferta.getAgendamentoTotal());
+				oferta.setTaxaAusente(String.valueOf(valor));
+				
+			}catch(NumberFormatException e)
+			{
+				oferta.setTaxaAusente("-");
+			}
+			
+			try
+			{
+				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoDesistencia()) / Integer.parseInt(oferta.getAgendamentoTotal());
+				oferta.setTaxaDesistencia(String.valueOf(valor));
+				
+			}catch(NumberFormatException e)
+			{
+				oferta.setTaxaDesistencia("-");
+			}
+			
+			try
+			{
+				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoDispensado()) / Integer.parseInt(oferta.getAgendamentoTotal());
+				oferta.setTaxaDispensado(String.valueOf(valor));
+				
+			}catch(NumberFormatException e)
+			{
+				oferta.setTaxaDispensado("-");
+			}
+			
+			try
+			{
+				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoNaoInformado()) / Integer.parseInt(oferta.getAgendamentoTotal());
+				oferta.setTaxaNaoInformado(String.valueOf(valor));
+				
+			}catch(NumberFormatException e)
+			{
+				oferta.setTaxaNaoInformado("-");
+			}
+		}
+		
 		oferta.setOfertaBloqueada("");
 		oferta.setRecepcaoFechada("");
 		
-		if(oferta.getObservacao()  == null)
+		if(oferta.getObservacao() == null)
 			oferta.setObservacao("");
 		
 		oferta.setLinhaExcel(linhaExcel);
@@ -2663,7 +2815,7 @@ public class OfertaDemandaDeAcessoR1 {
 	}
 	
 
-	private String atualizarPlanilhaDeRelacoes(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String tipoDeBusca, EntidadeExecutanteR1 entidade, String especialidade)
+	private String atualizarPlanilhaDeRelacoes(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String tipoDeBusca, EntidadeExecutanteR1 entidade, String especialidade, boolean planilhaRelacoesAtualizada)
 	{
 		ArrayList<String> opcoes = new ArrayList<>();
 		opcoes.add("Manutenção");
@@ -2685,7 +2837,7 @@ public class OfertaDemandaDeAcessoR1 {
 			celulas.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_GRUPO.getIndice(), especialidade.trim().toUpperCase(), "String"));
 			celulas.add(new CelulaExcel(primeiraLinhaVazia, ParametrosArquivoOfertasParaBloqueio.INDICE_COLUNA_EQUIPAMENTO.getIndice(), especialidade.trim().toUpperCase(), "String"));
 		}
-		else
+		else if(!planilhaRelacoesAtualizada)
 		{
 			try {
 				Thread.sleep(1000);
@@ -2737,7 +2889,7 @@ public class OfertaDemandaDeAcessoR1 {
 					{
 						for(ArrayList<String> linhaDaTabela : tabelaDeResultados)
 						{
-							if(!linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).equals(IdentificadoresPaginaWebSIRESP.TEXTO_MANUTENCAO_EQUIPAMENTO_TABELA_RESULTADOS_PRIMEIRA_CELULA.getTextoIdentificador()))
+							if(!linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).trim().equals(IdentificadoresPaginaWebSIRESP.TEXTO_MANUTENCAO_EQUIPAMENTO_TABELA_RESULTADOS_PRIMEIRA_CELULA.getTextoIdentificador()))
 							{
 								if(!relacoesOfertaEmBloqueios.containsKey(entidade.getExecutante() + tipoDeBusca + linhaDaTabela.get(ParametrosTabelaManutencaoEquipamento.INDICE_COLUNA_NOME_ASSOCIACO.getIndice()).trim()))
 								{

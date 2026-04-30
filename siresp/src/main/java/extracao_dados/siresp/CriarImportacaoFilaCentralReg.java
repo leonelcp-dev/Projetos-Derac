@@ -248,7 +248,7 @@ public class CriarImportacaoFilaCentralReg {
 					
 					if(linha.getObservacao().equals(""))
 					{
-						linha.setObservacao("Paciente transferido da unidade Central Reg Campinas");
+						linha.setObservacao("Paciente transferido da unidade Policlinica II - Campinas");
 						importar.add(linha);
 					}
 					else
