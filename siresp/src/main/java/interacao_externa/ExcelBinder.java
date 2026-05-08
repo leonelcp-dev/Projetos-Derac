@@ -263,10 +263,10 @@ public class ExcelBinder {
                 return instant.atZone(zone).toLocalDateTime();
             } else {
                 // fallback para texto formatado
-            	System.out.println(cell.getNumericCellValue());
+            	//System.out.println(cell.getNumericCellValue());
 
-            	System.out.println(cell.getCellType());
-            	System.out.println(cell.getCellStyle().getDataFormatString());
+            	//System.out.println(cell.getCellType());
+            	//System.out.println(cell.getCellStyle().getDataFormatString());
 
             	if(fb.pattern.equals("mmm/yyyy"))
             	{

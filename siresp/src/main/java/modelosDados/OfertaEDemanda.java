@@ -93,6 +93,9 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Recepção Fechada")
     private String recepcaoFechada;
     
+    @ExcelColumn(header = "Mais Velho na Fila (em dias)")
+    private String maisVelhoNaFila;
+    
     @ExcelColumn(header = "Observação")
     private String observacao;
     
@@ -328,6 +331,14 @@ public class OfertaEDemanda {
 
 	public void setTempoDeEspera(String tempoDeEspera) {
 		this.tempoDeEspera = tempoDeEspera;
+	}
+	
+	public String getMaisVelhoNaFila() {
+		return maisVelhoNaFila;
+	}
+
+	public void setMaisVelhoNaFila(String maisVelhoNaFila) {
+		this.maisVelhoNaFila = maisVelhoNaFila;
 	}
 
 	public String getRecepcaoFechada() {

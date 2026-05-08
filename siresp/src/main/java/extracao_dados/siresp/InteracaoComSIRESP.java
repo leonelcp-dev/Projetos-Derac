@@ -161,16 +161,15 @@ public class InteracaoComSIRESP
         	OfertaDemandaDeAcesso ofertaDemanda = new OfertaDemandaDeAcesso();
         	ofertaDemanda.calcularOfertaEDemanda(driver);
         }
-        else if(escolha == 8)
+        else if(escolha == 8)	
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "04/2026", "04/2026", false, false, false, false, false, true, true, true, true, true);
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, "03/2026", "03/2026", true, false, false, false, true, true, false, false, false, false);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "02/2026", "02/2026", false, false, false, false, false, false, true, true, true, true);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "02/2026", "02/2026", true, true, true, false, true, false, false, false, false, false);
         }
         
         else if(escolha == 9)
         {
-        	
         	RemoverDaFilaCentralReg filaCentralReg = new RemoverDaFilaCentralReg();
         	filaCentralReg.remvoverRegistrosCentralReg(driver);
         	

@@ -132,7 +132,7 @@ public class RemoverDaFilaCentralReg {
 		}
 		
 		//EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("5733944", "CENTRAL REG DE CAMPINAS", "DIVERSOS", "CENTRAL REG DE CAMPINAS");
-		EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("2022710", "POLICLINICA II - CAMPINAS", "UR", "POLICLINICA II - CAMPINAS");
+		EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("5677424", "CRI DE CAMPINAS", "UR", "CRI DE CAMPINAS");
 		
 		String value = elementosRadioUnidades.get(centralReg.getCNES() + " - " + centralReg.getNomeUnidadeSIRESP());
 		//System.out.println(value);
@@ -304,17 +304,20 @@ public class RemoverDaFilaCentralReg {
 									String cid = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_CID.getIndice()).trim();
 									String status = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_STATUS.getIndice()).trim();
 									String dataEntrada = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_DATA_ENTRADA.getIndice()).trim().replace("-", "/");
+									String usuario = linhaDaTabelaConsulta.get(ParametrosTabelaCDRRegulacoesConsulta.INDICE_COLUNA_USUARIO.getIndice()).trim();
 									
 									System.out.println(especialidade + "|" + entradaDeFila.especialidade + "|");
 									System.out.println(cid + "|" + entradaDeFila.cid + "|");
 									System.out.println(status + "|" + entradaDeFila.status + "|");
 									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
 									
-									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_POLICLINICA_II.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CRI.getTextoIdentificador().equals(unidade.toUpperCase()) &&
 									   entradaDeFila.especialidade.toUpperCase().equals(especialidade.toUpperCase()) && 
 									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
 									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
-									   entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									   //entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									   (entradaDeFila.dataEntrada.toUpperCase().substring(0, 10) + " 00:00").equals(dataEntrada.toUpperCase()) &&
+									   IdentificadoresPaginaWebSIRESP.TEXTO_USUARIO_IMPORTACAO_MANUAL.getTextoIdentificador().equals(usuario.toUpperCase()))
 									{
 										idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_REGULACAO_CONSULTA.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(numeroLinhaDaTabelaConsultas));
 										
@@ -399,17 +402,21 @@ public class RemoverDaFilaCentralReg {
 									String cid = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_CID.getIndice()).trim();
 									String status = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_STATUS.getIndice()).trim();
 									String dataEntrada = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_DATA_ENTRADA.getIndice()).trim().replace("-", "/");
+									String usuario = linhaDaTabelaExame.get(ParametrosTabelaCDRRegulacoesExames.INDICE_COLUNA_USUARIO.getIndice()).trim();
+									
 									
 									System.out.println(exame + "|" + entradaDeFila.especialidade + "|");
 									System.out.println(cid + "|" + entradaDeFila.cid + "|");
 									System.out.println(status + "|" + entradaDeFila.status + "|");
 									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
 									
-									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CENTRAL_POLICLINICA_II.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CRI.getTextoIdentificador().equals(unidade.toUpperCase()) &&
 									   entradaDeFila.especialidade.toUpperCase().equals(exame.toUpperCase()) &&
 									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
 									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
-									   entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									  // entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									   (entradaDeFila.dataEntrada.toUpperCase().substring(0, 10) + " 00:00").equals(dataEntrada.toUpperCase()) &&
+									   IdentificadoresPaginaWebSIRESP.TEXTO_USUARIO_IMPORTACAO_MANUAL.getTextoIdentificador().equals(usuario.toUpperCase()))
 									{
 										idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_REGULACAO_EXAME.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(numeroLinhaDaTabelaExames));
 										

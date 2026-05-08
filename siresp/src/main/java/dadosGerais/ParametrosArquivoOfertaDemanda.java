@@ -36,17 +36,18 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_CALCULOS_NAO_INFORMADO(26, 27,"Cálculo Não Informado", "Porcentagem", ""),
 	INDICE_COLUNA_DEMANDA_REPRIMIDA(27, 28,"Demanda Reprimida", "Int", ""),
 	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(28, 29,"Cálculos Tempo de Espera", "Double", ""),
-	INDICE_COLUNA_RECEPCAO_FECHADA(29, 30,"Recepção Fechada", "String", ""),
-	INDICE_COLUNA_OBSERVACAO(30, 31,"Recepção Fechada", "String", ""),
+	INDICE_COLUNA_MAIS_VELHO_NA_FILA(29, 30,"Mais Velho na Fila", "String", ""),
+	INDICE_COLUNA_RECEPCAO_FECHADA(30, 31,"Recepção Fechada", "String", ""),
+	INDICE_COLUNA_OBSERVACAO(31, 32,"Recepção Fechada", "String", ""),
 	
-	LINHA_INICIAL_ARQUIVO(31, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	LINHA_INICIAL_ARQUIVO(32, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(32, 0, "Ofertas", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(33, 0, "Ofertas", "", ""),
 	
-	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(33, 0, "Erro ao selecionar o grupo de cota", "", ""),
+	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(34, 0, "Erro ao selecionar o grupo de cota", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(34, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(35, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(35, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(36, 0, "xls", "", "");
 	
 
 	private int idUnico;
