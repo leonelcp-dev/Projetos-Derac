@@ -4,10 +4,13 @@ package interacao_externa;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.poifs.filesystem.FileMagic;
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFPivotTable;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -35,6 +38,7 @@ import javax.swing.text.DateFormatter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.*;
 import org.jsoup.select.*;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTPivotCacheDefinition;
 
 import modelosDados.CelulaExcel;
 
@@ -45,7 +49,7 @@ public class AcoesArquivoExcel {
 	private Workbook arquivoXLSX;
 	private Workbook arquivoXLS;
 	private Sheet planilhaAtiva;
-	private int primeiraLinhaVazia;
+	private int ultimaLinhaPreenchida;
 	private FileInputStream arquivoLeitura;
 	//private ArrayList<CellStyle> estilosDasColunas;
 	private Map<Integer, CellStyle> estilosDasColunas;
@@ -474,7 +478,7 @@ public class AcoesArquivoExcel {
 	{
 		planilhaAtiva = arquivoXLSX.getSheetAt(planilha);
 		
-		primeiraLinhaVazia = planilhaAtiva.getLastRowNum();
+		ultimaLinhaPreenchida = planilhaAtiva.getLastRowNum();
 	}
 	
 	public void abrirPlanilha(String nome, int linhaBaseFormatacao)
@@ -482,7 +486,7 @@ public class AcoesArquivoExcel {
 		System.out.println(nome);
 		planilhaAtiva = arquivoXLSX.getSheet(nome);
 		
-		primeiraLinhaVazia = planilhaAtiva.getLastRowNum();
+		ultimaLinhaPreenchida = planilhaAtiva.getLastRowNum();
 	}
 
 	public String getNomeDoAquivo() {
@@ -493,8 +497,8 @@ public class AcoesArquivoExcel {
 		this.nomeDoAquivo = nomeDoAquivo;
 	}
 
-	public int getPrimeiraLinhaVazia() {
-		return primeiraLinhaVazia;
+	public int getUltimaLinhaPreenchida() {
+		return ultimaLinhaPreenchida;
 	}
 	
 	public int getUlimtaLinhaPreenchidaEmUmaColuna(int primeiraLinha, int coluna) {
@@ -600,7 +604,7 @@ public class AcoesArquivoExcel {
 	}
 
 	public void setPrimeiraLinhaVazia(int primeiraLinhaVazia) {
-		this.primeiraLinhaVazia = primeiraLinhaVazia;
+		this.ultimaLinhaPreenchida = primeiraLinhaVazia;
 	}
 	
 
@@ -625,9 +629,17 @@ public class AcoesArquivoExcel {
 	public String getValorDaCelulaString(int Linha, int Coluna)
 	{
 		Row linha = planilhaAtiva.getRow(Linha);
-		Cell celula = linha.getCell(Coluna);
-		if(celula == null)
-			return "";
+		
+		Cell celula = null;
+		
+		if(linha != null)
+		{
+			celula = linha.getCell(Coluna);
+			if(celula == null)
+				return "";
+		}
+		else
+			return null;
 		
 		return celula.getStringCellValue();
 	}
@@ -835,6 +847,36 @@ public class AcoesArquivoExcel {
 	{
 		arquivoXLSX.setForceFormulaRecalculation(true);
 	}
+	
+
+	public void atualizarTabelasDinamicas(String nomePlanilhaDinamica, String nomePlanilhaDados, String referencia) {
+	
+	    Path caminho = Paths.get(nomeDoAquivo);
+	
+	    try {
+	        XSSFWorkbook wb = (XSSFWorkbook) arquivoXLSX;
+	        XSSFSheet sheetPivot = wb.getSheet(nomePlanilhaDinamica);
+	
+	        for (XSSFPivotTable pivotTable : sheetPivot.getPivotTables()) {
+	
+	            CTPivotCacheDefinition cacheDef = pivotTable.getPivotCacheDefinition().getCTPivotCacheDefinition();
+	
+	            cacheDef.getCacheSource().getWorksheetSource().setSheet(nomePlanilhaDados);
+	
+	            cacheDef.getCacheSource().getWorksheetSource().setRef(referencia);
+	
+	            cacheDef.setRefreshOnLoad(true);
+	        }
+	
+	        try (FileOutputStream fos = new FileOutputStream(caminho.toFile())) {
+	            wb.write(fos);
+	        }
+	
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+
 
 	public void copiarFormulas(int linhaComFormula, int linhaOndeAplicarAFormula, ArrayList<Integer> colunas){
 
@@ -1051,7 +1093,7 @@ public class AcoesArquivoExcel {
 				general.setDataFormat(df.getFormat("0.00%")); // General
 	        }
 	        
-	        for(int linha = linhaInicial; linha < primeiraLinhaVazia; linha++)
+	        for(int linha = linhaInicial; linha < ultimaLinhaPreenchida; linha++)
 	        {
 	        	row = planilhaAtiva.getRow(linha);     // linha 2 (0-based)
 	        	

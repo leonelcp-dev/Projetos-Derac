@@ -604,7 +604,7 @@ public class OfertaDemandaDeAcessoR1 {
 		if(!arquivoMaisRecente.equals(""))
 		{
 			AcoesArquivoExcel arquivoDeParaEspecialidades = new AcoesArquivoExcel(caminhoDeParaEspecialidades, 0);
-			int proximaLinhaVaziaDeParaEspecialidades = arquivoDeParaEspecialidades.getPrimeiraLinhaVazia() + 1;
+			int proximaLinhaVaziaDeParaEspecialidades = arquivoDeParaEspecialidades.getUltimaLinhaPreenchida() + 1;
 			
 			AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(arquivoMaisRecente, 0);
 			
@@ -851,6 +851,8 @@ public class OfertaDemandaDeAcessoR1 {
 					String caminhoArquivoXLSX = "";
 					boolean arquivoConvertido = false;
 					
+					File arquivoConvertidoXLSX = null;
+					
 					String nomeArquivo = itemDaPasta.getPath();
 					if(nomeArquivo.endsWith(ParametrosArquivoFilasNominaisRegulada.EXTENSAO_ARQUIVO_XLSX.getDescricao()))
 					{
@@ -865,6 +867,8 @@ public class OfertaDemandaDeAcessoR1 {
 						try
 						{
 							conversor.converterArquivoHTML(nomeArquivo, caminhoArquivoXLSX, true);
+							
+							arquivoConvertidoXLSX = new File(caminhoArquivoXLSX);
 							arquivoConvertido = true;
 						}catch(Exception e)
 						{
@@ -898,7 +902,7 @@ public class OfertaDemandaDeAcessoR1 {
 					}
 					
 					if(arquivoConvertido)
-						itemDaPasta.delete();
+						arquivoConvertidoXLSX.delete();
 
 				}
 			}
@@ -917,6 +921,9 @@ public class OfertaDemandaDeAcessoR1 {
 		excel.abrirPlanilha(0, 0);
 		
 		int cabecalho = 0;
+		
+		if(excel.getValorDaCelulaString(0, 0) == null)
+			return "Erro";
 		
 		if(excel.getValorDaCelulaString(0, 0).trim().equals("Solicitado em:"))
 			cabecalho = 0;
@@ -1007,7 +1014,7 @@ public class OfertaDemandaDeAcessoR1 {
 			AcoesArquivoExcel arquivoDoMes = new AcoesArquivoExcel(pastaArquivosBaixados + "\\" + nomeArquivo, ParametrosArquivoReguladaConsolidado.ARQUIVO_FINAL_LINHA_INICIAL.getIndice());
 			arquivoDoMes.abrirPlanilha(ParametrosArquivoReguladaConsolidado.NOME_PLANILHA_ARQUIVO_FORMATADO.getDescricao(), ParametrosArquivoReguladaConsolidado.ARQUIVO_FINAL_LINHA_INICIAL.getIndice());
 			
-			int ultimaLinhaPreenchida = arquivoDoMes.getPrimeiraLinhaVazia() + 1;
+			int ultimaLinhaPreenchida = arquivoDoMes.getUltimaLinhaPreenchida() + 1;
 			
 			ArrayList<CelulaExcel> celulasArquivoMensal = new ArrayList<CelulaExcel>();
 			
@@ -1044,6 +1051,9 @@ public class OfertaDemandaDeAcessoR1 {
 		excel.abrirPlanilha(0, 0);
 		
 		int cabecalho = 0;
+		
+		if(excel.getValorDaCelulaString(0, 0) == null)
+			return "Erro";
 		
 		if(excel.getValorDaCelulaString(0, 0).trim().equals("Solicitado em:"))
 			cabecalho = 0;
@@ -1137,7 +1147,7 @@ public class OfertaDemandaDeAcessoR1 {
 			AcoesArquivoExcel arquivoDoMes = new AcoesArquivoExcel(pastaArquivosBaixados + "\\" + nomeArquivo, ParametrosArquivoReguladaConsolidado.ARQUIVO_FINAL_LINHA_INICIAL.getIndice());
 			arquivoDoMes.abrirPlanilha(ParametrosArquivoReguladaConsolidado.NOME_PLANILHA_ARQUIVO_FORMATADO.getDescricao(), ParametrosArquivoReguladaConsolidado.ARQUIVO_FINAL_LINHA_INICIAL.getIndice());
 			
-			int ultimaLinhaPreenchida = arquivoDoMes.getPrimeiraLinhaVazia() + 1;
+			int ultimaLinhaPreenchida = arquivoDoMes.getUltimaLinhaPreenchida() + 1;
 			
 			ArrayList<CelulaExcel> celulasArquivoMensal = new ArrayList<CelulaExcel>();
 			
@@ -1272,7 +1282,7 @@ public class OfertaDemandaDeAcessoR1 {
 		System.out.println(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_CDR_NOME.getDescricao());
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivosNovasSolicitacoes + ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_CDR_NOME.getDescricao(), 0);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoNovasSolicitacoesConsolidado.NOME_PLANILHA_BD_CDR.getDescricao(), ParametrosArquivoNovasSolicitacoesConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL.getIndice());
-		int proximaLinhaVaziaConsolidadoMunicipal = arquivoConsolidado.getPrimeiraLinhaVazia() + 1;
+		int proximaLinhaVaziaConsolidadoMunicipal = arquivoConsolidado.getUltimaLinhaPreenchida() + 1;
 		
 		String abaPrincipal = driver.getWindowHandle();
 				
@@ -1508,7 +1518,7 @@ public class OfertaDemandaDeAcessoR1 {
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
 		
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
-		int ultimaLinhaLivre = arquivoConsolidado.getPrimeiraLinhaVazia() + 1;
+		int ultimaLinhaLivre = arquivoConsolidado.getUltimaLinhaPreenchida() + 1;
 		int linhaExcel;
 		
 		Locale localeBR = Locale.of("pt", "BR");
@@ -1688,11 +1698,12 @@ public class OfertaDemandaDeAcessoR1 {
 		System.out.println(arquivoFinal.getCaminhoCompleto());
 		
 		AcoesArquivoExcel arquivoSIRESP = new AcoesArquivoExcel(entidade.getCaminhoCompletoArquivoBaixadoXLSX(), 0);
+		System.out.println(entidade.getCaminhoCompletoArquivoBaixadoXLSX());
 		
 		ArrayList<CelulaExcel> celulasArquivoConsolidado = new ArrayList<CelulaExcel>();
 		ArrayList<CelulaExcel> celulasArquivoMensal = new ArrayList<CelulaExcel>();
 		
-		int ultimaLinhaArquivoSIRESP = arquivoSIRESP.getPrimeiraLinhaVazia();
+		int ultimaLinhaArquivoSIRESP = arquivoSIRESP.getUltimaLinhaPreenchida();
 		
 		int primeiraLinhaArquivoSIRESP = 0;
 		if(tipoDeBusca.equals("Exame"))
@@ -1722,7 +1733,11 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		for(int linha = primeiraLinhaArquivoSIRESP; linha <= ultimaLinhaArquivoSIRESP; linha++)
 		{
+			System.out.println(linha + " " + colunaUnidadeSolicitante);
+			
 			String unidadeSolicitante = arquivoSIRESP.getValorDaCelulaString(linha, colunaUnidadeSolicitante).trim();
+			
+			System.out.println(linha + " " + unidadeSolicitante);
 
 			if(unidadesSolicitantes.contains(unidadeSolicitante))
 			{
@@ -1810,6 +1825,11 @@ public class OfertaDemandaDeAcessoR1 {
 					entradaNovaSolicitacao.setQtdeSolicitacoes(1);
 					entradaNovaSolicitacao.setLinhaExcel(proximaLinhaVaziaConsolidadoMunicipal);
 					
+					if(nomenclaturasPadronizadas.containsKey(especialidade.toUpperCase()))
+						entradaNovaSolicitacao.setNomenclaturaPadronizada(nomenclaturasPadronizadas.get(especialidade.toUpperCase()).getNomenclatura());
+					else
+						entradaNovaSolicitacao.setNomenclaturaPadronizada("Não encontrada");
+					
 					novasSolicitacoesCDR.put(valorConcatenadoConsolidado, entradaNovaSolicitacao);
 					
 					proximaLinhaVaziaConsolidadoMunicipal++;
@@ -1866,6 +1886,7 @@ public class OfertaDemandaDeAcessoR1 {
 			{
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice(), entrada.getTipoSolicitacao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), entrada.getEspecialidadeExame(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOMENCLATURA_PADRONIZADA.getIndice(), entrada.getNomenclaturaPadronizada(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOMENCLATURA_PADRONIZADA.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), entrada.getCID(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), entrada.getUnidadesCampinas(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getIndice(), entrada.getMesInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getTipo()));
@@ -1992,6 +2013,11 @@ public class OfertaDemandaDeAcessoR1 {
 				entradaNovaSolicitacao.setQtdeSolicitacoes(1);
 				entradaNovaSolicitacao.setLinhaExcel(proximaLinhaVaziaConsolidadoMunicipal);
 				
+				if(nomenclaturasPadronizadas.containsKey(especialidade.toUpperCase()))
+					entradaNovaSolicitacao.setNomenclaturaPadronizada(nomenclaturasPadronizadas.get(especialidade.toUpperCase()).getNomenclatura());
+				else
+					entradaNovaSolicitacao.setNomenclaturaPadronizada("Não encontrada");
+				
 				novasSolicitacoesRegulada.put(valorConcatenadoConsolidado, entradaNovaSolicitacao);
 				
 				proximaLinhaVaziaConsolidadoMunicipal++;
@@ -2006,6 +2032,7 @@ public class OfertaDemandaDeAcessoR1 {
 			{
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getIndice(), entrada.getTipoSolicitacao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_TIPO_SOLICITACAO.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), entrada.getEspecialidadeExame(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_ESPECIALIDADE_EXAME.getTipo()));
+				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOMENCLATURA_PADRONIZADA.getIndice(), entrada.getNomenclaturaPadronizada(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_NOMENCLATURA_PADRONIZADA.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getIndice(), entrada.getCID(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_CID.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getIndice(), entrada.getUnidadesCampinas(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_UNIDADES_CAMPINAS.getTipo()));
 				celulasArquivoConsolidado.add(new CelulaExcel(entrada.getLinhaExcel(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getIndice(), entrada.getMesInclusao(), ParametrosArquivoNovasSolicitacoesConsolidado.INDICE_COLUNA_MES_INCLUSAO.getTipo()));
@@ -2284,6 +2311,7 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 				
 			paginaWeb.MarcarElementoCheckBoxPeloName(driver, IdentificadoresPaginaWebSIRESP.NAME_PRODUCAO_EXECUTANTE_EXIBIR_RECEPCAO.getTextoIdentificador());
+			paginaWeb.MarcarElementoCheckBoxPeloName(driver, IdentificadoresPaginaWebSIRESP.NAME_PRODUCAO_EXECUTANTE_MOSTRAR_AGENDAMENTO_UNIDADES_ABAIXO.getTextoIdentificador());
 			
 			paginaWeb.selecionarItemSelectPeloName(driver, IdentificadoresPaginaWebSIRESP.NAME_PRODUCAO_EXECUTANTE_FILTRO_MES.getTextoIdentificador(), meses.getMeses().get(mesCompetencia - 1).getMesDescricaoPrimeiraMaiuscula());
 			paginaWeb.selecionarItemSelectPeloName(driver, IdentificadoresPaginaWebSIRESP.NAME_PRODUCAO_EXECUTANTE_FILTRO_ANO.getTextoIdentificador(), Integer.toString(anoCompetencia));
@@ -2485,7 +2513,7 @@ public class OfertaDemandaDeAcessoR1 {
 							{
 								AcoesArquivoExcel arquivoConsolidadoBloqueio = new AcoesArquivoExcel(pastaDestinoArquivos + "\\RelacaoEspecialidadesBloqueio.xlsx", 0);
 								arquivoConsolidadoBloqueio.abrirPlanilha(ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
-								int primeiraLinhaVazia = arquivoConsolidadoBloqueio.getPrimeiraLinhaVazia() + 1;
+								int primeiraLinhaVazia = arquivoConsolidadoBloqueio.getUltimaLinhaPreenchida() + 1;
 								
 								ArrayList<CelulaExcel> celulasDoBloqueio = new ArrayList<CelulaExcel>();
 	
@@ -2768,7 +2796,7 @@ public class OfertaDemandaDeAcessoR1 {
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\ConsolidadoOfertaEDemanda.xlsx", 0);
 		
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), anoCompetencia);
-		int ultimaLinhaLivre = arquivoConsolidado.getPrimeiraLinhaVazia() + 1;
+		int ultimaLinhaLivre = arquivoConsolidado.getUltimaLinhaPreenchida() + 1;
 		int linhaExcel;
 		
 		Locale localeBR = Locale.of("pt", "BR");
@@ -3040,7 +3068,7 @@ public class OfertaDemandaDeAcessoR1 {
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaDestinoArquivos + "\\RelacaoEspecialidadesBloqueio.xlsx", 0);
 		
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertasParaBloqueio.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
-		int primeiraLinhaVazia = arquivoConsolidado.getPrimeiraLinhaVazia() + 1;
+		int primeiraLinhaVazia = arquivoConsolidado.getUltimaLinhaPreenchida() + 1;
 		
 		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 		

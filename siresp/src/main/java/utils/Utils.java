@@ -1,0 +1,125 @@
+package utils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
+
+public class Utils {
+	
+	public static String converterData(String Data)
+	{
+
+	    Locale localeBR = Locale.of("pt", "BR"); // Java 21
+	    DateTimeFormatter fmtDataCompleta = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+	    DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		
+	    try {
+	    	
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+	        LocalDateTime data = LocalDateTime.parse(Data, fmtEntradaAbrev);
+	        
+	        return fmtDataCompleta.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	    
+	    try {
+	    	
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	        LocalDateTime data = LocalDateTime.parse(Data, fmtEntradaAbrev);
+	        
+	        return fmtDataCompleta.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	    
+	    try {
+	    	
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        LocalDateTime data = LocalDateTime.parse(Data, fmtEntradaAbrev);
+	        
+	        return fmtData.format(data) + " 00:00";
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	    
+	      
+	    try {
+	    	
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("M/d/yy H:mm");
+	        LocalDateTime data = LocalDateTime.parse(Data, fmtEntradaAbrev);
+	        
+	        return fmtDataCompleta.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	    
+	    try {
+	    	
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("M/d/yy", Locale.US);
+	        LocalDateTime data = LocalDateTime.parse(Data, fmtEntradaAbrev);
+	        
+	        return fmtData.format(data) + " 00:00";
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	    
+	    throw new IllegalArgumentException("Formato de data inválido: " + Data);
+	}
+	
+	public static String normalizarDataParaMesAno(String valor) {
+	    if (valor == null || valor.isBlank())
+	        return null;
+	
+	    Locale localeBR = Locale.of("pt", "BR"); // Java 21
+	    DateTimeFormatter fmtMesAno = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+	
+	    // 1️ Caso seja número serial do Excel
+	    if (valor.matches("\\d+")) {
+	        long serial = Long.parseLong(valor);
+	        LocalDate data = LocalDate.of(1899, 12, 30).plusDays(serial); // Ajuste Excel
+	        return fmtMesAno.format(data);
+	    }
+	
+	    // 2️ Caso seja dd/MM/yyyy
+	    try {
+	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("dd/MM/yyyy", localeBR);
+	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
+	        return fmtMesAno.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e tenta o próximo formato
+	    }
+	
+	    // 3️ Caso seja mmm/yyyy (direto do Excel ou do POI)
+	    try {
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+	        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy", localeBR));
+	        return fmtMesAno.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	
+	    throw new IllegalArgumentException("Formato de data inválido: " + valor);
+	}
+	
+	public static String somenteIniciais(String texto)
+	{
+		String iniciais = "";
+		
+		texto = texto.trim();
+		String[] palavras = texto.split(" ");
+		
+		for(String palavra : palavras)
+		{
+			palavra = palavra.trim();
+			
+			if(palavra.length() > 0)
+				iniciais += palavra.charAt(0) + " ";
+		}
+		
+		return iniciais.trim();
+	}
+
+}

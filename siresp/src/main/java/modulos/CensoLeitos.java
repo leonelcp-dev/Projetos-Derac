@@ -273,7 +273,7 @@ public class CensoLeitos {
 				
 				ArrayList<CelulaExcel> celulas = new ArrayList();
 				
-				for(int contLinha = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice(); contLinha < arquivoExcelEntidade.getPrimeiraLinhaVazia(); contLinha++)
+				for(int contLinha = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice(); contLinha < arquivoExcelEntidade.getUltimaLinhaPreenchida(); contLinha++)
 				{
 					String motivoDoBloqueio = "";
 					String justificativaDoBloqueio = "";
@@ -525,7 +525,7 @@ public class CensoLeitos {
 			if(!arquivoXLSX.startsWith("0"))
 			{
 				AcoesArquivoExcel arquivoDiario = new AcoesArquivoExcel(pastaEntidade + "\\" + arquivoXLSX, ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_SIRESP.getIndice());
-				int primeiraLinhaVaziaArquivoDiario = arquivoDiario.getPrimeiraLinhaVazia();
+				int primeiraLinhaVaziaArquivoDiario = arquivoDiario.getUltimaLinhaPreenchida();
 				
 				LocalDate dataCensoDiario = null;
 				

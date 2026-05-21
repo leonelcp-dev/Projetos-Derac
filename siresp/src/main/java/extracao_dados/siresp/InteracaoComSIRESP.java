@@ -142,8 +142,8 @@ public class InteracaoComSIRESP
         else if(escolha == 4)
         {
         	Absenteismo absenteismo = new Absenteismo();
-        	absenteismo.verificarAbsenteismo(driver, null, null);
-        	//absenteismo.verificarAbsenteismo(driver, "12/2024", "12/2024");
+        	//absenteismo.verificarAbsenteismo(driver, null, null);
+        	absenteismo.verificarAbsenteismo(driver, "01/2023", "02/2023");
         	//absenteismo.parametrizarArquivosVazios(driver);C:\Users\PMC514991-2\Documents\Oferta e Demanda
         }
         else if(escolha == 5)
@@ -164,8 +164,8 @@ public class InteracaoComSIRESP
         else if(escolha == 8)	
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "02/2026", "02/2026", false, false, false, false, false, false, true, true, true, true);
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "02/2026", "02/2026", true, true, true, false, true, false, false, false, false, false);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "05/2024", "05/2026", false, false, false, false, false, true, true, true, true, false);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", true, true, true, true, true, false, false, false, false, false);
         }
         
         else if(escolha == 9)

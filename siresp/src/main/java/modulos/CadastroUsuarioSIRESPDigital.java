@@ -70,7 +70,7 @@ public class CadastroUsuarioSIRESPDigital {
 		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 		
 		arquivoExcel.abrirPlanilha(0, 0);
-		int linha = arquivoExcel.getPrimeiraLinhaVazia() + 1;
+		int linha = arquivoExcel.getUltimaLinhaPreenchida() + 1;
 		
 		celulas.add(new CelulaExcel(linha, 0, usuario.getUnidade(), "String"));
 		celulas.add(new CelulaExcel(linha, 1, usuario.getNomeCompleto(), "String"));

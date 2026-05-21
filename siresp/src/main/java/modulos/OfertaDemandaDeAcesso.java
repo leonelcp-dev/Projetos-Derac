@@ -216,7 +216,7 @@ public class OfertaDemandaDeAcesso {
 						ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresSIRESPDigitalOfertaDemanda.XPATH_TABELA_RESULTADOS.getTextoIdentificador());
 						
 						arquivoExcelResultante.abrirPlanilha(ParametrosArquivoOfertas.NOME_PLANILHA_OFERTAS.getDescricao(), 0);
-						int numeroDaLinha = arquivoExcelResultante.getPrimeiraLinhaVazia() + 1;
+						int numeroDaLinha = arquivoExcelResultante.getUltimaLinhaPreenchida() + 1;
 						ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 						
 						System.out.println("Tabela :" + tabelaResultados.size());

@@ -396,7 +396,7 @@ public class Absenteismo {
 				
 				celulas = new ArrayList<CelulaExcel>();
 				
-				int ultimaLinhaArquivoSIRESP = arquivoSIRESP.getPrimeiraLinhaVazia();
+				int ultimaLinhaArquivoSIRESP = arquivoSIRESP.getUltimaLinhaPreenchida();
 				
 				int primeiraLinhaArquivoSIRESP = 0;
 				if(tiposDeBusca[i].equals("Exame"))
@@ -512,7 +512,7 @@ public class Absenteismo {
 		arquivoConsolidado.abrirPlanilha(nomeDaPlanilha, 0);
 		
 		int linhaInicialArquivoMunicipal = ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL_UNIDADES.getIndice();
-		int linhaFinalArquivoMunicipal = arquivoConsolidado.getPrimeiraLinhaVazia();
+		int linhaFinalArquivoMunicipal = arquivoConsolidado.getUltimaLinhaPreenchida();
 		
 		int diferencaDeLinhaEntrePlanilhas = ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL_PLANILHA_VALORES.getIndice() - ParametrosArquivoAbsenteismoConsolidado.ARQUIVO_MUNICIPAL_LINHA_INICIAL_UNIDADES.getIndice();
 		

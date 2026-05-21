@@ -378,7 +378,7 @@ public class LoginsSirespDigital {
 					ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 					
 					arquivoExcel.abrirPlanilha(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_PROCESSADOS.getDescricao(), 0);
-					int linha = arquivoExcel.getPrimeiraLinhaVazia() + 1;
+					int linha = arquivoExcel.getUltimaLinhaPreenchida() + 1;
 					
 					celulas.add(new CelulaExcel(linha, 0, elemento.getText(), "String"));
 					celulas.add(new CelulaExcel(linha, 1, ParametrosArquivoLoginSIRESP.TEXTO_UNIDADE_CONCLUIDA.getDescricao(), "String"));
@@ -392,7 +392,7 @@ public class LoginsSirespDigital {
 					ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 					
 					arquivoExcel.abrirPlanilha(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_PROCESSADOS.getDescricao(), 0);
-					int linha = arquivoExcel.getPrimeiraLinhaVazia() + 1;
+					int linha = arquivoExcel.getUltimaLinhaPreenchida() + 1;
 					
 					celulas.add(new CelulaExcel(linha, 0, elemento.getText(), "String"));
 					celulas.add(new CelulaExcel(linha, 1, ErroAoAcessarUnidade, "String"));
@@ -409,7 +409,7 @@ public class LoginsSirespDigital {
 		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 		
 		arquivoExcel.abrirPlanilha(ParametrosArquivoLoginSIRESP.NOME_PLANILHA_LOGINS.getDescricao(), 0);
-		int linha = arquivoExcel.getPrimeiraLinhaVazia() + 1;
+		int linha = arquivoExcel.getUltimaLinhaPreenchida() + 1;
 		
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoLoginSIRESP.INDICE_COLUNA_UNIDADE.getIndice(), usuario.getUnidade(), "String"));
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoLoginSIRESP.INDICE_COLUNA_NOME_COMPLETO.getIndice(), usuario.getNomeCompleto(), "String"));

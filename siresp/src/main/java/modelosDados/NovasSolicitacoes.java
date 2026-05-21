@@ -9,6 +9,9 @@ public class NovasSolicitacoes {
     @ExcelColumn(header = "Especialidade/Exame")
     private String especialidadeExame;
     
+    @ExcelColumn(header = "Nomenclatura Padronizada")
+    private String nomenclaturaPadronizada;
+    
     @ExcelColumn(header = "CID")
     private String cid;
     
@@ -41,6 +44,14 @@ public class NovasSolicitacoes {
 
 	public void setEspecialidadeExame(String especialidadeExame) {
 		this.especialidadeExame = especialidadeExame;
+	}
+	
+	public String getNomenclaturaPadronizada() {
+		return nomenclaturaPadronizada;
+	}
+
+	public void setNomenclaturaPadronizada(String nomenclaturaPadronizada) {
+		this.nomenclaturaPadronizada = nomenclaturaPadronizada;
 	}
 
 	public String getCID() {
