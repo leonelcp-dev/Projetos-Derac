@@ -14,9 +14,9 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_PROCEDIMENTOS(4, 5, "Procedimentos (Padronizado)", "String", ""),
 	INDICE_COLUNA_ESPECIALIDADE(5, 6, "Especialidade", "String", ""),
 	INDICE_COLUNA_CLASSIFICACAO(6, 7, "Classificação", "String", ""),
-	INDICE_COLUNA_FPO(7, 8, "FPO", "Int", ""),
-	INDICE_COLUNA_NOVAS_SOLICITACOES(8, 9, "Novas Solicitações", "Int", ""),
-	INDICE_COLUNA_OFERTA_TOTAL(9, 10, "Oferta Total", "Int", ""),
+	INDICE_COLUNA_OFERTAS_PREVISTAS(7, 8, "Ofertas Previstas", "Int", ""),
+	INDICE_COLUNA_NOVAS_SOLICITACOES_MENSAIS(8, 9, "Novas Solicitações (mensais)", "Int", ""),
+	INDICE_COLUNA_OFERTA_DISPONIVEL(9, 10, "Oferta Disponível", "Int", ""),
 	INDICE_COLUNA_OFERTA_BLOQUEADA(10, 11,"Oferta Bloqueada", "Int", ""),
 	INDICE_COLUNA_AGENDAMENTOS_TOTAL(11, 12,"Agendamentos Total", "Int", ""),
 	INDICE_COLUNA_AGENDAMENTOS_COTA(12, 13,"Agendamentos Cota", "Int", ""),
@@ -34,9 +34,9 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_CALCULOS_DESISTENCIA(24, 25,"Cálculos Desistência", "Porcentagem", ""),
 	INDICE_COLUNA_CALCULOS_DISPENSADO(25, 26,"Cálculo Dispensado", "Porcentagem", ""),
 	INDICE_COLUNA_CALCULOS_NAO_INFORMADO(26, 27,"Cálculo Não Informado", "Porcentagem", ""),
-	INDICE_COLUNA_DEMANDA_REPRIMIDA(27, 28,"Demanda Reprimida", "Int", ""),
+	INDICE_COLUNA_DEMANDA_REPRIMIDA_DO_DIA(27, 28,"Demanda Reprimida", "Int", ""),
 	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(28, 29,"Cálculos Tempo de Espera", "Double", ""),
-	INDICE_COLUNA_MAIS_VELHO_NA_FILA(29, 30,"Mais Velho na Fila", "String", ""),
+	INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS(29, 30,"Maior tempo de espera em dias", "String", ""),
 	INDICE_COLUNA_RECEPCAO_FECHADA(30, 31,"Recepção Fechada", "String", ""),
 	INDICE_COLUNA_OBSERVACAO(31, 32,"Recepção Fechada", "String", ""),
 	
@@ -46,8 +46,13 @@ public enum ParametrosArquivoOfertaDemanda {
 	
 	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(34, 0, "Erro ao selecionar o grupo de cota", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(35, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(36, 0, "xls", "", "");
+	INDICE_COLUNA_DATA_PROCESSAMENTO(35, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
+	INDICE_LINHA_DATA_PROCESSAMENTO(36, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	
+	NOME_ARQUIVO_CONSOLIDADO(37, 0, "ConsolidadoOfertaEDemanda.xlsx", "", ""),
+	
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(38, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(39, 0, "xls", "", "");
 	
 
 	private int idUnico;

@@ -30,5 +30,4 @@ public class ConsolidacaoDemandaReprimida {
 		
 		demanda.montarDemandaReprimidaDiaria(args[0]);
 	}
-
 }

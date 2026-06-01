@@ -38,10 +38,12 @@ public class InteracaoComSIRESP
     	int escolha = -1;
     	int maximoEscolha = 9;
     	boolean abrirMenuInicial = false;
+    	String ambiente;
     	
     	if(args.length == 0)
     	{
     		abrirMenuInicial = true;
+    		ambiente = "TESTE";
     	}
     	else
     	{
@@ -56,6 +58,11 @@ public class InteracaoComSIRESP
     		{
     			abrirMenuInicial = true;
     		}
+    		
+    		if(args.length > 1)
+    			ambiente = args[1];
+    		else
+    			ambiente = "TESTE";
     	}
     	
     	String nomeUsuario = System.getProperty("user.name");
@@ -121,8 +128,18 @@ public class InteracaoComSIRESP
         
         if(escolha == 0)
         {
+        	boolean consolidarAlgumMes = false;
+        	
+        	if(args.length > 2)
+        	{
+        		if(args[2].equals("SIM"))
+        		{
+        			consolidarAlgumMes = true;
+        		}
+        	}
+        	
 	        CensoLeitos censo = new CensoLeitos();
-	        censo.executarCenso(driver);
+	        censo.executarCenso(driver, consolidarAlgumMes);
         }
         else if(escolha == 1)
         {
@@ -164,8 +181,9 @@ public class InteracaoComSIRESP
         else if(escolha == 8)	
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "05/2024", "05/2026", false, false, false, false, false, true, true, true, true, false);
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", true, true, true, true, true, false, false, false, false, false);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", false, false, false, false, false, false, true, false, false, false, ambiente);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "07/2026", "07/2026", false, true, true, false, true, true, true, true, true, true, ambiente);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, "02/2025", "02/2025", true, true, true, true, true, false, false, false, false, false, ambiente);
         }
         
         else if(escolha == 9)

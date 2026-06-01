@@ -17,6 +17,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
+import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
 import dominiosSIRESP.EspecialidadesSIRESP;
 import dominiosSIRESP.ExamesSIRESP;
@@ -248,7 +249,7 @@ public class CriarImportacaoFilaCentralReg {
 					
 					if(linha.getObservacao().equals(""))
 					{
-						linha.setObservacao("Paciente transferido da unidade Policlinica II - Campinas");
+						linha.setObservacao("Paciente transferido da unidade " + IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_POLICLINICA_III.getTextoIdentificador());
 						importar.add(linha);
 					}
 					else

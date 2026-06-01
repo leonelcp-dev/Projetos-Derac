@@ -24,7 +24,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
 
 import dadosGerais.CorrelacaoArquivosDemandaReprimida;
-import dadosGerais.IdentificadoresPastasCompartilhadas;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDRA;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
 import dadosGerais.ParametrosArquivoDemandaReprimida;
@@ -55,19 +56,25 @@ public class DemandaReprimida {
 	
 	private String pastaBase;
 	private String pastaArquivosFilasNominais;
-	private String pastaArquivosDemandaReprimida;
+	private String pastaArquivosDemandaReprimidaCDIDR;
+	private String pastaArquivosDemandaReprimidaCDRA;
 	private String composicaoPastaNoMes;
 	private String dataDeAnalise;
 	private LocalDate dataInformada;
+	private String pastaBaseAmbulatorialCDIDR;
+	private String pastaBaseDemandaReprimidaCDIDR;
+	private String pastaBaseDemandaReprimidaCDRA;
 	private MesesFormatados meses;
 	private ArrayList<String> pastasPrincipais;
 	private HashMap<String, String> relacaoUnidadeTipo;
 	HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas;
-	private IdentificadoresPastasCompartilhadas diretorios; 
+	private IdentificadoresPastasCompartilhadasCDIDR diretoriosCDIDR; 
+	private IdentificadoresPastasCompartilhadasCDRA diretoriosCDRA; 
 	
 	public String montarDemandaReprimidaDiaria(String ambiente)
 	{
-		diretorios = IdentificadoresPastasCompartilhadas.valueOf(ambiente.toUpperCase());
+		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDR.valueOf(ambiente.toUpperCase());
+		diretoriosCDRA = IdentificadoresPastasCompartilhadasCDRA.valueOf(ambiente.toUpperCase());
 		
 		pastasPrincipais = new ArrayList<String>();
 		pastasPrincipais.add("AGENDA REGULADA");
@@ -85,10 +92,70 @@ public class DemandaReprimida {
 		dataInformada = LocalDate.parse(dataDeAnalise, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		meses = new MesesFormatados();
 		
+		try {
+			
+			Reader reader = null;
+			
+			if(ambiente.equals("TESTE"))
+				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			else if(ambiente.equals("PRODUCAO"))
+			{
+				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
+			
+			if(reader == null)
+			{
+				JOptionPane.showMessageDialog(null, "Não foi informado o ambiente da execução");
+				return "";
+			}
+			
+			CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(';').setQuote('"').setHeader().setSkipHeaderRecord(true).setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL).build();
+			
+			HashMap<String, String> mapaDePastas = new HashMap<String, String>();
+			
+			Iterable<CSVRecord> registros = format.parse(reader);
+			for(CSVRecord registro : registros)						
+			{
+				mapaDePastas.put(registro.get(0) + registro.get(1), registro.get(2));
+			}
+			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDRA.REFERENCIA_PASTAS_DEMANDA_REPRIMIDA_CDRA.getTextoIdentificador()))
+				pastaBaseDemandaReprimidaCDRA = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDRA.REFERENCIA_PASTAS_DEMANDA_REPRIMIDA_CDRA.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Ambulatorial compartilhada");
+				return "";
+			}
+			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDIDR.REFERENCIA_PASTAS_DEMANDA_REPRIMIDA_CDIDR.getTextoIdentificador()))
+				pastaBaseDemandaReprimidaCDIDR = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDIDR.REFERENCIA_PASTAS_DEMANDA_REPRIMIDA_CDIDR.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Demanda Reprimida compartilhada");
+				return "";
+			}
+			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDIDR.REFERENCIA_PASTAS_AMBULATORIAL.getTextoIdentificador()))
+				pastaBaseAmbulatorialCDIDR = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDIDR.REFERENCIA_PASTAS_AMBULATORIAL.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Ambulatorial compartilhada");
+				return "";
+			}
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+			JOptionPane.showMessageDialog(null, "Erro ao encontrar o arquivos de parâmetros da pasta");
+			return "";
+		}
+		
 		
 		ArrayList<NomenclaturaPadronizada> nomenclaturas;
 		
-		try (FileInputStream in = new FileInputStream(pastaBase + "\\" + diretorios.getCaminhoArquivoNomenclaturas())) {
+		try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getCaminhoArquivoNomenclaturas())) {
 			nomenclaturas = ExcelBinder.readSheet(in, NomenclaturaPadronizada.class, ParametrosArquivoNomenclaturas.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoNomenclaturas.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
 
         }
@@ -108,15 +175,16 @@ public class DemandaReprimida {
 			nomenclaturasPadronizadas.put(nomenclatura.getInsercao().trim().toUpperCase(), nomenclatura);
 		}
 		
-		pastaArquivosFilasNominais = pastaBase + "\\" + diretorios.getPastaFilasNominais();
-		pastaArquivosDemandaReprimida = pastaBase + "\\" + diretorios.getArquivosDemandaReprimida();
+		pastaArquivosFilasNominais = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaFilasNominais();
+		pastaArquivosDemandaReprimidaCDIDR = pastaBaseDemandaReprimidaCDIDR + "\\" + diretoriosCDIDR.getArquivosDemandaReprimida();
+		pastaArquivosDemandaReprimidaCDRA = pastaBaseDemandaReprimidaCDRA + "\\" + diretoriosCDRA.getArquivosDemandaReprimida();
 		
 		relacaoUnidadeTipo = new HashMap<String, String>();
 		
 		BufferedReader br;
 		//obter tipos de unidades
 		try {
-			br = new BufferedReader(new FileReader(pastaArquivosFilasNominais + "\\entidadesParaDemandaReprimida.csv", StandardCharsets.ISO_8859_1));
+			br = new BufferedReader(new FileReader(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoUnidadesDemandaReprimida(), StandardCharsets.ISO_8859_1));
 			
 			String linha;
 			
@@ -151,21 +219,41 @@ public class DemandaReprimida {
 		
 		Pasta pasta = new Pasta(pastaArquivosFilasNominais + "\\" + ano + "\\" + composicaoPastaNoMes + "\\" + dataFormatada, false);
 		
-		String pastaDemandaReprimidaDoMes = pastaArquivosDemandaReprimida + "\\" + ano;
+		String pastaDemandaReprimidaDoMes = pastaArquivosDemandaReprimidaCDIDR + "\\" + ano;
 		Pasta pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
 		
 		pastaDemandaReprimidaDoMes += "\\" + composicaoPastaNoMes;
 		pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
 		
-		Arquivo arquivo = new Arquivo(pastaArquivosDemandaReprimida, diretorios.getNomeArquivoDemandaReprimidaVazio());
-		arquivo.CopiarArquivo(pastaDemandaReprimidaDoMes + "\\" + diretorios.getNomeArquivoDemandaReprimidaVazio());
+		Arquivo arquivo = new Arquivo(pastaArquivosDemandaReprimidaCDIDR, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+		arquivo.CopiarArquivo(pastaDemandaReprimidaDoMes + "\\" + diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
 		
-		arquivo = new Arquivo(pastaDemandaReprimidaDoMes, diretorios.getNomeArquivoDemandaReprimidaVazio());
-		arquivo.renomear(diretorios.getNomeArquivoDemandaReprimidaConsolidadoDiario().replace(IdentificadoresPastasCompartilhadas.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), dataFormatada));
+		arquivo = new Arquivo(pastaDemandaReprimidaDoMes, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+		arquivo.renomear(diretoriosCDIDR.getNomeArquivoDemandaReprimidaConsolidadoDiario().replace(IdentificadoresPastasCompartilhadasCDIDR.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), dataFormatada));
 		
 		procurarEConsolidarArquivo(pasta, false, "", "", arquivo.getCaminhoCompleto(), dataDaColeta);
 		atualizarTabelasDinamicas(arquivo.getCaminhoCompleto());
 		copiarTabelasDinamicas(arquivo.getCaminhoCompleto());
+		ocultarPlanilhasCopia(arquivo.getCaminhoCompleto());
+		copiarDemandaReprimidaParaCDRA(arquivo, dataDaColeta);
+		
+		return "";
+	}
+	
+	private String copiarDemandaReprimidaParaCDRA(Arquivo arquivo, LocalDate dataDaColeta)
+	{
+		int ano = dataDaColeta.getYear();
+		int mes = dataDaColeta.getMonthValue();
+		
+		composicaoPastaNoMes = meses.getMeses().get(mes - 1).getMesNumero() + " " + meses.getMeses().get(mes - 1).getMesDescricao() + " " + ano;
+		
+		String pastaDemandaReprimidaDoMes = pastaArquivosDemandaReprimidaCDRA + "\\" + ano;
+		Pasta pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
+		
+		pastaDemandaReprimidaDoMes += "\\" + composicaoPastaNoMes;
+		pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
+		
+		arquivo.CopiarArquivo(pastaDemandaReprimidaDoMes + "\\" + arquivo.getNomeDoArquivo());
 		
 		return "";
 	}
@@ -185,6 +273,17 @@ public class DemandaReprimida {
 		areaTabelaDinamica = ParametrosArquivoDemandaReprimidaRegulada.AREA_PARA_TABELA_DINAMICA_REGULADA.getDescricao() + (ultimaLinhaPreenchida + 1);
 		System.out.println(areaTabelaDinamica);
 		arquivoDemandaReprimida.atualizarTabelasDinamicas(ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_DINAMICA_REGULADA.getDescricao(), ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_REGULADA.getDescricao(), areaTabelaDinamica);
+		
+		return "";
+	}
+	
+	private String ocultarPlanilhasCopia(String caminhoArquivo)
+	{
+		AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(caminhoArquivo, 0);
+		
+		arquivoDemandaReprimida.ocultarPlanilha(ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CONSOLIDADO_CDR.getDescricao());
+
+		arquivoDemandaReprimida.ocultarPlanilha(ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_CONSOLIDADO_REGULADA.getDescricao());
 		
 		return "";
 	}
@@ -292,7 +391,8 @@ public class DemandaReprimida {
 				{
 					DemandasReguladas novasSolicitacoes = new DemandasReguladas();
 					
-					novasSolicitacoes.agruparDadosPorEspecialidadeRegulada(pasta, pastaBase, caminhoArquivo, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, itemDaPasta, diretorios);				
+					if((new File(itemDaPasta.getPath()).exists()))
+						novasSolicitacoes.agruparDadosPorEspecialidadeRegulada(pasta, pastaBaseAmbulatorialCDIDR, caminhoArquivo, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, itemDaPasta, diretoriosCDIDR);				
 				}
 				else
 				{

@@ -18,7 +18,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
 
 import dadosGerais.CorrelacaoArquivosDemandaReprimida;
-import dadosGerais.IdentificadoresPastasCompartilhadas;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
 import dadosGerais.ParametrosArquivoDemandaReprimidaCDR;
@@ -46,13 +46,13 @@ import utils.Utils;
 
 public class DemandasReguladas {
 	
-	private IdentificadoresPastasCompartilhadas diretorios;
+	private IdentificadoresPastasCompartilhadasCDIDR diretorios;
 
 	
-	public String agruparDadosPorEspecialidadeRegulada(Pasta pasta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, File itemDaPasta, IdentificadoresPastasCompartilhadas diretorios)
+	public String agruparDadosPorEspecialidadeRegulada(Pasta pasta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, File itemDaPasta, IdentificadoresPastasCompartilhadasCDIDR diretorios)
 	{
 		System.out.println(pasta.getCaminhoDaPasta());
-		File[] conteudoDaPasta = pasta.listarDiretorio();
+		//File[] conteudoDaPasta = pasta.listarDiretorio();
 		this.diretorios = diretorios;
 		
 		String caminhoArquivoXLSX = "";
@@ -183,7 +183,7 @@ public class DemandasReguladas {
 			
 			if(!arquivoFinal.existe())
 			{
-				arquivoFinal = new Arquivo(pastaDestinoArquivosNovasSolicitacoes, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
+				arquivoFinal = new Arquivo(pastaBase + "\\" + diretorios.getPastaArquivosParaAutomatizacao(), ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
 				
 				System.out.println("Copiar como: " + pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao()); 
 				arquivoFinal.CopiarArquivo(pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
@@ -321,7 +321,7 @@ public class DemandasReguladas {
 			
 			if(!arquivoFinal.existe())
 			{
-				arquivoFinal = new Arquivo(pastaDestinoArquivosNovasSolicitacoes, ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
+				arquivoFinal = new Arquivo(pastaBase + "\\" + diretorios.getPastaArquivosParaAutomatizacao(), ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());
 				
 				System.out.println("Copiar como: " + pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao()); 
 				arquivoFinal.CopiarArquivo(pastaArquivosBaixados + "\\" + ParametrosArquivoReguladaConsolidado.ARQUIVO_MUNICIPAL_VAZIO.getDescricao());

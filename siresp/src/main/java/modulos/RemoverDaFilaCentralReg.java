@@ -127,12 +127,21 @@ public class RemoverDaFilaCentralReg {
 					String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
 					elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
 				}
+				else
+				{
+					posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Atendente");
+					
+					if(posicaoPerfilDeAcesso > 0)
+					{
+						String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
+						elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
+					}
+				}
 			}
-
 		}
 		
 		//EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("5733944", "CENTRAL REG DE CAMPINAS", "DIVERSOS", "CENTRAL REG DE CAMPINAS");
-		EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("5677424", "CRI DE CAMPINAS", "UR", "CRI DE CAMPINAS");
+		EntidadeCDRNaoRegulada centralReg = new EntidadeCDRNaoRegulada("2022893", "POLICLINICA III - CAMPINAS", "UR", "POLICLINICA III - CAMPINAS");
 		
 		String value = elementosRadioUnidades.get(centralReg.getCNES() + " - " + centralReg.getNomeUnidadeSIRESP());
 		//System.out.println(value);
@@ -311,13 +320,12 @@ public class RemoverDaFilaCentralReg {
 									System.out.println(status + "|" + entradaDeFila.status + "|");
 									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
 									
-									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CRI.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_POLICLINICA_III.getTextoIdentificador().equals(unidade.toUpperCase()) &&
 									   entradaDeFila.especialidade.toUpperCase().equals(especialidade.toUpperCase()) && 
 									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
 									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
-									   //entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
-									   (entradaDeFila.dataEntrada.toUpperCase().substring(0, 10) + " 00:00").equals(dataEntrada.toUpperCase()) &&
-									   IdentificadoresPaginaWebSIRESP.TEXTO_USUARIO_IMPORTACAO_MANUAL.getTextoIdentificador().equals(usuario.toUpperCase()))
+									   entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									   //(entradaDeFila.dataEntrada.toUpperCase().substring(0, 10) + " 00:00").equals(dataEntrada.toUpperCase()))
 									{
 										idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_REGULACAO_CONSULTA.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(numeroLinhaDaTabelaConsultas));
 										
@@ -341,7 +349,7 @@ public class RemoverDaFilaCentralReg {
 										
 										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 										
-										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS para ser transferido para a unidade " + nomeSIRESP;
+										retornoProcesso = "Removido da fila da unidade " + IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_POLICLINICA_III.getTextoIdentificador() + " para ser transferido para a unidade " + nomeSIRESP;
 									}
 								}
 								
@@ -410,13 +418,12 @@ public class RemoverDaFilaCentralReg {
 									System.out.println(status + "|" + entradaDeFila.status + "|");
 									System.out.println(dataEntrada + "|" + entradaDeFila.dataEntrada + "|");
 									
-									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_CRI.getTextoIdentificador().equals(unidade.toUpperCase()) &&
+									if(IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_POLICLINICA_III.getTextoIdentificador().equals(unidade.toUpperCase()) &&
 									   entradaDeFila.especialidade.toUpperCase().equals(exame.toUpperCase()) &&
 									   entradaDeFila.cid.toUpperCase().equals(cid.toUpperCase()) && 
 									   entradaDeFila.status.toUpperCase().equals(status.toUpperCase()) && 
-									  // entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
-									   (entradaDeFila.dataEntrada.toUpperCase().substring(0, 10) + " 00:00").equals(dataEntrada.toUpperCase()) &&
-									   IdentificadoresPaginaWebSIRESP.TEXTO_USUARIO_IMPORTACAO_MANUAL.getTextoIdentificador().equals(usuario.toUpperCase()))
+									   entradaDeFila.dataEntrada.toUpperCase().equals(dataEntrada.toUpperCase()))
+									   //(entradaDeFila.dataEntrada.toUpperCase().substring(0, 10) + " 00:00").equals(dataEntrada.toUpperCase()))
 									{
 										idAcao = IdentificadoresPaginaWebSIRESP.XPATH_CADASTRO_DEMANDA_POR_RECURSO_BOTAO_ACAO_TABELA_REGULACAO_EXAME.getTextoIdentificador().replace(IdentificadoresPaginaWebSIRESP.VALOR_DINAMICO_LINHA_TABELA_RESULTADOS.getTextoIdentificador(), String.valueOf(numeroLinhaDaTabelaExames));
 										
@@ -442,7 +449,7 @@ public class RemoverDaFilaCentralReg {
 										
 										while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 										
-										retornoProcesso = "Removido da fila da CENTRAL REG CAMPINAS para ser transferido para a unidade " + nomeSIRESP;
+										retornoProcesso = "Removido da fila da unidade " + IdentificadoresPaginaWebSIRESP.TEXTO_UNIDADE_POLICLINICA_III.getTextoIdentificador() + " para ser transferido para a unidade " + nomeSIRESP;
 									}
 								}
 								

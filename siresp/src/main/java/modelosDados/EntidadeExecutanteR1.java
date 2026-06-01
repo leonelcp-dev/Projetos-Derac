@@ -8,18 +8,18 @@ public class EntidadeExecutanteR1 {
 	private String vinculo;
 	private String executante;
 	private String nomeUnidadeSIRESP;
-	private String nomeFPO;
+	private String nomeOfertasParaDERAC;
 	private String caminhoCompletoArquivoBaixadoXLS;
 	private String caminhoCompletoArquivoBaixadoXLSX;
 	private String arquivoBaixadoXLS;
 	private String arquivoBaixadoXLSX;
 	
-	public EntidadeExecutanteR1(String cnes, String vinculo, String executante, String nomeUnidadeSIRESP, String nomeFPO) {
+	public EntidadeExecutanteR1(String cnes, String vinculo, String executante, String nomeUnidadeSIRESP, String nomeOfertasParaDERAC) {
 		this.cnes = cnes;
 		this.vinculo = vinculo;
 		this.executante = executante;
 		this.nomeUnidadeSIRESP = nomeUnidadeSIRESP;
-		this.nomeFPO = nomeFPO;
+		this.nomeOfertasParaDERAC = nomeOfertasParaDERAC;
 	}
 	
 	public String getCNES() {
@@ -94,12 +94,12 @@ public class EntidadeExecutanteR1 {
 		this.arquivoBaixadoXLSX = arquivoBaixadoXLSX;
 	}
 
-	public String getNomeFPO() {
-		return nomeFPO;
+	public String getNomeOfertasParaDERAC() {
+		return nomeOfertasParaDERAC;
 	}
 
-	public void setNomeFPO(String nomeFPO) {
-		this.nomeFPO = nomeFPO;
+	public void setNomeOfertasParaDERAC(String nomeOfertasParaDERAC) {
+		this.nomeOfertasParaDERAC = nomeOfertasParaDERAC;
 	}
 	
 	

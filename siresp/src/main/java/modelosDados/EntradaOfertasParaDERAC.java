@@ -1,7 +1,7 @@
 package modelosDados;
 
 
-public class EntradaFPO {
+public class EntradaOfertasParaDERAC {
 
 	@ExcelColumn(header = "ESPECIALIDADES")
     private String especialidades;
@@ -21,8 +21,8 @@ public class EntradaFPO {
     @ExcelColumn(header = "Executante")
     private String executante;
     
-    @ExcelColumn(header = "FPO")
-    private String fpo;
+    @ExcelColumn(header = "Oferta prevista")
+    private String ofertasParaDERAC;
     
     @ExcelColumn(header = "Plano de trabalho (documento SEI)")
     private String planoDeTrabalho;
@@ -78,12 +78,12 @@ public class EntradaFPO {
 		this.executante = executante;
 	}
 
-	public String getFPO() {
-		return fpo;
+	public String getOfertasParaDERAC() {
+		return ofertasParaDERAC;
 	}
 
-	public void setFPO(String fpo) {
-		this.fpo = fpo;
+	public void setOfertasParaDERAC(String ofertasParaDERAC) {
+		this.ofertasParaDERAC = ofertasParaDERAC;
 	}
 
 	public String getPlanoDeTrabalho() {

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoMapaDeOfertasFPO {
+public enum ParametrosArquivoMapaDeOfertasOfertasParaDERAC {
 		
 	INDICE_COLUNA_ESPECIALIDADES(0, 0, "ESPECIALIDADES", "String", ""),
 	INDICE_COLUNA_PROCEDIMENTOS(1, 1, "PROCEDIMENTOS (nomenclatura padronizada)", "String", ""),
@@ -13,7 +13,7 @@ public enum ParametrosArquivoMapaDeOfertasFPO {
 	INDICE_COLUNA_AGENDA(3, 3, "Agenda", "String", ""),
 	INDICE_COLUNA_TIPO(4, 4, "Tipo", "String", ""),
 	INDICE_COLUNA_EXECUTANTE(5, 5, "Executante", "String", ""),
-	INDICE_COLUNA_FPO(6, 6, "FPO", "Int", ""),
+	INDICE_COLUNA_OFERTAS_PARA_DERAC(6, 6, "FPO", "Int", ""),
 	INDICE_COLUNA_PLANO_DE_TRABALHO(7, 7, "Plano de trabalho (documento SEI)", "String", ""),
 	INDICE_COLUNA_MES_DE_REFERENCIA(8, 8, "Mês de Referência", "Date", "MMM/yyyy"),
 	
@@ -33,7 +33,7 @@ public enum ParametrosArquivoMapaDeOfertasFPO {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoMapaDeOfertasFPO(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoMapaDeOfertasOfertasParaDERAC(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);
@@ -82,10 +82,10 @@ public enum ParametrosArquivoMapaDeOfertasFPO {
 		this.formato = formato;
 	}	
 	
-    private static final Map<Integer, ParametrosArquivoMapaDeOfertasFPO> POR_ID_UNICO =
-        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoMapaDeOfertasFPO::getIdUnico, Function.identity()));
+    private static final Map<Integer, ParametrosArquivoMapaDeOfertasOfertasParaDERAC> POR_ID_UNICO =
+        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoMapaDeOfertasOfertasParaDERAC::getIdUnico, Function.identity()));
 
-    public static ParametrosArquivoMapaDeOfertasFPO poIdUnico(int idUnico) {
+    public static ParametrosArquivoMapaDeOfertasOfertasParaDERAC poIdUnico(int idUnico) {
         return POR_ID_UNICO.get(idUnico); // pode retornar null se não existir
     }
 

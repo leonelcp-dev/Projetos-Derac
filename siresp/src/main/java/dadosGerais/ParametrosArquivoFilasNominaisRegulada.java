@@ -13,9 +13,11 @@ public enum ParametrosArquivoFilasNominaisRegulada {
 	EXTENSAO_ARQUIVO_CDR(2, 0, "csv", "", ""),
 	PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO(3, 0, "AGENDAMENTO PENDENTE", "", ""),
 	PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES(4, 0, "SOLICITACOES PENDENTES", "", ""),
-	TEXTO_REGULADA(5, 0, "REGULADA", "", ""),
-	EXTENSAO_ARQUIVO_XLSX(6, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_XLS(7, 0, "xls", "", "");
+	QUANTIDADE_MAXIMA_CARACTERES_DESCRICAO(5, 30, "Quantidade máxima de caracteres da descrição", "", ""),
+	PREFIXO_NOME_ARQUIVO_REGULADA_BAIXADO(6, 0, "pendentes-", "", ""),
+	TEXTO_REGULADA(6, 0, "REGULADA", "", ""),
+	EXTENSAO_ARQUIVO_XLSX(7, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_XLS(8, 0, "xls", "", "");
 
 	private int idUnico;
 	private int indice;

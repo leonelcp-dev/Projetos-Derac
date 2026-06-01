@@ -22,6 +22,7 @@ import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
+import dadosGerais.ParametrosArquivoFilasNominaisRegulada;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.ConversaoHMTL_XLSX;
@@ -215,7 +216,8 @@ public class FilaNominalSolicitacoesPendentes {
 				String nomeExame = opcao.getText().replaceAll("[<>:\"/\\\\|?*\\x00-\\x1F]", "_");
 				
 				Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
-				arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao() + " - " + tiposDeBusca[i].toUpperCase() + " " + nomeExame + " " + arquivoMaisRecente);
+				String nomeDoArquivoFormatado = arquivoMaisRecente.replace("pendentes-", "");
+				arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao() + " - " + tiposDeBusca[i].toUpperCase() + " " + nomeExame + " " + nomeDoArquivoFormatado);
 				
 				transferirArquivos(entidade, tiposDeBusca[i], arquivo);
 				
@@ -407,17 +409,42 @@ public class FilaNominalSolicitacoesPendentes {
 		tiposDeBusca[0] = "Consulta";
 		tiposDeBusca[1] = "Exame";
 		
+		int maximoCaracteresInicio;
+		int maximoCaracteresFinal;
+		
+		if(primeiro == 0)
+			maximoCaracteresInicio = 1;
+		else
+			maximoCaracteresInicio = textos.get(primeiro).length();
+		
+		if(ultimo == valores.size() - 1)
+			maximoCaracteresFinal = " até final de ".length() + 1;
+		else
+			maximoCaracteresFinal = textos.get(ultimo).length();
+		
+		int metadeDaQuantidadeMaxima = ParametrosArquivoFilasNominaisRegulada.QUANTIDADE_MAXIMA_CARACTERES_DESCRICAO.getIndice() / 2;
+		
+		if(maximoCaracteresInicio > metadeDaQuantidadeMaxima)
+		{
+			maximoCaracteresInicio = metadeDaQuantidadeMaxima;
+		}
+		
+		if(maximoCaracteresFinal > metadeDaQuantidadeMaxima)
+		{
+			maximoCaracteresFinal = metadeDaQuantidadeMaxima;			
+		}
+		
 		String grupo;
 		
 		if(primeiro == 0)
 			grupo = "" + letra;
 		else
-			grupo = textos.get(primeiro);
+			grupo = textos.get(primeiro).substring(0, maximoCaracteresInicio);
 		
 		if(ultimo == valores.size() - 1)
 			grupo += " até final de " + letra;
 		else
-			grupo += " até " + textos.get(ultimo);
+			grupo += " até " + textos.get(ultimo).substring(0, maximoCaracteresFinal);
 		
 		System.out.println("Recursivo: " + grupo);
 		
@@ -518,8 +545,6 @@ public class FilaNominalSolicitacoesPendentes {
 			}
 			arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
 			
-
-			
 			boolean existe = !driver.findElements(By.xpath("//button[contains(translate(@aria-label, '\u00A0', ' '), 'Go back')]")).isEmpty();
 			
 			if(existe)
@@ -535,7 +560,9 @@ public class FilaNominalSolicitacoesPendentes {
 		String nomeExame = Grupo.replaceAll("[<>:\"/\\\\|?*\\x00-\\x1F]", "_");
 		
 		Arquivo arquivo = new Arquivo(pastaDownloads, arquivoMaisRecente);
-		arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao() + " - " + tipoDeBusca.toUpperCase() + " " + nomeExame + " " + arquivoMaisRecente);
+		
+		String nomeArquivoFormatado = arquivoMaisRecente.replaceAll(ParametrosArquivoFilasNominaisRegulada.PREFIXO_NOME_ARQUIVO_REGULADA_BAIXADO.getDescricao(), "");
+		arquivo.renomear(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao() + " - " + tipoDeBusca.toUpperCase() + " " + nomeExame + " " + nomeArquivoFormatado);
 		
 		transferirArquivos(entidade, tipoDeBusca, arquivo);
 		

@@ -65,12 +65,13 @@ public class CensoLeitos {
 	private String pastaDownloads;
 	private int execucao10Horas;
 	private int execucaoCompleta;
+	private String mesAnoExecucao;
 	private MesesFormatados meses;	
 	private DateTimeFormatter formatoDataCenso;
 	private DateTimeFormatter formatoDataCensoDiario;
 	private ArrayList<Integer> colunasComFormulasNoArquivoCenso;
 
-	public String executarCenso(WebDriver driver)
+	public String executarCenso(WebDriver driver, boolean ConsolidarMesEspecifico)
 	{			
 		formatoDataCenso = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		formatoDataCensoDiario = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -93,8 +94,22 @@ public class CensoLeitos {
 		meses = new MesesFormatados();
 		
 		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados do censo", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
-		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
-		execucao10Horas = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina das 10 horas da manhã.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		
+		if(ConsolidarMesEspecifico)
+		{
+			mesAnoExecucao = JOptionPane.showInputDialog(null, "Insira os dados do mê/ano de processamento (MM/yyyy)", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+			pastaDownloads = "";
+			execucao10Horas = 0;
+			
+			data = LocalDate.parse("01/" + mesAnoExecucao, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			mesCompetencia = data.getMonthValue();
+			anoCompetencia = data.getYear();
+		}
+		else
+		{
+			pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+			execucao10Horas = JOptionPane.showOptionDialog(null, "Favor informar se será realizada a rotina das 10 horas da manhã.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+		}
 		System.out.println(execucaoCompleta);
 		
 		if(execucao10Horas == 0)
@@ -135,15 +150,18 @@ public class CensoLeitos {
 		
 		//paginaWeb.clicarMenuUL(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes);
 		
-		paginaWeb.clicarMenuUL(driver, 2, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
-		
-		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
-		
-		baixarArquivosCenso(driver, paginaWeb, entidades);
-		
-		buscarMotivoBloqueio(driver, paginaWeb, entidades);
-		
-		transferirArquivos(entidades);
+		if(!ConsolidarMesEspecifico)
+		{
+			paginaWeb.clicarMenuUL(driver, 2, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.ID_MENU.getTextoIdentificador(), opcoes, OpenStrategy.HOVER);
+			
+			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+			
+			baixarArquivosCenso(driver, paginaWeb, entidades);
+			
+			buscarMotivoBloqueio(driver, paginaWeb, entidades);
+			
+			transferirArquivos(entidades);
+		}
 		
 		if(rotinaCompleta.equals("Sim"))
 			consolidarArquivoZero(entidades);

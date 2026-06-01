@@ -18,20 +18,20 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Procedimentos (padronizado)")
     private String procedimento;
 
-    @ExcelColumn(header = "Especialidade")
+    @ExcelColumn(header = "Nomenclatura SIRESP")
     private String especialidade;
 
     @ExcelColumn(header = "Classificação")
     private String classificacao;
 
-    @ExcelColumn(header = "FPO")
-    private String fpo;
+    @ExcelColumn(header = "Ofertas Previstas")
+    private String ofertasPrevistas;
 
-    @ExcelColumn(header = "Novas Solicitações")
+    @ExcelColumn(header = "Novas Solicitações (mensais)")
     private String novasSolicitacoes;
 
-    @ExcelColumn(header = "Oferta Total")
-    private String ofertaTotal;
+    @ExcelColumn(header = "Oferta Disponível")
+    private String ofertaDisponivel;
 
     @ExcelColumn(header = "Oferta Bloqueada")
     private String ofertaBloqueada;
@@ -84,7 +84,7 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Taxa Não Informado")
     private String taxaNaoInformado;
     
-   	@ExcelColumn(header = "Demanda Reprimida")
+   	@ExcelColumn(header = "Demanda Reprimida do dia")
     private String demandaReprimida;
     
     @ExcelColumn(header = "Tempo de Espera")
@@ -93,11 +93,13 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Recepção Fechada")
     private String recepcaoFechada;
     
-    @ExcelColumn(header = "Mais Velho na Fila (em dias)")
+    @ExcelColumn(header = "Maior tempo de espera em dias")
     private String maisVelhoNaFila;
     
     @ExcelColumn(header = "Observação")
     private String observacao;
+    
+    private String diferencaDeOferta;
     
     private int linhaExcel;
 
@@ -157,12 +159,12 @@ public class OfertaEDemanda {
 		this.classificacao = classificacao;
 	}
 
-	public String getFPO() {
-		return fpo;
+	public String getOfertasPrevistas() {
+		return ofertasPrevistas;
 	}
 
-	public void setFPO(String fpo) {
-		this.fpo = fpo;
+	public void setOfertasPrevistas(String ofertasPrevistas) {
+		this.ofertasPrevistas = ofertasPrevistas;
 	}
 
 	public String getNovasSolicitacoes() {
@@ -181,12 +183,12 @@ public class OfertaEDemanda {
 		this.ofertaBloqueada = ofertaBloqueada;
 	}
 
-	public String getOfertaTotal() {
-		return ofertaTotal;
+	public String getOfertaDisponivel() {
+		return ofertaDisponivel;
 	}
 
-	public void setOfertaTotal(String ofertaTotal) {
-		this.ofertaTotal = ofertaTotal;
+	public void setOfertaDisponivel(String ofertaDisponivel) {
+		this.ofertaDisponivel = ofertaDisponivel;
 	}
 
 	public String getAgendamentoCota() {
@@ -363,6 +365,14 @@ public class OfertaEDemanda {
 
 	public void setLinhaExcel(int linhaExcel) {
 		this.linhaExcel = linhaExcel;
+	}
+
+	public String getDiferencaDeOferta() {
+		return diferencaDeOferta;
+	}
+
+	public void setDiferencaDeOferta(String diferencaDeOferta) {
+		this.diferencaDeOferta = diferencaDeOferta;
 	}
 
 }

@@ -966,6 +966,45 @@ public class AcoesArquivoExcel {
 
 	}
 	
+	public String ocultarPlanilha(int indicePlanilha)
+	{
+		try
+		{
+			arquivoXLSX.setSheetHidden(indicePlanilha, true);
+		 try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+             arquivoXLSX.write(fos);
+         }
+			 
+	    }catch(IOException e)
+	    {
+	    	e.printStackTrace();
+	    }
+		
+		return "";
+	}
+	
+	public String ocultarPlanilha(String nomePlanilha)
+	{
+		try
+		{
+			int indicePlanilha;
+			
+			indicePlanilha = arquivoXLSX.getSheetIndex(nomePlanilha);
+			
+			arquivoXLSX.setSheetHidden(indicePlanilha, true);
+			
+			 try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+	             arquivoXLSX.write(fos);
+	         }
+			 
+	    }catch(IOException e)
+	    {
+	    	e.printStackTrace();
+	    }
+		
+		return "";
+	}
+	
 	public boolean ehCelulaComString(int linha, int coluna)
 	{
 		Cell cell = ensureCell(planilhaAtiva, linha, coluna);

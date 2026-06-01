@@ -9,19 +9,19 @@ public class Demanda {
     @ExcelColumn(header = "Procedimentos (padronizado)")
     private String procedimento;
 
-    @ExcelColumn(header = "Novas Solicitações")
+    @ExcelColumn(header = "Novas Solicitações (mensais)")
     private String novasSolicitacoes;
 
-    @ExcelColumn(header = "Oferta Total")
+    @ExcelColumn(header = "Oferta Disponível")
     private String ofertaTotal;
 
-   	@ExcelColumn(header = "Demanda Reprimida")
+   	@ExcelColumn(header = "Demanda Reprimida do dia")
     private String demandaReprimida;
     
     @ExcelColumn(header = "Tempo de Espera")
     private String tempoDeEspera;
     
-    @ExcelColumn(header = "Mais Velho na Fila (em dias)")
+    @ExcelColumn(header = "Maior tempo de espera em dias")
     private String maisVelhoNaFila;
     
     private int linhaExcel;
