@@ -96,9 +96,9 @@ public class OfertaEDemanda {
     @ExcelColumn(header = "Maior tempo de espera em dias")
     private String maisVelhoNaFila;
     
-    @ExcelColumn(header = "Observação")
     private String observacao;
-    
+
+    @ExcelColumn(header = "Diferença de oferta")
     private String diferencaDeOferta;
     
     private int linhaExcel;

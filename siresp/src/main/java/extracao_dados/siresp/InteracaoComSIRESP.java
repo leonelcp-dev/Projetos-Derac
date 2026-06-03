@@ -182,7 +182,7 @@ public class InteracaoComSIRESP
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
         	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", false, false, false, false, false, false, true, false, false, false, ambiente);
-        	ofertaDemanda.calcularOfertaEDemanda(driver, "07/2026", "07/2026", false, true, true, false, true, true, true, true, true, true, ambiente);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "07/2026", false, true, true, false, true, true, true, true, true, true, ambiente);
         	//ofertaDemanda.calcularOfertaEDemanda(driver, "02/2025", "02/2025", true, true, true, true, true, false, false, false, false, false, ambiente);
         }
         

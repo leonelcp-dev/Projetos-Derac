@@ -404,7 +404,7 @@ public class CensoLeitos {
 							System.out.println("Justificativa: " + "");
 							System.out.println("----------------------------");
 							
-							motivoDoBloqueio = "";
+							motivoDoBloqueio = "DESBLOQUEADO";
 							justificativaDoBloqueio = "";
 						}
 						

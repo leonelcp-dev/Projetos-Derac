@@ -414,7 +414,44 @@ public class OfertaDemandaDeAcessoR1 {
 					oferta.setPlanoDeTrabalho(oferta.getPlanoDeTrabalho().replaceAll("\u00A0", ""));
 					oferta.setMesDeReferencia(oferta.getMesDeReferencia().replaceAll("\u00A0", ""));
 					
-					mapaDeOfertasParaDERAC.put(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase(), oferta);
+					if(mapaDeOfertasParaDERAC.containsKey(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase()))
+					{
+						EntradaOfertasParaDERAC ofertaExistente = mapaDeOfertasParaDERAC.get(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase());
+						
+						boolean ehNumeroExistente = false;
+						boolean ehNumeroNovo = false;
+						int soma = 0;
+						try
+						{
+							soma +=  Integer.parseInt(ofertaExistente.getOfertasParaDERAC());
+							ehNumeroExistente = true;
+						}catch(NumberFormatException e)
+						{
+							e.printStackTrace();
+						}
+						
+						System.out.println(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase() + " - " + soma);
+						
+						try
+						{
+							soma +=  Integer.parseInt(oferta.getOfertasParaDERAC());
+							ehNumeroNovo = true;
+						}catch(NumberFormatException e)
+						{
+							e.printStackTrace();
+						}
+						
+						if(ehNumeroExistente || ehNumeroNovo)
+						{
+							ofertaExistente.setOfertasParaDERAC(String.valueOf(soma));
+						}
+						
+						System.out.println(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase() + " - " + soma);
+						
+						mapaDeOfertasParaDERAC.put(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase(), ofertaExistente);
+					}
+					else
+						mapaDeOfertasParaDERAC.put(oferta.getExecutante().trim().toUpperCase() + oferta.getProcedimentos().trim().toUpperCase(), oferta);
 				}
 			}
 			
@@ -3016,6 +3053,7 @@ public class OfertaDemandaDeAcessoR1 {
 					{
 						oferta = new OfertaEDemanda();
 						//mapaEspecialidade = new HashMap<String, OfertaEDemanda>();
+						ofertaPreExistente = -1;
 						linhaExcel = ultimaLinhaLivre;
 						ultimaLinhaLivre++;
 					}
@@ -3024,6 +3062,7 @@ public class OfertaDemandaDeAcessoR1 {
 				{
 					oferta = new OfertaEDemanda();
 					mapaEspecialidade = new HashMap<String, OfertaEDemanda>();
+					ofertaPreExistente = -1;
 					ofertasDemandasProcessadas.put(entidade.getExecutante() + inicioCompetenciaFormatado, mapaEspecialidade);
 					linhaExcel = ultimaLinhaLivre;
 					ultimaLinhaLivre++;
@@ -3134,10 +3173,10 @@ public class OfertaDemandaDeAcessoR1 {
 				else
 					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_NAO_INFORMADO.getIndice(), Double.parseDouble(oferta.getTaxaNaoInformado()), "Porcentagem"));
 				
-//				if(oferta.getDiferencaDeOferta.equals("-"))
-//					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), "-", "String"));
-//				else
-//					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), Double.parseDouble(oferta.getDiferencaDeOferta()), "Int"));
+				if(oferta.getDiferencaDeOferta().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), Double.parseDouble(oferta.getDiferencaDeOferta()), "Int"));
 				
 				if(mapaEspecialidade != null)
 				{
@@ -3196,7 +3235,7 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			try
 			{
-				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoAusenteCalculado()) / Integer.parseInt(oferta.getAgendamentoTotal());
+				Double valor = 1.0 * Integer.parseInt(oferta.getRecepcaoAusente()) / Integer.parseInt(oferta.getAgendamentoTotal());
 				oferta.setTaxaAusente(String.valueOf(valor));
 				
 			}catch(NumberFormatException e)

@@ -462,19 +462,13 @@ public class DemandaReprimida {
 							Iterable<CSVRecord> registros = format.parse(reader);
 							for(CSVRecord registro : registros)						
 							{
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
-							    
-							    String nomeAbreviado = Utils.somenteIniciais(registro.get(colunaNomePaciente).replaceAll("\"", ""));
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOME_ABREVIADO.getIndice(), nomeAbreviado, "String"));
-							    
+								String nomeAbreviado = Utils.somenteIniciais(registro.get(colunaNomePaciente).replaceAll("\"", ""));
+
 							    System.out.println(linhaPlanilhaCDR + " " + registro.get(0));
 							    System.out.println(registro.get(colunaDataEntrada));
 							    LocalDate dataEntrada = LocalDate.parse(registro.get(colunaDataEntrada).replaceAll("\"", ""), DateTimeFormatter.ofPattern(formatoDataHora));
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_DATA_ENTRADA.getIndice(), dataEntrada, "Date"));
 							    
 							    int tempoDeEsperaEmDias = (int)ChronoUnit.DAYS.between(dataEntrada, dataDaColeta);
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
 							    
 							    String especialidadeExame = registro.get(colunaEspecialidadeExame).replaceAll("\"", "");
 							    String nomePadronizado = "";
@@ -485,13 +479,7 @@ public class DemandaReprimida {
 							    	nomePadronizado = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getNomenclatura();
 							    	tipoAgendamento = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getFluxo();
 							    }
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOMENCLATURA_CORRETA.getIndice(), nomePadronizado, "String"));
-							    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_AGENDAMENTO.getIndice(), tipoAgendamento, "String"));
-							    
-							    correlacionarCDR(colunasCDR, registro, linhaPlanilhaCDR, celulasCDR, formatoData, formatoDataHora, formatoHora);
-							    
-							    linhaPlanilhaCDR++;
-							    
+								
 							    if(registro.get(colunaStatus).equals(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.TEXTO_STATUS_AGENDADO.getDescricao())) 
 							    {
 							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
@@ -508,6 +496,23 @@ public class DemandaReprimida {
 								    correlacionarCDR(colunasFilipeta, registro, linhaPlanilhaFilipetaNaoImpressa, celulasFilipetasNaoImpressas, formatoData, formatoDataHora, formatoHora);
 								    
 								    linhaPlanilhaFilipetaNaoImpressa++;
+							    }
+							    else
+							    {
+							    	celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
+								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
+								    							    
+								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOME_ABREVIADO.getIndice(), nomeAbreviado, "String"));
+								    
+								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_DATA_ENTRADA.getIndice(), dataEntrada, "Date"));
+								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
+								    
+								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOMENCLATURA_CORRETA.getIndice(), nomePadronizado, "String"));
+								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_AGENDAMENTO.getIndice(), tipoAgendamento, "String"));
+								    
+								    correlacionarCDR(colunasCDR, registro, linhaPlanilhaCDR, celulasCDR, formatoData, formatoDataHora, formatoHora);
+								    
+								    linhaPlanilhaCDR++;
 							    }
 							}
 							

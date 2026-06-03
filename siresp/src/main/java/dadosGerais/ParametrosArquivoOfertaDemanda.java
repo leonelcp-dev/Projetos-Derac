@@ -39,20 +39,21 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS(29, 30,"Maior tempo de espera em dias", "String", ""),
 	INDICE_COLUNA_RECEPCAO_FECHADA(30, 31,"Recepção Fechada", "String", ""),
 	INDICE_COLUNA_OBSERVACAO(31, 32,"Recepção Fechada", "String", ""),
+	INDICE_COLUNA_DIFERENCA_DE_OFERTA(32, 32,"Diferença de oferta", "Int", ""),
 	
-	LINHA_INICIAL_ARQUIVO(32, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	LINHA_INICIAL_ARQUIVO(33, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(33, 0, "Ofertas", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(34, 0, "Ofertas", "", ""),
 	
-	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(34, 0, "Erro ao selecionar o grupo de cota", "", ""),
+	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(35, 0, "Erro ao selecionar o grupo de cota", "", ""),
 	
-	INDICE_COLUNA_DATA_PROCESSAMENTO(35, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
-	INDICE_LINHA_DATA_PROCESSAMENTO(36, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	INDICE_COLUNA_DATA_PROCESSAMENTO(36, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
+	INDICE_LINHA_DATA_PROCESSAMENTO(37, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
 	
-	NOME_ARQUIVO_CONSOLIDADO(37, 0, "ConsolidadoOfertaEDemanda.xlsx", "", ""),
+	NOME_ARQUIVO_CONSOLIDADO(38, 0, "ConsolidadoOfertaEDemanda.xlsx", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(38, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(39, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(39, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(40, 0, "xls", "", "");
 	
 
 	private int idUnico;
