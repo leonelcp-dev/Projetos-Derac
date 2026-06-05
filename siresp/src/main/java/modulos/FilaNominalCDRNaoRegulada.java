@@ -113,6 +113,16 @@ public class FilaNominalCDRNaoRegulada {
 					String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
 					elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
 				}
+				else
+				{
+					posicaoPerfilDeAcesso = elemento.getText().indexOf(" - Atendente");
+					
+					if(posicaoPerfilDeAcesso > 0)
+					{
+						String composicaoCNESNomeUnidade = elemento.getText().substring(0, posicaoPerfilDeAcesso);
+						elementosRadioUnidades.put(composicaoCNESNomeUnidade, value);
+					}
+				}
 			}
 
 		}
@@ -241,7 +251,7 @@ public class FilaNominalCDRNaoRegulada {
 			
 			transferirArquivos(entidade, tiposDeBusca[i], arquivo);
 			
-			ultimoRecente = arquivo.getNomeDoArquivo();
+			ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
 		}
 		
 

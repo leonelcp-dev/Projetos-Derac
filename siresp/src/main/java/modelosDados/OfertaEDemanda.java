@@ -11,6 +11,8 @@ public class OfertaEDemanda {
 
     @ExcelColumn(header = "Competência", pattern = "mmm/yyyy")
     private String competencia;
+    
+    private String competenciaOrdenacao;
 
     @ExcelColumn(header = "Tipo de oferta")
     private String tipoDeOferta;
@@ -373,6 +375,14 @@ public class OfertaEDemanda {
 
 	public void setDiferencaDeOferta(String diferencaDeOferta) {
 		this.diferencaDeOferta = diferencaDeOferta;
+	}
+
+	public String getCompetenciaOrdenacao() {
+		return competenciaOrdenacao;
+	}
+
+	public void setCompetenciaOrdenacao(String competenciaOrdenacao) {
+		this.competenciaOrdenacao = competenciaOrdenacao;
 	}
 
 }

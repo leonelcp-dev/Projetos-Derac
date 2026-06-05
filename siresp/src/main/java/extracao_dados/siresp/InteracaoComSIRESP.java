@@ -154,7 +154,7 @@ public class InteracaoComSIRESP
         else if(escolha == 3)
         {
         	FilaNominalSolicitacoesPendentes filaNominalRegulada = new FilaNominalSolicitacoesPendentes();
-        	filaNominalRegulada.baixarFilaAgendamentosPendentes(driver);
+        	filaNominalRegulada.baixarFilaSolicitacoesPendentes(driver);
         } 
         else if(escolha == 4)
         {

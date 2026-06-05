@@ -12,8 +12,8 @@ public enum ParametrosArquivoOfertaPlanilhaDemanda {
 	INDICE_COLUNA_NOVAS_SOLICITACOES(2, 3, "Novas Solicitações", "Int", ""),
 	INDICE_COLUNA_DEMANDA_REPRIMIDA(3, 4,"Demanda Reprimida", "Int", ""),
 	INDICE_COLUNA_OFERTA_TOTAL(4, 5, "Oferta Total", "Int", ""),
-	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(5, 6,"Cálculos Tempo de Espera", "Double", ""),
-	INDICE_COLUNA_MAIS_VELHO_NA_FILA(6, 7,"Mais Velho na Fila", "String", ""),
+	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(5, 6,"Cálculos Tempo de Espera", "Int", ""),
+	INDICE_COLUNA_MAIS_VELHO_NA_FILA(6, 7,"Mais Velho na Fila", "Int", ""),
 	
 	LINHA_INICIAL_ARQUIVO(8, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	

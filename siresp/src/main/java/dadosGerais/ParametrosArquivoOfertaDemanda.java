@@ -35,8 +35,8 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_CALCULOS_DISPENSADO(25, 26,"Cálculo Dispensado", "Porcentagem", ""),
 	INDICE_COLUNA_CALCULOS_NAO_INFORMADO(26, 27,"Cálculo Não Informado", "Porcentagem", ""),
 	INDICE_COLUNA_DEMANDA_REPRIMIDA_DO_DIA(27, 28,"Demanda Reprimida", "Int", ""),
-	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(28, 29,"Cálculos Tempo de Espera", "Double", ""),
-	INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS(29, 30,"Maior tempo de espera em dias", "String", ""),
+	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(28, 29,"Cálculos Tempo de Espera", "Int", ""),
+	INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS(29, 30,"Maior tempo de espera em dias", "Int", ""),
 	INDICE_COLUNA_RECEPCAO_FECHADA(30, 31,"Recepção Fechada", "String", ""),
 	INDICE_COLUNA_OBSERVACAO(31, 32,"Recepção Fechada", "String", ""),
 	INDICE_COLUNA_DIFERENCA_DE_OFERTA(32, 32,"Diferença de oferta", "Int", ""),
@@ -51,9 +51,10 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_LINHA_DATA_PROCESSAMENTO(37, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
 	
 	NOME_ARQUIVO_CONSOLIDADO(38, 0, "ConsolidadoOfertaEDemanda.xlsx", "", ""),
+	NOME_ARQUIVO_CONSOLIDADO_EM_PROCESSAMENTO(39, 0, "ConsolidadoOfertaEDemanda-temp.xlsx", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(39, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(40, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(40, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(41, 0, "xls", "", "");
 	
 
 	private int idUnico;

@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
@@ -36,6 +38,7 @@ import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDRA;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
+import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoDemandaReprimida;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import dadosGerais.ParametrosArquivoFilasNominaisRegulada;
@@ -116,6 +119,17 @@ public class OfertaDemandaDeAcessoR1 {
 	private IdentificadoresPastasCompartilhadasCDIDR diretoriosCDIDR; 
 	private IdentificadoresPastasCompartilhadasCDRA diretoriosCDRA; 
 
+	public OfertaDemandaDeAcessoR1(String pastaBase, String ambiente)
+	{
+		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDR.valueOf(ambiente);
+		pastaBaseAmbulatorialCDIDR = pastaBase;
+	}
+	
+	public OfertaDemandaDeAcessoR1()
+	{
+
+	}
+	
 	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal, boolean testeNovasSolicitacoes, boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida, boolean preencherProdutividade, boolean preencherOfertasParaDERAC, boolean preencherNomenclatura, boolean preencherBloqueio, boolean preencherRecepcao, String ambiente)
 	{			
 		formatoDataPaginaWeb = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -195,6 +209,7 @@ public class OfertaDemandaDeAcessoR1 {
 			return "";
 		}
 		
+		gerarCopiaTemporariaRelatorioProducao();
 
 		unidadesSolicitantes = lerEntidadesSolicitantes(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoUnidadesSolicitantes());
 		
@@ -587,8 +602,6 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			preencherDataDeProcessamento();
 			
-			copiarDemandaReprimidaParaCDRA();
-			
 			mesCompetencia++;
 			if(mesCompetencia > 12)
 			{
@@ -597,6 +610,10 @@ public class OfertaDemandaDeAcessoR1 {
 			}
 				
 		}
+		
+		atualizarCopiaOriginalRelatorioProducao();
+		copiarRelatorioProducaoParaCDIDR();
+		copiarRelatorioProducaoParaCDRA();
 		
 		return "";	
 	}
@@ -3635,7 +3652,7 @@ public class OfertaDemandaDeAcessoR1 {
         return data;
 	}
 	
-	private String copiarDemandaReprimidaParaCDRA()
+	private String copiarRelatorioProducaoParaCDRA()
 	{
 		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
 		Arquivo arquivo = new Arquivo(caminhoArquivo, ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO.getDescricao());
@@ -3643,6 +3660,42 @@ public class OfertaDemandaDeAcessoR1 {
 		String pastaRelatorioCDRA = pastaBaseCDRA + "\\" + diretoriosCDRA.getPastaRelatorioOfertaDemanda();
 		
 		arquivo.CopiarArquivo(pastaRelatorioCDRA + "\\" + arquivo.getNomeDoArquivo());
+		
+		return "";
+	}
+	
+	private String copiarRelatorioProducaoParaCDIDR()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO.getDescricao());
+		
+		String pastaRelatorioCDIDR = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemandaCDIDR();
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + arquivo.getNomeDoArquivo());
+		
+		return "";
+	}
+	
+	private String gerarCopiaTemporariaRelatorioProducao()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO.getDescricao());
+		
+		String pastaRelatorio = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
+		
+		arquivo.CopiarArquivo(pastaRelatorio + "\\" + ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO_EM_PROCESSAMENTO.getDescricao());
+		
+		return "";
+	}
+	
+	private String atualizarCopiaOriginalRelatorioProducao()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO_EM_PROCESSAMENTO.getDescricao());
+		
+		String pastaRelatorio = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
+		
+		arquivo.CopiarArquivo(pastaRelatorio + "\\" + ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO.getDescricao());
 		
 		return "";
 	}
@@ -3742,6 +3795,201 @@ public class OfertaDemandaDeAcessoR1 {
 	
 	    throw new IllegalArgumentException("Formato de data inválido: " + valor);
 	}
+	
+	private static String normalizarDataParaAnoMes(String valor) {
+	    if (valor == null || valor.isBlank())
+	        return null;
+	
+	    Locale localeBR = Locale.of("pt", "BR"); // Java 21
+	    DateTimeFormatter fmtAnoMes = DateTimeFormatter.ofPattern("yyyy-MM", localeBR);
+	
+	    // 1️ Caso seja número serial do Excel
+	    if (valor.matches("\\d+")) {
+	        long serial = Long.parseLong(valor);
+	        LocalDate data = LocalDate.of(1899, 12, 30).plusDays(serial); // Ajuste Excel
+	        return fmtAnoMes.format(data);
+	    }
+	
+	    // 2️ Caso seja dd/MM/yyyy
+	    try {
+	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("dd/MM/yyyy", localeBR);
+	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
+	        return fmtAnoMes.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e tenta o próximo formato
+	    }
+	
+	    // 3️ Caso seja mmm/yyyy (direto do Excel ou do POI)
+	    try {
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+	        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy", localeBR));
+	        return fmtAnoMes.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	
+	    throw new IllegalArgumentException("Formato de data inválido: " + valor);
+	}
+	
+	public String ordenarPlanilhaDeOfertas()
+	{
+		ArrayList<OfertaEDemanda> ofertasEDemandasJaRegistradas = lerOfertasJaProcessadas(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
+		ofertasDemandasProcessadas = new HashMap<String, HashMap<String, OfertaEDemanda>>();
+		
+		int linhaArquivo = ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(OfertaEDemanda oferta : ofertasEDemandasJaRegistradas)
+		{
+			String competenciaExtraida = oferta.getCompetencia();
+			oferta.setCompetencia(normalizarDataParaMesAno(competenciaExtraida));
+			oferta.setCompetenciaOrdenacao(normalizarDataParaAnoMes(competenciaExtraida));
+		}
+		
+		Collections.sort(ofertasEDemandasJaRegistradas, Comparator
+		    .comparing(OfertaEDemanda::getCompetenciaOrdenacao).reversed()
+		    .thenComparing(OfertaEDemanda::getUnidade)
+		    .thenComparing(OfertaEDemanda::getTipoDeOferta)
+		    .thenComparing(OfertaEDemanda::getEspecialidade)
+		);		
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(OfertaEDemanda oferta : ofertasEDemandasJaRegistradas)
+		{
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_UNIDADE.getIndice(), oferta.getUnidade(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_UNIDADE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_VINCULO.getIndice(), oferta.getVinculo(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_VINCULO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), oferta.getCompetencia(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_COMPETENCIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_TIPO_OFERTA.getIndice(), oferta.getTipoDeOferta(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_TIPO_OFERTA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getIndice(), oferta.getProcedimento(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ESPECIALIDADE.getIndice(), oferta.getEspecialidade(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ESPECIALIDADE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CLASSIFICACAO.getIndice(), oferta.getClassificacao(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CLASSIFICACAO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTAS_PREVISTAS.getIndice(), oferta.getOfertasPrevistas(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTAS_PREVISTAS.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES_MENSAIS.getIndice(), oferta.getNovasSolicitacoes(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES_MENSAIS.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_DISPONIVEL.getIndice(), oferta.getOfertaDisponivel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_DISPONIVEL.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), oferta.getOfertaBloqueada(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_TOTAL.getIndice(), oferta.getAgendamentoTotal(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_TOTAL.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_COTA.getIndice(), oferta.getAgendamentoCota(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_COTA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_BOLSAO.getIndice(), oferta.getAgendamentoBolsao(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_BOLSAO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_NAO_DISTRIBUIDO.getIndice(), oferta.getAgendamentoNaoDistribuido(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_NAO_DISTRIBUIDO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_EXTRA.getIndice(), oferta.getAgendamentoExtra(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_EXTRA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_PRESENTE.getIndice(), oferta.getRecepcaoAtendido(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_PRESENTE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_AUSENTE.getIndice(), oferta.getRecepcaoAusente(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_AUSENTE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_AUSENTE_CALCULADO.getIndice(), oferta.getRecepcaoAusenteCalculado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_AUSENTE_CALCULADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DESISTENCIA.getIndice(), oferta.getRecepcaoDesistencia(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DESISTENCIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DISPENSADO.getIndice(), oferta.getRecepcaoDispensado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DISPENSADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_NAO_INFORMADO.getIndice(), oferta.getRecepcaoNaoInformado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_NAO_INFORMADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_ATENDIDO.getIndice(), oferta.getTaxaAtendido(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_ATENDIDO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AUSENTE.getIndice(), oferta.getTaxaAusente(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AUSENTE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DESISTENCIA.getIndice(), oferta.getTaxaDesistencia(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DESISTENCIA.getTipo()));			
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DISPENSADO.getIndice(), oferta.getTaxaDispensado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DISPENSADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_NAO_INFORMADO.getIndice(), oferta.getTaxaNaoInformado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_NAO_INFORMADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA_DO_DIA.getIndice(), oferta.getDemandaReprimida(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA_DO_DIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), oferta.getTempoDeEspera(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), oferta.getMaisVelhoNaFila(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_RECEPCAO_FECHADA.getIndice(), oferta.getRecepcaoFechada(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_RECEPCAO_FECHADA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), oferta.getDiferencaDeOferta(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getTipo()));
+			
+			linhaArquivo++;
+		}
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	public String ordenarPlanilhaDeDemandas()
+	{
+		ArrayList<Demanda> demandasJaRegistradas = lerDemandasJaProcessadas(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaPlanilhaDemanda.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
+		demandasProcessadas = new HashMap<String, Demanda>();
+		
+		int linhaArquivoDemanda = ParametrosArquivoOfertaPlanilhaDemanda.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(Demanda demanda : demandasJaRegistradas)
+		{
+			String competenciaExtraida = demanda.getCompetencia();
+			demanda.setCompetencia(normalizarDataParaMesAno(competenciaExtraida));
+			demanda.setCompetenciaOrdenacao(normalizarDataParaAnoMes(competenciaExtraida));
+		}
+		
+		Collections.sort(demandasJaRegistradas, Comparator
+		    .comparing(Demanda::getCompetenciaOrdenacao).reversed()
+		    .thenComparing(Demanda::getProcedimento)
+		);		
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(Demanda demanda : demandasJaRegistradas)
+		{
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getIndice(), demanda.getProcedimento(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), demanda.getCompetencia(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_COMPETENCIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES.getIndice(), demanda.getNovasSolicitacoes(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA.getIndice(), demanda.getDemandaReprimida(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_TOTAL.getIndice(), demanda.getOfertaTotal(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_TOTAL.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), demanda.getTempoDeEspera(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getIndice(), demanda.getMaisVelhoNaFila(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getTipo()));
+			
+			linhaArquivoDemanda++;
+		}
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaPlanilhaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
 
+	private CelulaExcel criarCelula(int linha, int coluna, String valor, String tipo)
+	{
+		CelulaExcel celula = null;
+		
+		if(tipo.equals("String"))
+			celula = new CelulaExcel(linha, coluna, valor, tipo);
+		else if(tipo.equals("Int"))
+		{
+			try
+			{
+				int valorInteiro = Integer.parseInt(valor);
+				celula = new CelulaExcel(linha, coluna, valorInteiro, tipo);
+			}
+			catch(NumberFormatException e)
+			{
+				celula = new CelulaExcel(linha, coluna, valor, "String");
+			}
+		}
+		else if(tipo.equals("Porcentagem"))
+		{
+			try
+			{
+				String valorReal = valor.replace("%", "").replace(",", ".");
+				Double valorPorcentagem = Double.parseDouble(valorReal)/100;
+				celula = new CelulaExcel(linha, coluna, valorPorcentagem, tipo);
+			}
+			catch(NumberFormatException e)
+			{
+				celula = new CelulaExcel(linha, coluna, valor, "String");
+			}
+		}
+		else if(tipo.equals("Date mes/ano"))
+		{
+			 try 
+			 {
+				Locale localeBR = Locale.of("pt", "BR"); // Java 21
+		        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy", localeBR));
+
+		        celula = new CelulaExcel(linha, coluna, data, tipo);
+		        
+			 } catch (DateTimeParseException e) {
+		    	celula = new CelulaExcel(linha, coluna, valor, "String");
+		    }
+		}
+		
+		return celula;
+	}
 	
 }

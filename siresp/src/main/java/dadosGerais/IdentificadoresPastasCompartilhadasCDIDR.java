@@ -15,7 +15,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	TESTE_PASTA_ARQUIVOS_PARA_IMPORTACAO(3, "Importacao"),
 	TESTE_PASTA_CENSO_DIARIO(4, "Leitos"),
 	TESTE_PASTA_LOGINS_SIRESP(5, "Logins SIRESP"),
-	TESTE_PASTA_RELATORIO_OFERTA_E_DEMANDA(6, "Oferta e Demanda"),
+	TESTE_PASTA_RELATORIO_OFERTA_E_DEMANDA(6, "Oferta e Demanda\\temp"),
 	TESTE_PASTA_ARQUIVOS_ORIGINAIS_PRODUCAO(7, "Oferta e Demanda\\Arquivos Originais"),
 	TESTE_PASTA_ARQUIVOS_CDR_NOVAS_SOLICITACOES(8, "Oferta e Demanda\\ENTRADAS MENSAIS\\DADOS BRUTOS"),
 	TESTE_PASTA_ARQUIVOS_DEMANDA_REPRIMIDA(9, "Oferta e Demanda\\ENTRADAS MENSAIS\\Demanda Reprimida"),
@@ -29,7 +29,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	TESTE_NOME_ARQUIVO_UNIDADES_SOLICITANTES(13, "Oferta e Demanda\\unidadesSolicitantes.csv"),
 	TESTE_NOME_ARQUIVO_BD_CONSOLIDADO_NOVAS_SOLICITACOES_CDR(13, "Oferta e Demanda\\ENTRADAS MENSAIS\\BD Demanda Reprimida - CDR.xlsx"),
 	TESTE_NOME_ARQUIVO_BD_CONSOLIDADO_NOVAS_SOLICITACOES_REGULADA(13, "Oferta e Demanda\\ENTRADAS MENSAIS\\BD Demanda Reprimida - Regulada.xlsx"),
-	TESTE_NOME_ARQUIVO_OFERTA_DEMANDA(13, "Oferta e Demanda\\ConsolidadoOfertaEDemanda.xlsx"),
+	TESTE_NOME_ARQUIVO_OFERTA_DEMANDA(13, "Oferta e Demanda\\temp\\ConsolidadoOfertaEDemanda-temp.xlsx"),
 	TESTE_NOME_ARQUIVO_RELACOES_ESPECIALIDADES_BLOQUEIO(13, "Oferta e Demanda\\RelacaoEspecialidadesBloqueio.xlsx"),
 	
 	TESTE_PASTA_ARQUIVOS_OFERTAS_PARA_DERAC(13, "Oferta e Demanda\\FPO"),
@@ -37,6 +37,8 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	TESTE_NOME_ARQUIVO_DE_PARA_ESPECIALIDADES(13, "Oferta e Demanda\\ENTRADAS MENSAIS\\Demanda Reprimida\\de-para Especialidades.xlsx"),
 	TESTE_PASTA_ARQUIVOS_PARA_AUTOMATIZACAO(13, "Oferta e Demanda\\Arquivos Vazios"),
 	TESTE_NOME_ARQUIVO_UNIDADES_DEMANDA_REPRIMIDA(13, "Ambulatorial\\entidadesParaDemandaReprimida.csv"),
+	TESTE_PASTA_RELATORIO_OFERTA_E_DEMANDA_PARA_CDIDR(13, "Oferta e Demanda"),
+	
 	
 
 	PROD_PASTA_FILAS_NOMINAIS(0, "FILAS NOMINAIS - UNIDADES"),
@@ -45,7 +47,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	PROD_PASTA_ARQUIVOS_PARA_IMPORTACAO(3, "Importacao"),
 	PROD_PASTA_CENSO_DIARIO(4, "Leitos"),
 	PROD_PASTA_LOGINS_SIRESP(5, "Logins SIRESP"),
-	PROD_PASTA_RELATORIO_OFERTA_E_DEMANDA(6, "01 - BANCO DE DADOS\\Oferta e Demanda"),
+	PROD_PASTA_RELATORIO_OFERTA_E_DEMANDA(6, "01 - BANCO DE DADOS\\Base para Automatizacao\\Oferta e Demanda"),
 	PROD_PASTA_ARQUIVOS_ORIGINAIS_PRODUCAO(7, "01 - BANCO DE DADOS\\Oferta e Demanda\\Arquivos Originais"),
 	PROD_PASTA_ARQUIVOS_CDR_NOVAS_SOLICITACOES(8, "06 - ENTRADAS MENSAIS DE SOLICITAÇÕES\\Dados CDR"),
 	PROD_PASTA_ARQUIVOS_DEMANDA_REPRIMIDA(9, ""),
@@ -59,7 +61,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	PROD_NOME_ARQUIVO_UNIDADES_SOLICITANTES(13, "01 - BANCO DE DADOS\\Base para Automatizacao\\Oferta e Demanda\\unidadesSolicitantes.csv"),
 	PROD_NOME_ARQUIVO_BD_CONSOLIDADO_NOVAS_SOLICITACOES_CDR(13, "06 - ENTRADAS MENSAIS DE SOLICITAÇÕES\\BD Demanda Reprimida - CDR.xlsx"),
 	PROD_NOME_ARQUIVO_BD_CONSOLIDADO_NOVAS_SOLICITACOES_REGULADA(13, "06 - ENTRADAS MENSAIS DE SOLICITAÇÕES\\BD Demanda Reprimida - Regulada.xlsx"),
-	PROD_NOME_ARQUIVO_OFERTA_DEMANDA(13, "01 - BANCO DE DADOS\\Oferta e Demanda\\ConsolidadoOfertaEDemanda.xlsx"),
+	PROD_NOME_ARQUIVO_OFERTA_DEMANDA(13, "01 - BANCO DE DADOS\\Base para Automatizacao\\Oferta e Demanda\\ConsolidadoOfertaEDemanda-temp.xlsx"),
 	PROD_NOME_ARQUIVO_RELACOES_ESPECIALIDADES_BLOQUEIO(13, "01 - BANCO DE DADOS\\Base para Automatizacao\\Oferta e Demanda\\RelacaoEspecialidadesBloqueio.xlsx"),
 	
 	PROD_PASTA_ARQUIVOS_OFERTAS_PARA_DERAC(13, "01 - BANCO DE DADOS\\Ofertas Previstas"),
@@ -67,6 +69,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	PROD_NOME_ARQUIVO_DE_PARA_ESPECIALIDADES(13, "01 - BANCO DE DADOS\\Base para Automatizacao\\Oferta e Demanda\\de-para Especialidades.xlsx"),
 	PROD_PASTA_ARQUIVOS_PARA_AUTOMATIZACAO(13, "01 - BANCO DE DADOS\\Base para Automatizacao\\Oferta e Demanda"),
 	PROD_NOME_ARQUIVO_UNIDADES_DEMANDA_REPRIMIDA(13, "01 - BANCO DE DADOS\\Base para Automatizacao\\Demanda Reprimida\\entidadesParaDemandaReprimida.csv"),
+	PROD_PASTA_RELATORIO_OFERTA_E_DEMANDA_PARA_CDIDR(13, "01 - BANCO DE DADOS\\Oferta e Demanda"),
 	
 	TESTE(TESTE_PASTA_FILAS_NOMINAIS.getTextoIdentificador(),
 			TESTE_PASTA_ABSENTEISMO.getTextoIdentificador(),
@@ -92,7 +95,8 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 			TESTE_NOME_ARQUIVO_UNIDADES_EXECUTANTES.getTextoIdentificador(),
 			TESTE_NOME_ARQUIVO_DE_PARA_ESPECIALIDADES.getTextoIdentificador(),
 			TESTE_PASTA_ARQUIVOS_PARA_AUTOMATIZACAO.getTextoIdentificador(),
-			TESTE_NOME_ARQUIVO_UNIDADES_DEMANDA_REPRIMIDA.getTextoIdentificador()),
+			TESTE_NOME_ARQUIVO_UNIDADES_DEMANDA_REPRIMIDA.getTextoIdentificador(),
+			TESTE_PASTA_RELATORIO_OFERTA_E_DEMANDA_PARA_CDIDR.getTextoIdentificador()),
 	
 	PRODUCAO(PROD_PASTA_FILAS_NOMINAIS.getTextoIdentificador(),
 			PROD_PASTA_ABSENTEISMO.getTextoIdentificador(),
@@ -118,7 +122,8 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 			PROD_NOME_ARQUIVO_UNIDADES_EXECUTANTES.getTextoIdentificador(),
 			PROD_NOME_ARQUIVO_DE_PARA_ESPECIALIDADES.getTextoIdentificador(),
 			PROD_PASTA_ARQUIVOS_PARA_AUTOMATIZACAO.getTextoIdentificador(),
-			PROD_NOME_ARQUIVO_UNIDADES_DEMANDA_REPRIMIDA.getTextoIdentificador());
+			PROD_NOME_ARQUIVO_UNIDADES_DEMANDA_REPRIMIDA.getTextoIdentificador(),
+			PROD_PASTA_RELATORIO_OFERTA_E_DEMANDA_PARA_CDIDR.getTextoIdentificador());
 	
 	
 	
@@ -147,6 +152,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 	private String nomeArquivoDeParaEspecialidades;
 	private String pastaArquivosParaAutomatizacao;
 	private String nomeArquivoUnidadesDemandaReprimida;
+	private String pastaRelatorioOfertaEDemandaCDIDR;
 	
 	private int indice;
 	private String textoIdentificador;
@@ -165,7 +171,8 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 										String nomeArquivoUnidadesSolicitantes, String nomeArquivoBDConsolidadoNovasSolicitacoesCDR,
 										String nomeArquivoBDConsolidadoNovasSolicitacoesRegulada, String nomeArquivoOfertaDemanda, 
 										String nomeArquivoRelacoesEspecialidadesBloqueio, String pastaArquivosOfertasParaDERAC, String nomeArquivoUnidadesExecutantes,
-										String nomeArquivoDeParaEspecialidades, String pastaArquivosParaAutomatizacao, String nomeArquivoUnidadesDemandaReprimida)
+										String nomeArquivoDeParaEspecialidades, String pastaArquivosParaAutomatizacao, String nomeArquivoUnidadesDemandaReprimida,
+										String pastaRelatorioOfertaEDemandaCDIDR)
 	{
 		this.pastaFilasNominais = pastaFilasNominais;
 		this.pastaAbsenteismo = pastaAbsenteismo;
@@ -192,6 +199,7 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 		this.nomeArquivoDeParaEspecialidades = nomeArquivoDeParaEspecialidades;
 		this.pastaArquivosParaAutomatizacao = pastaArquivosParaAutomatizacao;
 		this.nomeArquivoUnidadesDemandaReprimida = nomeArquivoUnidadesDemandaReprimida;
+		this.pastaRelatorioOfertaEDemandaCDIDR = pastaRelatorioOfertaEDemandaCDIDR;
 	}
 
 	public String getTextoIdentificador() {
@@ -409,5 +417,13 @@ public enum IdentificadoresPastasCompartilhadasCDIDR {
 
 	public void setNomeArquivoUnidadesDemandaReprimida(String nomeArquivoUnidadesDemandaReprimida) {
 		this.nomeArquivoUnidadesDemandaReprimida = nomeArquivoUnidadesDemandaReprimida;
+	}
+
+	public String getPastaRelatorioOfertaEDemandaCDIDR() {
+		return pastaRelatorioOfertaEDemandaCDIDR;
+	}
+
+	public void setPastaRelatorioOfertaEDemandaCDIDR(String pastaRelatorioOfertaEDemandaCDIDR) {
+		this.pastaRelatorioOfertaEDemandaCDIDR = pastaRelatorioOfertaEDemandaCDIDR;
 	}
 }

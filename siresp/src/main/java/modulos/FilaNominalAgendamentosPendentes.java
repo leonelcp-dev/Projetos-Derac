@@ -183,7 +183,7 @@ public class FilaNominalAgendamentosPendentes {
 			
 			transferirArquivos(entidade, tiposDeBusca[i], arquivo);
 			
-			ultimoRecente = arquivo.getNomeDoArquivo();
+			ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
 		}
 		
 

@@ -46,7 +46,7 @@ public class FilaNominalSolicitacoesPendentes {
 	LocalDate dataProcessamento;
 	String dataFormatadaPasta;
 
-	public String baixarFilaAgendamentosPendentes(WebDriver driver)
+	public String baixarFilaSolicitacoesPendentes(WebDriver driver)
 	{			
 		formatoDataPasta = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 				

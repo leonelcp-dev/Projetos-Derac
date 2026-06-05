@@ -5,6 +5,8 @@ public class Demanda {
 
     @ExcelColumn(header = "Competência", pattern = "mmm/yyyy")
     private String competencia;
+    
+    private String competenciaOrdenacao;
 
     @ExcelColumn(header = "Procedimentos (padronizado)")
     private String procedimento;
@@ -88,6 +90,14 @@ public class Demanda {
 
 	public void setLinhaExcel(int linhaExcel) {
 		this.linhaExcel = linhaExcel;
+	}
+
+	public String getCompetenciaOrdenacao() {
+		return competenciaOrdenacao;
+	}
+
+	public void setCompetenciaOrdenacao(String competenciaOrdenacao) {
+		this.competenciaOrdenacao = competenciaOrdenacao;
 	}
 
 }
