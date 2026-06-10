@@ -112,6 +112,7 @@ public class OfertaDemandaDeAcessoR1 {
 	HashMap<String, Demanda> demandasProcessadas;
 	HashMap<String, String> relacoesOfertaEmBloqueios;
 	HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas;
+	HashMap<String, String> nomenclaturasPorTipoDeOferta;
 	HashMap<String, EntradaOfertasParaDERAC> mapaDeOfertasParaDERAC;
 	HashMap<String, ArrayList<OfertaEDemanda>> demandasProcedimentos;
 	HashMap<String, NovasSolicitacoes> novasSolicitacoesCDR;
@@ -148,6 +149,12 @@ public class OfertaDemandaDeAcessoR1 {
         
 		pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+		
+		if(competenciaInicial == null || competenciaFinal == null)
+		{
+			competenciaInicial = JOptionPane.showInputDialog(null, "Insira os dados do mês/ano do início do processamento (MM/yyyy)", "Competência Inicial", JOptionPane.QUESTION_MESSAGE).trim();
+			competenciaFinal = JOptionPane.showInputDialog(null, "Insira os dados do mês/ano do final do processamento (MM/yyyy)", "Competência Final", JOptionPane.QUESTION_MESSAGE).trim();
+		}
 		
 		try {
 			
@@ -266,7 +273,6 @@ public class OfertaDemandaDeAcessoR1 {
 
 		}
 		
-		
 		ArrayList<OfertaEDemanda> ofertasEDemandasJaRegistradas = lerOfertasJaProcessadas(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
 		ofertasDemandasProcessadas = new HashMap<String, HashMap<String, OfertaEDemanda>>();
 		
@@ -333,12 +339,16 @@ public class OfertaDemandaDeAcessoR1 {
 		ArrayList<NomenclaturaPadronizada> nomenclaturas = lerPadronizacaoDeNomenclaturas(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getCaminhoArquivoNomenclaturas(), ParametrosArquivoNomenclaturas.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoNomenclaturas.LINHA_INICIAL_ARQUIVO.getIndice() - 1);
 		
 		nomenclaturasPadronizadas = new HashMap<String, NomenclaturaPadronizada>();
+		nomenclaturasPorTipoDeOferta = new HashMap<String, String>();
 		for(NomenclaturaPadronizada nomenclatura : nomenclaturas)
 		{
 			nomenclatura.setInsercao(nomenclatura.getInsercao().replaceAll("\u00A0", ""));
 			nomenclatura.setNomenclatura(nomenclatura.getNomenclatura().replaceAll("\u00A0", ""));
 			nomenclatura.setFluxo(nomenclatura.getFluxo().replaceAll("\u00A0", ""));
+			nomenclatura.setTipoDeOferta(nomenclatura.getTipoDeOferta().replaceAll("\u00A0", ""));
 			nomenclaturasPadronizadas.put(nomenclatura.getInsercao().trim().toUpperCase(), nomenclatura);
+			
+			nomenclaturasPorTipoDeOferta.put(nomenclatura.getNomenclatura(), nomenclatura.getTipoDeOferta());
 		}
 		
 		String mesInicio;
@@ -584,14 +594,17 @@ public class OfertaDemandaDeAcessoR1 {
 						
 						if(executarDemandaReprimida)
 						{
+							HashMap <String, String> tipoDeOfertaPorEspecialidade = new HashMap<String, String>();
 							HashMap <String, Integer> demandaPorEspecialidade = new HashMap<String, Integer>();
 							HashMap <String, Integer> ofertaPorEspecialidade = new HashMap<String, Integer>();
 							HashMap <String, Integer> maximoTempoPorEspecialidade = new HashMap<String, Integer>();
+							HashMap <String, Integer> agendamentosPorEspecialidade = new HashMap<String, Integer>();
+							HashMap <String, Integer> perdaPrimariaPorEspecialidade = new HashMap<String, Integer>();
 							HashMap <String, Boolean> existeOfertaPorEspecialidade = new HashMap<String, Boolean>();
 							
-							preencherDemandaReprimida(entidades, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, existeOfertaPorEspecialidade);
+							preencherDemandaReprimida(entidades, tipoDeOfertaPorEspecialidade, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, agendamentosPorEspecialidade, perdaPrimariaPorEspecialidade, existeOfertaPorEspecialidade);
 							
-							montarPlanilhaDeDemandas(entradasPorOferta, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, existeOfertaPorEspecialidade);
+							montarPlanilhaDeDemandas(tipoDeOfertaPorEspecialidade, entradasPorOferta, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, agendamentosPorEspecialidade, perdaPrimariaPorEspecialidade, existeOfertaPorEspecialidade);
 						}
 					}
 				}
@@ -611,6 +624,8 @@ public class OfertaDemandaDeAcessoR1 {
 				
 		}
 		
+		ordenarPlanilhaDeOfertas();
+		ordenarPlanilhaDeDemandas();
 		atualizarCopiaOriginalRelatorioProducao();
 		copiarRelatorioProducaoParaCDIDR();
 		copiarRelatorioProducaoParaCDRA();
@@ -676,18 +691,21 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		if(executarDemandaReprimida)
 		{
+			HashMap <String, String> tipoDeOfertaPorEspecialidade = new HashMap<String, String>();
 			HashMap <String, Integer> demandaPorEspecialidade = new HashMap<String, Integer>();
 			HashMap <String, Integer> ofertaPorEspecialidade = new HashMap<String, Integer>();
 			HashMap <String, Integer> maximoTempoPorEspecialidade = new HashMap<String, Integer>();
+			HashMap <String, Integer> agendamentosPorEspecialidade = new HashMap<String, Integer>();
+			HashMap <String, Integer> perdaPrimariaPorEspecialidade = new HashMap<String, Integer>();
 			HashMap <String, Boolean> existeOfertaPorEspecialidade = new HashMap<String, Boolean>();
 			
-			preencherDemandaReprimida(entidades, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, existeOfertaPorEspecialidade);
+			preencherDemandaReprimida(entidades, tipoDeOfertaPorEspecialidade, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, agendamentosPorEspecialidade, perdaPrimariaPorEspecialidade, existeOfertaPorEspecialidade);
 		}
 		
 		return "";
 	}
 	
-	private String preencherDemandaReprimida(ArrayList<EntidadeExecutanteR1> entidades, HashMap <String, Integer> ofertaPorEspecialidade, HashMap <String, Integer> demandaPorEspecialidade, HashMap <String, Integer> maximoTempoPorEspecialidade, HashMap <String, Boolean> existeOfertaPorEspecialidade)
+	private String preencherDemandaReprimida(ArrayList<EntidadeExecutanteR1> entidades, HashMap <String, String> tipoDeOfertaPorEspecialidade, HashMap <String, Integer> ofertaPorEspecialidade, HashMap <String, Integer> demandaPorEspecialidade, HashMap <String, Integer> maximoTempoPorEspecialidade, HashMap <String, Integer> agendamentosPorEspecialidade, HashMap <String, Integer> perdaPrimariaPorEspecialidade, HashMap <String, Boolean> existeOfertaPorEspecialidade)
 	{
 		String caminhoDeParaEspecialidades = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoDeParaEspecialidades();
 		
@@ -818,14 +836,14 @@ public class OfertaDemandaDeAcessoR1 {
 				}
 			}
 			
-			consolidarDemandaReprimidaEmOfertasEDemandas(entidades, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, existeOfertaPorEspecialidade);
+			consolidarDemandaReprimidaEmOfertasEDemandas(entidades, tipoDeOfertaPorEspecialidade, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, agendamentosPorEspecialidade, perdaPrimariaPorEspecialidade, existeOfertaPorEspecialidade);
 		}
 		
 		
 		return "";
 	}
 	
-	private String consolidarDemandaReprimidaEmOfertasEDemandas(ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, Integer> ofertaPorEspecialidade, HashMap<String, Integer> demandaPorEspecialidade, HashMap<String, Integer> maximoTempoPorEspecialidade, HashMap<String, Boolean> existeOfertaPorEspecialidade)
+	private String consolidarDemandaReprimidaEmOfertasEDemandas(ArrayList<EntidadeExecutanteR1> entidades, HashMap<String, String> tipoDeOfertaPorEspecialidade, HashMap<String, Integer> ofertaPorEspecialidade, HashMap<String, Integer> demandaPorEspecialidade, HashMap<String, Integer> maximoTempoPorEspecialidade, HashMap<String, Integer> agendamentosPorEspecialidade, HashMap<String, Integer> perdaPrimariaPorEspecialidade, HashMap<String, Boolean> existeOfertaPorEspecialidade)
 	{
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), 0);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
@@ -843,10 +861,11 @@ public class OfertaDemandaDeAcessoR1 {
 			{
 				for(OfertaEDemanda oferta : mapaEspecialidades.values())
 				{
-					int soma = 0;
+					//somando ofertas
+					int somaOfertaDisponivel = 0;
 					try
 					{
-						soma = Integer.parseInt(oferta.getOfertaDisponivel());
+						somaOfertaDisponivel = Integer.parseInt(oferta.getOfertaDisponivel());
 					}catch(Exception e)
 					{
 						e.printStackTrace();
@@ -854,10 +873,29 @@ public class OfertaDemandaDeAcessoR1 {
 
 					if(ofertaPorEspecialidade.containsKey(oferta.getProcedimento()))
 					{
-						soma += ofertaPorEspecialidade.get(oferta.getProcedimento());
+						somaOfertaDisponivel += ofertaPorEspecialidade.get(oferta.getProcedimento());
 					}
 					
-					ofertaPorEspecialidade.put(oferta.getProcedimento(), soma);
+					//somando agendamentos
+					int somaAgendamentos = 0;
+					try
+					{
+						somaAgendamentos = Integer.parseInt(oferta.getAgendamentoTotal());
+					}catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+
+					if(agendamentosPorEspecialidade.containsKey(oferta.getProcedimento()))
+					{
+						somaAgendamentos +=agendamentosPorEspecialidade.get(oferta.getProcedimento());
+					}
+					
+					int perdaPrimaria = (int)Math.max(somaOfertaDisponivel - somaAgendamentos, 0);
+					
+					ofertaPorEspecialidade.put(oferta.getProcedimento(), somaOfertaDisponivel);
+					agendamentosPorEspecialidade.put(oferta.getProcedimento(), somaAgendamentos);
+					perdaPrimariaPorEspecialidade.put(oferta.getProcedimento(), perdaPrimaria);
 					existeOfertaPorEspecialidade.put(oferta.getProcedimento(), true);
 				}
 			}
@@ -889,7 +927,7 @@ public class OfertaDemandaDeAcessoR1 {
 						celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA_DO_DIA.getIndice(), demandaTotal, "Int"));
 						
 						if(ofertaTotal == 0)
-							celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), "-", "String"));
+							celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), demandaTotal, "Int"));
 						else
 						{
 							int tempoDeEspera = (int)Math.ceil(1.0 * demandaTotal / ofertaTotal);
@@ -1733,14 +1771,17 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			if(executarDemandaReprimida)
 			{
+				HashMap <String, String> tipoDeOfertaPorEspecialidade = new HashMap<String, String>();
 				HashMap <String, Integer> demandaPorEspecialidade = new HashMap<String, Integer>();
 				HashMap <String, Integer> ofertaPorEspecialidade = new HashMap<String, Integer>();
 				HashMap <String, Integer> maximoTempoPorEspecialidade = new HashMap<String, Integer>();
+				HashMap <String, Integer> agendamentosPorEspecialidade = new HashMap<String, Integer>();
+				HashMap <String, Integer> perdaPrimariaPorEspecialidade = new HashMap<String, Integer>();
 				HashMap <String, Boolean> existeOfertaPorEspecialidade = new HashMap<String, Boolean>();
 				
-				preencherDemandaReprimida(entidades, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, existeOfertaPorEspecialidade);
+				preencherDemandaReprimida(entidades, tipoDeOfertaPorEspecialidade, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, agendamentosPorEspecialidade, perdaPrimariaPorEspecialidade, existeOfertaPorEspecialidade);
 				
-				montarPlanilhaDeDemandas(entradasPorOferta, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, existeOfertaPorEspecialidade);
+				montarPlanilhaDeDemandas(tipoDeOfertaPorEspecialidade, entradasPorOferta, ofertaPorEspecialidade, demandaPorEspecialidade, maximoTempoPorEspecialidade, agendamentosPorEspecialidade, perdaPrimariaPorEspecialidade, existeOfertaPorEspecialidade);
 			}
 		}
 		
@@ -1748,7 +1789,7 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
-	private String montarPlanilhaDeDemandas(HashMap<String, Integer> entradasPorOferta, HashMap<String, Integer> ofertaPorEspecialidade, HashMap<String, Integer> demandasPorEspecialidade, HashMap<String, Integer> maximoTempoPorEspecialidade, HashMap<String, Boolean> existeOfertaPorEspecialidade)
+	private String montarPlanilhaDeDemandas(HashMap<String, String> tipoDeOfertaPorEspecialidade, HashMap<String, Integer> entradasPorOferta, HashMap<String, Integer> ofertaPorEspecialidade, HashMap<String, Integer> demandasPorEspecialidade, HashMap<String, Integer> maximoTempoPorEspecialidade, HashMap <String, Integer> agendamentosPorEspecialidade, HashMap <String, Integer> perdaPrimariaPorEspecialidade, HashMap<String, Boolean> existeOfertaPorEspecialidade)
 	{
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), 0);
 		
@@ -1792,6 +1833,11 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			demanda.setProcedimento(especialidade);
 			demanda.setCompetencia(inicioCompetenciaFormatado);
+
+			if(nomenclaturasPorTipoDeOferta.containsKey(especialidade.toUpperCase()))
+				demanda.setTipoDeOferta(nomenclaturasPorTipoDeOferta.get(especialidade.toUpperCase()));
+			else
+				demanda.setTipoDeOferta("-");
 			
 			if(entradasPorOferta.containsKey(especialidade))
 				demanda.setNovasSolicitacoes(String.valueOf(entradasPorOferta.get(especialidade)));
@@ -1811,29 +1857,55 @@ public class OfertaDemandaDeAcessoR1 {
 				{
 					ofertaTotal = ofertaPorEspecialidade.get(especialidade);
 					demanda.setOfertaTotal(String.valueOf(ofertaTotal));
+					demanda.setAgendamentos(String.valueOf(agendamentosPorEspecialidade.get(especialidade)));
+					demanda.setPerdaPrimaria(String.valueOf(perdaPrimariaPorEspecialidade.get(especialidade)));
+					
+					if(ofertaTotal > 0)
+						demanda.setTaxaPerdaPrimaria(String.valueOf(1.0 * perdaPrimariaPorEspecialidade.get(especialidade) / ofertaTotal));
+					else
+						demanda.setTaxaPerdaPrimaria("0.0");
 				}
 				else
 				{
 					demanda.setOfertaTotal("-");
-					demanda.setTempoDeEspera("-");
+					demanda.setAgendamentos("-");
+					demanda.setPerdaPrimaria("-");
+					demanda.setTaxaPerdaPrimaria("-");
+					//demanda.setTempoDeEspera("-");
 				}
 				
 				if(!demanda.getDemandaReprimida().equals("-"))
 				{
 					demanda.setOfertaTotal(String.valueOf(ofertaTotal));
+					
 					demanda.setMaisVelhoNaFila(String.valueOf(maximoTempoPorEspecialidade.get(especialidade)));
 					
 					if(ofertaTotal > 0)
 					{
 						demanda.setTempoDeEspera(String.valueOf((int) 1.0 * demandasPorEspecialidade.get(especialidade) / ofertaPorEspecialidade.get(especialidade)));
+
 					}
 					else
-					{
-						demanda.setTempoDeEspera("-");
-					}
+						demanda.setTempoDeEspera(String.valueOf(demandasPorEspecialidade.get(especialidade)));
+
 				}
 				else
 				{
+//					if(ofertaTotal > 0)
+//					{
+//						demanda.setAgendamentos(String.valueOf(agendamentosPorEspecialidade.get(especialidade)));
+//						demanda.setPerdaPrimaria(String.valueOf(perdaPrimariaPorEspecialidade.get(especialidade)));
+//						
+//						demanda.setTaxaPerdaPrimaria(String.valueOf(1.0 * perdaPrimariaPorEspecialidade.get(especialidade) / ofertaTotal));
+//					}
+//					else
+//					{
+//						//demanda.setTempoDeEspera("-");
+//						demanda.setAgendamentos("0");
+//						demanda.setPerdaPrimaria("0");
+//						demanda.setTaxaPerdaPrimaria("0.0");
+//					}
+					
 					demanda.setTempoDeEspera("-");
 					demanda.setMaisVelhoNaFila("-");
 				}
@@ -1843,19 +1915,25 @@ public class OfertaDemandaDeAcessoR1 {
 			{
 				demanda.setOfertaTotal("-");
 				demanda.setTempoDeEspera("-");
+				demanda.setAgendamentos("-");
+				demanda.setPerdaPrimaria("-");
+				demanda.setTaxaPerdaPrimaria("-");
 				
 				if(!demanda.getDemandaReprimida().equals("-"))
 				{
 					demanda.setMaisVelhoNaFila(String.valueOf(maximoTempoPorEspecialidade.get(especialidade)));
+					demanda.setTempoDeEspera(String.valueOf(demandasPorEspecialidade.get(especialidade)));
 				}
 				else
 				{
 					demanda.setMaisVelhoNaFila("-");
+					demanda.setTempoDeEspera("-");
 				}
 			}
 				
 
 			celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getIndice(), demanda.getProcedimento(), "String"));
+			celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TIPO_DE_OFERTA.getIndice(), demanda.getTipoDeOferta(), "String"));
 			celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), dataInicioCompetencia, "Date mes/ano"));
 
 			if(demanda.getNovasSolicitacoes().equals("-"))
@@ -1872,6 +1950,21 @@ public class OfertaDemandaDeAcessoR1 {
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_TOTAL.getIndice(), demanda.getOfertaTotal(), "String"));
 			else
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_TOTAL.getIndice(), Integer.parseInt(demanda.getOfertaTotal()), "Int"));
+			
+			if(demanda.getAgendamentos().equals("-"))
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_AGENDAMENTOS.getIndice(), demanda.getAgendamentos(), "String"));
+			else
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_AGENDAMENTOS.getIndice(), Integer.parseInt(demanda.getAgendamentos()), "Int"));
+			
+			if(demanda.getPerdaPrimaria().equals("-"))
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PERDA_PRIMARIA.getIndice(), demanda.getPerdaPrimaria(), "String"));
+			else
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PERDA_PRIMARIA.getIndice(), Integer.parseInt(demanda.getPerdaPrimaria()), "Int"));
+			
+			if(demanda.getTaxaPerdaPrimaria().equals("-"))
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TAXA_PERDA_PRIMARIA.getIndice(), demanda.getTaxaPerdaPrimaria(), "String"));
+			else
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TAXA_PERDA_PRIMARIA.getIndice(), Double.parseDouble(demanda.getTaxaPerdaPrimaria()), "Porcentagem"));
 			
 			if(demanda.getTempoDeEspera().equals("-"))
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), demanda.getTempoDeEspera(), "String"));
@@ -2344,7 +2437,7 @@ public class OfertaDemandaDeAcessoR1 {
 			buscas[0] = "Consulta";
 			buscas[1] = "Exame";
 			
-			preencherInformacoesDeBloqueio(driver, paginaWeb, entidade, buscas);
+			preencherInformacoesRelacionadasABloqueio(driver, paginaWeb, entidade, buscas);
 		}
 		
 		if(preencherRecepcao && dataInicioCompetencia.isBefore(LocalDate.now()))
@@ -2635,7 +2728,7 @@ public class OfertaDemandaDeAcessoR1 {
 //	}
 	
 	
-	private String preencherInformacoesDeBloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
+	private String preencherInformacoesRelacionadasABloqueio(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, EntidadeExecutanteR1 entidade, String[] tiposDeBusca)
 	{
 		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), 0);
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
@@ -2690,6 +2783,7 @@ public class OfertaDemandaDeAcessoR1 {
 			for(OfertaEDemanda oferta : mapaEspecialidades.values())
 			{
 				oferta.setOfertaBloqueada("0");
+				oferta.setOfertaDisponivel(oferta.getOfertasSIRESP());
 				System.out.println(oferta.getLinhaExcel() + ": " + oferta.getEspecialidade());
 			}
 			
@@ -2791,10 +2885,10 @@ public class OfertaDemandaDeAcessoR1 {
 							System.out.println(oferta.getEspecialidade());
 							
 							int ofertaTotal;
-							if(oferta.getOfertaDisponivel().trim().equals(""))
+							if(oferta.getOfertasSIRESP().trim().equals(""))
 								ofertaTotal = 0;
 							else
-								ofertaTotal = Integer.parseInt(oferta.getOfertaDisponivel().trim());
+								ofertaTotal = Integer.parseInt(oferta.getOfertasSIRESP().trim());
 							
 							int agendamentoTotal;
 							if(oferta.getAgendamentoTotal().trim().equals(""))
@@ -2811,8 +2905,24 @@ public class OfertaDemandaDeAcessoR1 {
 							System.out.println(oferta.getUnidade() + " " + oferta.getEspecialidade() + " (" + colunaBloqueio + ") " + ofertaTotal + " " + agendamentoTotal + " " + bloqueado);
 							
 							int bloqueioCalculado = (int)Math.min(Math.max(0, ofertaTotal - agendamentoTotal), bloqueado);
+							int ofertaDisponivel = ofertaTotal - bloqueioCalculado;
+							int perdaPrimaria = (int)Math.max(ofertaDisponivel - agendamentoTotal, 0);
 							
+							oferta.setOfertaDisponivel(Integer.toString(ofertaDisponivel));
 							oferta.setOfertaBloqueada(Integer.toString(bloqueioCalculado));
+							
+							oferta.setPerdaPrimaria(String.valueOf(perdaPrimaria));
+							
+							if(ofertaDisponivel > 0)
+							{
+								oferta.setTaxaAgendamento(String.valueOf(1.0 * agendamentoTotal / ofertaDisponivel));
+								oferta.setTaxaPerdaPrimaria(String.valueOf(1.0 * perdaPrimaria / ofertaDisponivel));
+							}
+							else
+							{
+								oferta.setTaxaAgendamento("-");
+								oferta.setTaxaPerdaPrimaria("-");
+							}
 						}
 					}
 				}
@@ -2820,7 +2930,34 @@ public class OfertaDemandaDeAcessoR1 {
 			
 			for(OfertaEDemanda oferta : mapaEspecialidades.values())
 			{
+				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_DISPONIVEL.getIndice(), Integer.parseInt(oferta.getOfertaDisponivel()), "Int"));
 				celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), Integer.parseInt(oferta.getOfertaBloqueada()), "Int"));
+				
+				if(oferta.getTaxaAgendamento().equals("-"))
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AGENDAMENTO.getIndice(), oferta.getTaxaAgendamento(), "String"));
+				else
+				{
+					if(oferta.getTaxaAgendamento().contains("%"))
+					{
+						String taxaAgendamento = oferta.getTaxaAgendamento().replace("%", "").replace(",", ".");
+						oferta.setTaxaAgendamento(String.valueOf(Double.parseDouble(taxaAgendamento) / 100));
+					}
+					
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AGENDAMENTO.getIndice(), Double.parseDouble(oferta.getTaxaAgendamento()), "Porcentagem"));
+				}
+
+				if(oferta.getTaxaPerdaPrimaria().equals("-"))
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_PERDA_PRIMARIA.getIndice(), "-", "String"));
+				else
+				{
+					if(oferta.getTaxaPerdaPrimaria().contains("%"))
+					{
+						String taxaPerdaPrimaria = oferta.getTaxaPerdaPrimaria().replace("%", "").replace(",", ".");
+						oferta.setTaxaPerdaPrimaria(String.valueOf(Double.parseDouble(taxaPerdaPrimaria) / 100));
+					}
+					
+					celulas.add(new CelulaExcel(oferta.getLinhaExcel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_PERDA_PRIMARIA.getIndice(), Double.parseDouble(oferta.getTaxaPerdaPrimaria()), "Porcentagem"));
+				}
 			}
 			
 			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
@@ -3063,7 +3200,7 @@ public class OfertaDemandaDeAcessoR1 {
 					if(mapaEspecialidade.containsKey(tipoDeBusca + especialidade.toUpperCase()))
 					{
 						oferta = mapaEspecialidade.get(tipoDeBusca + especialidade.toUpperCase());
-						ofertaPreExistente = Integer.parseInt(oferta.getOfertaDisponivel());
+						ofertaPreExistente = Integer.parseInt(oferta.getOfertasSIRESP());
 						linhaExcel = mapaEspecialidade.get(tipoDeBusca + especialidade.toUpperCase()).getLinhaExcel();
 					}
 					else
@@ -3217,7 +3354,7 @@ public class OfertaDemandaDeAcessoR1 {
 		oferta.setTipoDeOferta(tipoOferta);
 		oferta.setEspecialidade(especialidade.toUpperCase());
 		
-		oferta.setOfertaDisponivel(dadosSequenciais.get(1));
+		oferta.setOfertasSIRESP(dadosSequenciais.get(1));
 		oferta.setAgendamentoTotal(dadosSequenciais.get(2));
 		oferta.setAgendamentoCota(dadosSequenciais.get(3));
 		oferta.setAgendamentoBolsao(dadosSequenciais.get(4));
@@ -3292,7 +3429,7 @@ public class OfertaDemandaDeAcessoR1 {
 		}
 		
 		if(ofertaPreExistente >= 0)
-			oferta.setDiferencaDeOferta(String.valueOf(Integer.parseInt(oferta.getOfertaDisponivel()) - ofertaPreExistente));
+			oferta.setDiferencaDeOferta(String.valueOf(Integer.parseInt(oferta.getOfertasSIRESP()) - ofertaPreExistente));
 		else
 			oferta.setDiferencaDeOferta("-");
 		
@@ -3866,6 +4003,7 @@ public class OfertaDemandaDeAcessoR1 {
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTAS_PREVISTAS.getIndice(), oferta.getOfertasPrevistas(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTAS_PREVISTAS.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES_MENSAIS.getIndice(), oferta.getNovasSolicitacoes(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES_MENSAIS.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_DISPONIVEL.getIndice(), oferta.getOfertaDisponivel(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_DISPONIVEL.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_SIRESP.getIndice(), oferta.getOfertasSIRESP(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_SIRESP.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getIndice(), oferta.getOfertaBloqueada(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_OFERTA_BLOQUEADA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_TOTAL.getIndice(), oferta.getAgendamentoTotal(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_TOTAL.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_COTA.getIndice(), oferta.getAgendamentoCota(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_AGENDAMENTOS_COTA.getTipo()));
@@ -3878,6 +4016,8 @@ public class OfertaDemandaDeAcessoR1 {
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DESISTENCIA.getIndice(), oferta.getRecepcaoDesistencia(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DESISTENCIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DISPENSADO.getIndice(), oferta.getRecepcaoDispensado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_DISPENSADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_NAO_INFORMADO.getIndice(), oferta.getRecepcaoNaoInformado(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_ATENDIMENTOS_NAO_INFORMADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AGENDAMENTO.getIndice(), oferta.getTaxaAgendamento(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AGENDAMENTO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_PERDA_PRIMARIA.getIndice(), oferta.getTaxaPerdaPrimaria(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_PERDA_PRIMARIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_ATENDIDO.getIndice(), oferta.getTaxaAtendido(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_ATENDIDO.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AUSENTE.getIndice(), oferta.getTaxaAusente(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_AUSENTE.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DESISTENCIA.getIndice(), oferta.getTaxaDesistencia(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CALCULOS_DESISTENCIA.getTipo()));			
@@ -3924,10 +4064,14 @@ public class OfertaDemandaDeAcessoR1 {
 		for(Demanda demanda : demandasJaRegistradas)
 		{
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getIndice(), demanda.getProcedimento(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TIPO_DE_OFERTA.getIndice(), demanda.getTipoDeOferta(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TIPO_DE_OFERTA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), demanda.getCompetencia(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_COMPETENCIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES.getIndice(), demanda.getNovasSolicitacoes(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_NOVAS_SOLICITACOES.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA.getIndice(), demanda.getDemandaReprimida(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_DEMANDA_REPRIMIDA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_TOTAL.getIndice(), demanda.getOfertaTotal(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_TOTAL.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_AGENDAMENTOS.getIndice(), demanda.getAgendamentos(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_AGENDAMENTOS.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PERDA_PRIMARIA.getIndice(), demanda.getPerdaPrimaria(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PERDA_PRIMARIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TAXA_PERDA_PRIMARIA.getIndice(), demanda.getTaxaPerdaPrimaria(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TAXA_PERDA_PRIMARIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), demanda.getTempoDeEspera(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getIndice(), demanda.getMaisVelhoNaFila(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getTipo()));
 			

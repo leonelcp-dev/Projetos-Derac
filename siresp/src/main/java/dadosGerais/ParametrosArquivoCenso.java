@@ -41,7 +41,14 @@ public enum ParametrosArquivoCenso {
 	COLUNA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(31, 8, "Ajustado de acordo com o Java, no arquivo é a coluna 9", "", ""),
 	LINHA_DATA_HORA_RELATORIO_CENSO_DIARIO_FORMATADO(32, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
 	NOME_PLANILHA_CENSO(33, 0, "CENSOS", "", ""),
-	EXTENSAO_ARQUIVO_CENSO(34, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_CENSO(34, 0, "xls", "", ""),
+	TEXTO_LEITO_VAZIO(35, 0, "VAZIO", "", ""),
+	TEXTO_LEITO_OCUPADO(36, 0, "OCUPADO", "", ""),
+	TEXTO_LEITO_EXTRA(37, 0, "EXTRA", "", ""),
+	TEXTO_LEITO_BLOQUEADO(38, 0, "BLOQUEADO", "", ""),
+	TEXTO_MOTIVO_BLOQUEIO_AGUARDANDO_PACIENTE(39, 0, "AP", "", ""),
+	TEXTO_MOTIVO_BLOQUEIO_ISOLAMENTO(40, 0, "I", "", "");
+	
 
 	private int idUnico;
 	private int indice;

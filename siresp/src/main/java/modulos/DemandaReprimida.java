@@ -56,14 +56,16 @@ public class DemandaReprimida {
 	
 	private String pastaBase;
 	private String pastaArquivosFilasNominais;
-	private String pastaArquivosDemandaReprimidaCDIDR;
+	private String pastaArquivosDemandaReprimidaTemporaria;
 	private String pastaArquivosDemandaReprimidaCDRA;
+	private String pastaArquivosDemandaReprimidaCDIDR;
 	private String composicaoPastaNoMes;
 	private String dataDeAnalise;
 	private LocalDate dataInformada;
 	private String pastaBaseAmbulatorialCDIDR;
 	private String pastaBaseDemandaReprimidaCDIDR;
 	private String pastaBaseDemandaReprimidaCDRA;
+	private String nomeArquivoDemandaReprimida;
 	private MesesFormatados meses;
 	private ArrayList<String> pastasPrincipais;
 	private HashMap<String, String> relacaoUnidadeTipo;
@@ -176,8 +178,9 @@ public class DemandaReprimida {
 		}
 		
 		pastaArquivosFilasNominais = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaFilasNominais();
-		pastaArquivosDemandaReprimidaCDIDR = pastaBaseDemandaReprimidaCDIDR + "\\" + diretoriosCDIDR.getArquivosDemandaReprimida();
+		pastaArquivosDemandaReprimidaTemporaria = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaArquivosParaAutomatizacao();
 		pastaArquivosDemandaReprimidaCDRA = pastaBaseDemandaReprimidaCDRA + "\\" + diretoriosCDRA.getArquivosDemandaReprimida();
+		pastaArquivosDemandaReprimidaCDIDR = pastaBaseDemandaReprimidaCDIDR + "\\" + diretoriosCDIDR.getArquivosDemandaReprimida();
 		
 		relacaoUnidadeTipo = new HashMap<String, String>();
 		
@@ -218,6 +221,44 @@ public class DemandaReprimida {
 		composicaoPastaNoMes = meses.getMeses().get(mes - 1).getMesNumero() + " " + meses.getMeses().get(mes - 1).getMesDescricao() + " " + ano;
 		
 		Pasta pasta = new Pasta(pastaArquivosFilasNominais + "\\" + ano + "\\" + composicaoPastaNoMes + "\\" + dataFormatada, false);
+//		
+//		String pastaDemandaReprimidaDoMes = pastaArquivosDemandaReprimidaTemporaria + "\\" + ano;
+//		Pasta pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
+//		
+//		pastaDemandaReprimidaDoMes += "\\" + composicaoPastaNoMes;
+//		pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
+//		
+//		Arquivo arquivo = new Arquivo(pastaArquivosDemandaReprimidaTemporaria, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+//		arquivo.CopiarArquivo(pastaDemandaReprimidaDoMes + "\\" + diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+//		
+//		arquivo = new Arquivo(pastaDemandaReprimidaDoMes, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+//		arquivo.renomear(diretoriosCDIDR.getNomeArquivoDemandaReprimidaConsolidadoDiario().replace(IdentificadoresPastasCompartilhadasCDIDR.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), dataFormatada));
+		
+		nomeArquivoDemandaReprimida = diretoriosCDIDR.getNomeArquivoDemandaReprimidaConsolidadoDiario().replace(IdentificadoresPastasCompartilhadasCDIDR.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), dataFormatada);
+		
+		Arquivo arquivo = new Arquivo(pastaArquivosDemandaReprimidaTemporaria, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+		arquivo.CopiarArquivo(pastaArquivosDemandaReprimidaTemporaria + "\\" + nomeArquivoDemandaReprimida);
+		
+		arquivo = new Arquivo(pastaArquivosDemandaReprimidaTemporaria, nomeArquivoDemandaReprimida);
+		
+		procurarEConsolidarArquivo(pasta, false, "", "", arquivo.getCaminhoCompleto(), dataDaColeta);
+		atualizarTabelasDinamicas(arquivo.getCaminhoCompleto());
+		copiarTabelasDinamicas(arquivo.getCaminhoCompleto());
+		ocultarPlanilhasCopia(arquivo.getCaminhoCompleto());
+		copiarDemandaReprimidaParaCDIDR(arquivo, dataDaColeta);
+		copiarDemandaReprimidaParaCDRA(arquivo, dataDaColeta);
+		
+		arquivo.apagar();
+		
+		return "";
+	}
+	
+	private String copiarDemandaReprimidaParaCDIDR(Arquivo arquivo, LocalDate dataDaColeta)
+	{
+		int ano = dataDaColeta.getYear();
+		int mes = dataDaColeta.getMonthValue();
+		
+		composicaoPastaNoMes = meses.getMeses().get(mes - 1).getMesNumero() + " " + meses.getMeses().get(mes - 1).getMesDescricao() + " " + ano;
 		
 		String pastaDemandaReprimidaDoMes = pastaArquivosDemandaReprimidaCDIDR + "\\" + ano;
 		Pasta pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
@@ -225,17 +266,9 @@ public class DemandaReprimida {
 		pastaDemandaReprimidaDoMes += "\\" + composicaoPastaNoMes;
 		pastaDemandaReprimida = new Pasta(pastaDemandaReprimidaDoMes, true);
 		
-		Arquivo arquivo = new Arquivo(pastaArquivosDemandaReprimidaCDIDR, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
-		arquivo.CopiarArquivo(pastaDemandaReprimidaDoMes + "\\" + diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
+		arquivo.CopiarArquivo(pastaDemandaReprimidaDoMes + "\\" + arquivo.getNomeDoArquivo());
 		
-		arquivo = new Arquivo(pastaDemandaReprimidaDoMes, diretoriosCDIDR.getNomeArquivoDemandaReprimidaVazio());
-		arquivo.renomear(diretoriosCDIDR.getNomeArquivoDemandaReprimidaConsolidadoDiario().replace(IdentificadoresPastasCompartilhadasCDIDR.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), dataFormatada));
 		
-		procurarEConsolidarArquivo(pasta, false, "", "", arquivo.getCaminhoCompleto(), dataDaColeta);
-		atualizarTabelasDinamicas(arquivo.getCaminhoCompleto());
-		copiarTabelasDinamicas(arquivo.getCaminhoCompleto());
-		ocultarPlanilhasCopia(arquivo.getCaminhoCompleto());
-		copiarDemandaReprimidaParaCDRA(arquivo, dataDaColeta);
 		
 		return "";
 	}

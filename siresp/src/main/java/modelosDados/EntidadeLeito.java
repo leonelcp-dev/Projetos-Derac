@@ -4,6 +4,7 @@ public class EntidadeLeito {
 
 	private String nomePasta;
 	private String nomeSIRESP;
+	private String monitoraLeitos;
 	private String caminhoCompletoArquivoBaixadoXLS;
 	private String caminhoCompletoArquivoBaixadoXLSX;
 	private String arquivoBaixadoXLS;
@@ -57,6 +58,14 @@ public class EntidadeLeito {
 
 	public void setArquivoBaixadoXLSX(String arquivoBaixadoXLSX) {
 		this.arquivoBaixadoXLSX = arquivoBaixadoXLSX;
+	}
+
+	public String getMonitoraLeitos() {
+		return monitoraLeitos;
+	}
+
+	public void setMonitoraLeitos(String monitoraLeitos) {
+		this.monitoraLeitos = monitoraLeitos;
 	}
 	
 }

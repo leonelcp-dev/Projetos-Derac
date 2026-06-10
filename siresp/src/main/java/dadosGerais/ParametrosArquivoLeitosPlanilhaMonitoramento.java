@@ -27,8 +27,10 @@ public enum ParametrosArquivoLeitosPlanilhaMonitoramento {
 	
 	NOME_PLANILHA_MONITORAMENTO(16, 0, "Monitoramento de Leitos", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(17, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(18, 0, "xls", "", "");
+	DIVISOR_UNIDADE_ESPECIALIDADE(17, 0, "#$%&", "", ""),
+	
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(18, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(19, 0, "xls", "", "");
 	
 
 	private int idUnico;

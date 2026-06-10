@@ -2,22 +2,30 @@ package dadosGerais;
 
 public enum IdentificadoresPastasCompartilhadasCDIDRLeitos {
 
-	REFERENCIA_PASTAS_DEMANDA_REPRIMIDA_CDRA(2, "Demanda Reprimida CDRA"),
+	REFERENCIA_PASTAS_MONITORAMENTO_LEITOS_CDIDR(1, "Demanda Reprimida CDIDR"),
 	
 	MASCARA_NOMES_DINAMICOS(12, "######"),
 	
 	TESTE_PASTA_LEITOS_URGENCIA(9, "Urgencia"),
 	TESTE_ARQUIVO_CONSOLIDADO_URGENCIA(9, TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador() + "\\Consolidado Urgencia.xlsx"),
+	TESTE_ARQUIVO_ENTIDADES(9,"Urgencia\\entidadesMonitoramentoLeitos.csv"),
+	TESTE_PASTA_ARQUIVOS_CENSO(9, "Leitos"),
 
 	PROD_PASTA_LEITOS_URGENCIA(9, "Urgencia"),
 	PROD_ARQUIVO_CONSOLIDADO_URGENCIA(9, TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador() + "\\Consolidado Urgencia.xlsx"),
+	PROD_ARQUIVO_ENTIDADES(9, "Urgencia\\entidadesMonitoramentoLeitos.csv"),
+	PROD_PASTA_ARQUIVOS_CENSO(9, "Leitos"),
 
-	TESTE(TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador(), TESTE_ARQUIVO_CONSOLIDADO_URGENCIA.getTextoIdentificador()),
+	TESTE(TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador(), TESTE_ARQUIVO_CONSOLIDADO_URGENCIA.getTextoIdentificador(), 
+			TESTE_ARQUIVO_ENTIDADES.getTextoIdentificador(), TESTE_PASTA_ARQUIVOS_CENSO.getTextoIdentificador()),
 	
-	PRODUCAO(PROD_PASTA_LEITOS_URGENCIA.getTextoIdentificador(), TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador());
+	PRODUCAO(PROD_PASTA_LEITOS_URGENCIA.getTextoIdentificador(), TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador(), 
+			PROD_ARQUIVO_ENTIDADES.getTextoIdentificador(), PROD_PASTA_ARQUIVOS_CENSO.getTextoIdentificador());
 	
 	private String pastaLeitosUrgencia;
 	private String arquivoConsolidadoUrgencia;
+	private String arquivoEntidades;
+	private String pastaArquivosCenso;
 	
 	private int indice;
 	private String textoIdentificador;
@@ -28,10 +36,12 @@ public enum IdentificadoresPastasCompartilhadasCDIDRLeitos {
 		this.textoIdentificador = textoIdentificador;
 	}
 	
-	IdentificadoresPastasCompartilhadasCDIDRLeitos(String pastaLeitosUrgencia, String arquivoConsolidadoUrgencia)
+	IdentificadoresPastasCompartilhadasCDIDRLeitos(String pastaLeitosUrgencia, String arquivoConsolidadoUrgencia, String arquivoEntidades, String pastaArquivosCenso)
 	{
 		this.pastaLeitosUrgencia = pastaLeitosUrgencia;
 		this.arquivoConsolidadoUrgencia = arquivoConsolidadoUrgencia;
+		this.arquivoEntidades = arquivoEntidades;
+		this.pastaArquivosCenso = pastaArquivosCenso;
 	}
 
 	public String getTextoIdentificador() {
@@ -64,5 +74,21 @@ public enum IdentificadoresPastasCompartilhadasCDIDRLeitos {
 
 	public void setArquivoConsolidadoUrgencia(String arquivoConsolidadoUrgencia) {
 		this.arquivoConsolidadoUrgencia = arquivoConsolidadoUrgencia;
+	}
+
+	public String getArquivoEntidades() {
+		return arquivoEntidades;
+	}
+
+	public void setArquivoEntidades(String arquivoEntidades) {
+		this.arquivoEntidades = arquivoEntidades;
+	}
+
+	public String getPastaArquivosCenso() {
+		return pastaArquivosCenso;
+	}
+
+	public void setPastaArquivosCenso(String pastaArquivosCenso) {
+		this.pastaArquivosCenso = pastaArquivosCenso;
 	}
 }

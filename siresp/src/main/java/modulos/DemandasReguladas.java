@@ -407,6 +407,7 @@ public class DemandasReguladas {
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
 
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_FICHA.getIndice(), agendamento.getFicha(), "String"));
+		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_NOME_PACIENTE.getIndice(), agendamento.getPaciente(), "String"));
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_CODIGO.getIndice(), agendamento.getCodigoPaciente(), "String"));
 		    
 		    String nomeAbreviado = Utils.somenteIniciais(agendamento.getPaciente());
@@ -462,6 +463,7 @@ public class DemandasReguladas {
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
 
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_FICHA.getIndice(), solicitacao.getFicha(), "String"));
+		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_NOME_PACIENTE.getIndice(), solicitacao.getPaciente(), "String"));
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_CODIGO.getIndice(), solicitacao.getCodigoPaciente(), "String"));
 		    
 		    String nomeAbreviado = Utils.somenteIniciais(solicitacao.getPaciente());

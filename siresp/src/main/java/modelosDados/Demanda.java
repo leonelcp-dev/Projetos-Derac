@@ -10,6 +10,9 @@ public class Demanda {
 
     @ExcelColumn(header = "Procedimentos (padronizado)")
     private String procedimento;
+    
+    @ExcelColumn(header = "Tipo de Oferta")
+    private String tipoDeOferta;
 
     @ExcelColumn(header = "Novas Solicitações (mensais)")
     private String novasSolicitacoes;
@@ -17,6 +20,15 @@ public class Demanda {
     @ExcelColumn(header = "Oferta Disponível")
     private String ofertaTotal;
 
+    @ExcelColumn(header = "Agendamentos")
+    private String agendamentos;
+    
+    @ExcelColumn(header = "Perda Primária")
+    private String perdaPrimaria;
+    
+    @ExcelColumn(header = "Taxa de Perda Primária")
+    private String taxaPerdaPrimaria;
+    
    	@ExcelColumn(header = "Demanda Reprimida do dia")
     private String demandaReprimida;
     
@@ -98,6 +110,38 @@ public class Demanda {
 
 	public void setCompetenciaOrdenacao(String competenciaOrdenacao) {
 		this.competenciaOrdenacao = competenciaOrdenacao;
+	}
+
+	public String getTipoDeOferta() {
+		return tipoDeOferta;
+	}
+
+	public void setTipoDeOferta(String tipoDeOferta) {
+		this.tipoDeOferta = tipoDeOferta;
+	}
+
+	public String getAgendamentos() {
+		return agendamentos;
+	}
+
+	public void setAgendamentos(String agendamentos) {
+		this.agendamentos = agendamentos;
+	}
+
+	public String getPerdaPrimaria() {
+		return perdaPrimaria;
+	}
+
+	public void setPerdaPrimaria(String perdaPrimaria) {
+		this.perdaPrimaria = perdaPrimaria;
+	}
+
+	public String getTaxaPerdaPrimaria() {
+		return taxaPerdaPrimaria;
+	}
+
+	public void setTaxaPerdaPrimaria(String taxaPerdaPrimaria) {
+		this.taxaPerdaPrimaria = taxaPerdaPrimaria;
 	}
 
 }

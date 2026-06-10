@@ -11,6 +11,9 @@ public class NomenclaturaPadronizada {
 
     @ExcelColumn(header = "FLUXO")
     private String fluxo;
+    
+    @ExcelColumn(header = "TIPO DE OFERTA")
+    private String tipoDeOferta;
 
     public String getInsercao() {
 		return insercao;
@@ -34,6 +37,14 @@ public class NomenclaturaPadronizada {
 
 	public void setFluxo(String fluxo) {
 		this.fluxo = fluxo;
+	}
+
+	public String getTipoDeOferta() {
+		return tipoDeOferta;
+	}
+
+	public void setTipoDeOferta(String tipoDeOferta) {
+		this.tipoDeOferta = tipoDeOferta;
 	}
 	
 }

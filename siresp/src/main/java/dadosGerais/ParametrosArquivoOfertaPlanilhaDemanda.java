@@ -8,19 +8,23 @@ import java.util.stream.Collectors;
 public enum ParametrosArquivoOfertaPlanilhaDemanda {
 		
 	INDICE_COLUNA_PROCEDIMENTOS(0, 1, "Procedimentos (Padronizado)", "String", ""),
-	INDICE_COLUNA_COMPETENCIA(1, 2, "Competência", "Date mes/ano", "mmm/yyyy"),
-	INDICE_COLUNA_NOVAS_SOLICITACOES(2, 3, "Novas Solicitações", "Int", ""),
-	INDICE_COLUNA_DEMANDA_REPRIMIDA(3, 4,"Demanda Reprimida", "Int", ""),
-	INDICE_COLUNA_OFERTA_TOTAL(4, 5, "Oferta Total", "Int", ""),
-	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(5, 6,"Cálculos Tempo de Espera", "Int", ""),
-	INDICE_COLUNA_MAIS_VELHO_NA_FILA(6, 7,"Mais Velho na Fila", "Int", ""),
+	INDICE_COLUNA_TIPO_DE_OFERTA(1, 2, "Tipo de Oferta", "String", ""),
+	INDICE_COLUNA_COMPETENCIA(2, 3, "Competência", "Date mes/ano", "mmm/yyyy"),
+	INDICE_COLUNA_NOVAS_SOLICITACOES(3, 4, "Novas Solicitações", "Int", ""),
+	INDICE_COLUNA_DEMANDA_REPRIMIDA(4, 5,"Demanda Reprimida", "Int", ""),
+	INDICE_COLUNA_OFERTA_TOTAL(5, 6, "Oferta Disponível", "Int", ""),
+	INDICE_COLUNA_AGENDAMENTOS(6, 7, "Agendamentos", "Int", ""),
+	INDICE_COLUNA_PERDA_PRIMARIA(7, 8, "Perda Primária", "Int", ""),
+	INDICE_COLUNA_TAXA_PERDA_PRIMARIA(8, 9, "Taxa de Perda Primária", "Porcentagem", ""),
+	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(9, 10,"Cálculos Tempo de Espera", "Int", ""),
+	INDICE_COLUNA_MAIS_VELHO_NA_FILA(10, 11,"Mais Velho na Fila", "Int", ""),
 	
-	LINHA_INICIAL_ARQUIVO(8, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	LINHA_INICIAL_ARQUIVO(11, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(9, 0, "Demandas", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(12, 0, "Demandas", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(11, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(12, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(13, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(14, 0, "xls", "", "");
 	
 
 	private int idUnico;

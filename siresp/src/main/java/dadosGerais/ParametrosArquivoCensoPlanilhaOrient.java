@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 
 public enum ParametrosArquivoCensoPlanilhaOrient {
 		
-	INDICE_COLUNA_REFERENCIA_DADOS(0, 2, "Dados", "", ""),
-	INDICE_COLUNA_INICIO_VIGENCIA(1, 2, "Início", "Date", "dd/MM/yyyy"),
-	INDICE_COLUNA_FINAL_VIGENCIA(1, 3, "Fim", "Date", "dd/MM/yyyy"),
-	INDICE_COLUNA_PLANILHA_RELATORIO(2, 4, "Relatório", "String", ""),
+	INDICE_COLUNA_REFERENCIA_DADOS(0, 1, "Dados", "", ""),
+	INDICE_COLUNA_INICIO_VIGENCIA(1, 1, "Início", "Date", "dd/MM/yyyy"),
+	INDICE_COLUNA_FINAL_VIGENCIA(2, 2, "Fim", "Date", "dd/MM/yyyy"),
+	INDICE_COLUNA_PLANILHA_RELATORIO(3, 3, "Relatório", "String", ""),
 	
 	LINHA_INICIAL_ARQUIVO(15, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	

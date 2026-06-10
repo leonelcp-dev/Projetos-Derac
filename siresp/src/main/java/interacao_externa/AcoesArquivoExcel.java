@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -643,6 +644,63 @@ public class AcoesArquivoExcel {
 		
 		return celula.getStringCellValue();
 	}
+	
+
+	public String getValorDaCelulaComoString(int Linha, int Coluna, String formatoSeData) {
+
+		Row linha = planilhaAtiva.getRow(Linha);
+		if(linha == null)
+			return "";
+		
+		Cell celula = linha.getCell(Coluna);
+		if(celula == null)
+			return "";
+		
+        return valorStringDaCelula(celula, formatoSeData);
+    }
+	
+	private String valorStringDaCelula(Cell celula, String formatoSeData)
+	{
+		switch (celula.getCellType()) {
+
+	        case STRING:
+	            return celula.getStringCellValue();
+	
+	        case NUMERIC:
+	            if (DateUtil.isCellDateFormatted(celula)) {
+	                // Formata data no padrão desejado
+	                SimpleDateFormat sdf = new SimpleDateFormat(formatoSeData);
+	                return sdf.format(celula.getDateCellValue());
+	            } else {
+	                // Remove .0 de números inteiros, se quiser
+	                double value = celula.getNumericCellValue();
+	                if (value == (long) value) {
+	                    return String.valueOf((long) value);
+	                } else {
+	                    return String.valueOf(value);
+	                }
+	            }
+	
+	        case BOOLEAN:
+	            return String.valueOf(celula.getBooleanCellValue());
+	
+	        case FORMULA:
+	            // Avalia a fórmula e retorna o resultado como string
+	            FormulaEvaluator evaluator = celula.getSheet()
+	                    .getWorkbook()
+	                    .getCreationHelper()
+	                    .createFormulaEvaluator();
+	
+	            return valorStringDaCelula(evaluator.evaluateInCell(celula), formatoSeData);
+	
+	        case BLANK:
+	            return "";
+	
+	        default:
+	            return "";
+		}
+	}
+
 	
 	public int getValorDaCelulaInt(int Linha, int Coluna)
 	{
