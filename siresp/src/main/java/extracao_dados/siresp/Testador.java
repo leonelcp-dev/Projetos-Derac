@@ -14,6 +14,14 @@ public class Testador {
 		
 		LeitosUrgencia leitosUrgencia = new LeitosUrgencia();
 		
+
+Runtime rt = Runtime.getRuntime();
+
+System.out.println("Max memory: " + rt.maxMemory() / (1024 * 1024) + " MB");
+System.out.println("Total memory: " + rt.totalMemory() / (1024 * 1024) + " MB");
+System.out.println("Free memory: " + rt.freeMemory() / (1024 * 1024) + " MB");
+
+		
 		leitosUrgencia.consolidarDadosDeLeitos("TESTE");
 	}
 

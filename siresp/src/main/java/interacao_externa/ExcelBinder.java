@@ -280,6 +280,18 @@ public class ExcelBinder {
         		    return txt;
 
             	}
+            	else if(fb.pattern.equals("dd/MM/yyyy"))
+            	{
+            		// converte para LocalDate
+        		    LocalDate ld = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        		    // formata explicitamente em pt-BR
+        		    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        		    String txt = ld.format(fmt).toLowerCase(); // jan/2023
+        		    return txt;
+
+            	}
+            		
             	else
             	{
                 	String txt = formatter.formatCellValue(cell, evaluator);

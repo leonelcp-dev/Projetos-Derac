@@ -5,27 +5,24 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoCensoPlanilhaCadastro {
+public enum ParametrosArquivoCensoPlanilhaCadastroExtra {
 		
 	INDICE_COLUNA_UNIDADE(0, 0, "Unidade", "", ""),
 	INDICE_COLUNA_DESCRICAO_ENFERMARIA(1, 1, "Descrição Enfermaria", "String", ""),
 	INDICE_COLUNA_DESCRICAO_LEITO(2, 2, "Descrição Leito", "String", ""),
-	INDICE_COLUNA_ATIVIDADE(3, 3, "Atividade", "String", ""),
-	INDICE_COLUNA_ESPECIALIDADE(4, 4, "Especialidade", "String", ""),
-	INDICE_COLUNA_CONCATENAR(5, 5, "Concatenar", "String", ""),
-	INDICE_COLUNA_ATIVO(6, 6, "Atividade", "String", ""),
-	INDICE_COLUNA_CONTABILIZA_NA_TAXA_DE_OCUPACAO(7, 7, "Contabiliza na Taxa de Ocupação", "String", ""),
-	INDICE_COLUNA_ENFERMARIA(8, 8, "Enfermaria", "String", ""),
+	INDICE_COLUNA_ESPECIALIDADE(3, 3, "Especialidade", "String", ""),
+	INDICE_COLUNA_PACTUADO(4, 4, "Pactuado", "String", ""),
 	
 	LINHA_INICIAL_ARQUIVO(15, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
 	
-	NOME_PLANILHA(16, 0, "", "", ""),
+	NOME_PLANILHA(16, 0, "EXTRAS CADASTRADOS", "", ""),
 	
 	TEXTO_STATUS_LEITO_ATIVO(17, 0, "ativo", "", ""),
 	TEXTO_STATUS_LEITO_INATIVO(18, 0, "i n a t i v o", "", ""),
-	TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO(19, 0, "NÃO", "", ""),
+	TEXTO_NAO_PACTUADO(19, 0, "NÃO", "", ""),
+	TEXTO_PACTUADO(20, 0, "SIM", "", ""),
 	
-	EXTENSAO_ARQUIVO(20, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO(21, 0, "xlsx", "", "");
 	
 
 	private int idUnico;
@@ -34,7 +31,7 @@ public enum ParametrosArquivoCensoPlanilhaCadastro {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoCensoPlanilhaCadastro(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoCensoPlanilhaCadastroExtra(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);
@@ -83,10 +80,10 @@ public enum ParametrosArquivoCensoPlanilhaCadastro {
 		this.formato = formato;
 	}	
 	
-    private static final Map<Integer, ParametrosArquivoCensoPlanilhaCadastro> POR_ID_UNICO =
-        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoCensoPlanilhaCadastro::getIdUnico, Function.identity()));
+    private static final Map<Integer, ParametrosArquivoCensoPlanilhaCadastroExtra> POR_ID_UNICO =
+        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoCensoPlanilhaCadastroExtra::getIdUnico, Function.identity()));
 
-    public static ParametrosArquivoCensoPlanilhaCadastro poIdUnico(int idUnico) {
+    public static ParametrosArquivoCensoPlanilhaCadastroExtra poIdUnico(int idUnico) {
         return POR_ID_UNICO.get(idUnico); // pode retornar null se não existir
     }
 

@@ -10,27 +10,33 @@ public enum ParametrosArquivoLeitosPlanilhaMonitoramento {
 	INDICE_COLUNA_UNIDADE(0, 1, "Unidade", "String", ""),
 	INDICE_COLUNA_DATA(1, 2, "Data", "Date", "dd/MM/yyyy"),
 	INDICE_COLUNA_ESPECIALIDADE(2, 3, "Especialidade", "Int", ""),
-	INDICE_COLUNA_TOTAL_DISPONIVEL(3, 4,"Total Disponível", "Int", ""),
-	INDICE_COLUNA_RESERVA_INTERNA(4, 5, "Reserva Interna", "Int", ""),
-	INDICE_COLUNA_TOTAL_OCUPADO(5, 6, "Total Ocupado", "Int", ""),
-	INDICE_COLUNA_REGULAR_OCUPADO(6, 7, "Regular", "Int", ""),
-	INDICE_COLUNA_EXTRA_OCUPADO(7, 8, "Extra", "Int", ""),
-	INDICE_COLUNA_INTERNO_OCUPADO(8, 9, "Interno", "Int", ""),
-	INDICE_COLUNA_TOTAL_BLOQUEADO(9, 10, "Total Bloqueado", "Int", ""),
-	INDICE_COLUNA_ISOLAMENTO_BLOQUEADO(10, 11, "Isolamento", "Int", ""),
-	INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO(11, 12, "Aguardando Paciente", "Int", ""),
-	INDICE_COLUNA_OUTROS_BLOQUEADO(12, 13, "Outros", "Int", ""),
-	INDICE_COLUNA_LEITOS_VAGOS(13, 14, "Vagos", "Int", ""),
-	INDICE_COLUNA_TAXA_DE_OCUPACAO(14, 15, "Taxa de Ocupação", "Porcentagem", ""),
+	INDICE_COLUNA_ENFERMARIA(3, 4, "Enfermaria", "String", ""),
+	INDICE_COLUNA_TOTAL_DISPONIVEL(4, 5,"Total Disponível", "Int", ""),
+	INDICE_COLUNA_RESERVA_INTERNA(5, 6, "Reserva Interna", "Int", ""),
+	INDICE_COLUNA_TOTAL_OCUPADO(6, 7, "Total Ocupado", "Int", ""),
+	INDICE_COLUNA_REGULAR_OCUPADO(7, 8, "Regular", "Int", ""),
+	INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO(8, 9, "Extra Pactuado", "Int", ""),
+	INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO(9, 10, "Extra Não Pactuado", "Int", ""),
+	INDICE_COLUNA_INTERNO_OCUPADO(10, 11, "Interno", "Int", ""),
+	INDICE_COLUNA_TOTAL_BLOQUEADO(11, 12, "Total Bloqueado", "Int", ""),
+	INDICE_COLUNA_ISOLAMENTO_BLOQUEADO(12, 13, "Isolamento", "Int", ""),
+	INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO(13, 14, "Aguardando Paciente", "Int", ""),
+	INDICE_COLUNA_OUTROS_BLOQUEADO(14, 15, "Outros", "Int", ""),
+	INDICE_COLUNA_LEITOS_VAGOS(15, 16, "Vagos", "Int", ""),
+	INDICE_COLUNA_TAXA_DE_OCUPACAO(16, 17, "Taxa de Ocupação", "Porcentagem", ""),
 	
-	LINHA_INICIAL_ARQUIVO(15, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
+	LINHA_INICIAL_ARQUIVO(17, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_MONITORAMENTO(16, 0, "Monitoramento de Leitos", "", ""),
+	NOME_PLANILHA_MONITORAMENTO(18, 0, "Monitoramento de Leitos", "", ""),
 	
-	DIVISOR_UNIDADE_ESPECIALIDADE(17, 0, "#$%&", "", ""),
+	DIVISOR_UNIDADE_ESPECIALIDADE(19, 0, "####", "", ""),
+	DIVISOR_ESPECIALIDADE_ENFERMARIA(20, 0, "@@@@", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(18, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(19, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(21, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(22, 0, "xls", "", ""),
+	
+	INDICE_COLUNA_DATA_PROCESSAMENTO(23, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
+	INDICE_LINHA_DATA_PROCESSAMENTO(24, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),;
 	
 
 	private int idUnico;

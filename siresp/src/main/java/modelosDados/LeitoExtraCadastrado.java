@@ -1,24 +1,13 @@
 package modelosDados;
 
-public class LeitoCadastrado 
+public class LeitoExtraCadastrado 
 {
 	private String unidade;
 	private String descricaoEnfermaria;
 	private String descricaoLeito;
-	private String atividade;
 	private String especialidade;
-	private String status;
-	private String contabilizaNaTaxaDeOcupacao;
-	private String enfermaria;
+	private String pactuado;
 	
-	public String getAtividade() {
-		return atividade;
-	}
-	
-	public void setAtividade(String atividade) {
-		this.atividade = atividade;
-	}
-
 	public String getUnidade() {
 		return unidade;
 	}
@@ -43,14 +32,6 @@ public class LeitoCadastrado
 		this.descricaoLeito = descricaoLeito;
 	}
 
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
 	public String getEspecialidade() {
 		return especialidade;
 	}
@@ -59,19 +40,11 @@ public class LeitoCadastrado
 		this.especialidade = especialidade;
 	}
 
-	public String getContabilizaNaTaxaDeOcupacao() {
-		return contabilizaNaTaxaDeOcupacao;
+	public String getPactuado() {
+		return pactuado;
 	}
 
-	public void setContabilizaNaTaxaDeOcupacao(String contabilizaNaTaxaDeOcupacao) {
-		this.contabilizaNaTaxaDeOcupacao = contabilizaNaTaxaDeOcupacao;
-	}
-
-	public String getEnfermaria() {
-		return enfermaria;
-	}
-
-	public void setEnfermaria(String enfermaria) {
-		this.enfermaria = enfermaria;
+	public void setPactuado(String pactuado) {
+		this.pactuado = pactuado;
 	}
 }

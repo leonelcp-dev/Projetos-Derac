@@ -8,7 +8,8 @@ public class DadosAcumuladosLeitos {
     private int reservaInterna;
     private int totalOcupado;
     private int regularOcupado;
-    private int extraOcupado;
+    private int extraPactuadoOcupado;
+    private int extraNaoPactuadoOcupado;
     private int internoOcupado;
     private int totalBloqueado;
     private int bloqueadoIsolamento;
@@ -22,7 +23,8 @@ public class DadosAcumuladosLeitos {
          reservaInterna = 0;
          totalOcupado = 0;
          regularOcupado = 0;
-         extraOcupado = 0;
+         extraPactuadoOcupado = 0;
+         extraNaoPactuadoOcupado = 0;
          internoOcupado = 0;
          totalBloqueado = 0;
          bloqueadoIsolamento = 0;
@@ -51,9 +53,14 @@ public class DadosAcumuladosLeitos {
     	regularOcupado++;
     }
     
-    public void incrementarExtraOcupado()
+    public void incrementarExtraPactuadoOcupado()
     {
-    	extraOcupado++;
+    	extraPactuadoOcupado++;
+    }
+    
+    public void incrementarExtraNaoPactuadoOcupado()
+    {
+    	extraNaoPactuadoOcupado++;
     }
     
     public void incrementarInternoOcupado()
@@ -118,12 +125,20 @@ public class DadosAcumuladosLeitos {
 		this.regularOcupado = regularOcupado;
 	}
 
-	public int getExtraOcupado() {
-		return extraOcupado;
+	public int getExtraPactuadoOcupado() {
+		return extraPactuadoOcupado;
 	}
 
-	public void setExtraOcupado(int extraOcupado) {
-		this.extraOcupado = extraOcupado;
+	public void setExtraPactuadoOcupado(int extraPactuadoOcupado) {
+		this.extraPactuadoOcupado = extraPactuadoOcupado;
+	}
+	
+	public int getExtraNaoPactuadoOcupado() {
+		return extraNaoPactuadoOcupado;
+	}
+
+	public void setExtraNaoPactuadoOcupado(int extraNaoPactuadoOcupado) {
+		this.extraNaoPactuadoOcupado = extraNaoPactuadoOcupado;
 	}
 
 	public int getTotalBloqueado() {

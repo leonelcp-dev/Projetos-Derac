@@ -8,14 +8,19 @@ public class MonitoramentoLeitos {
 
     @ExcelColumn(header = "Data", pattern = "dd/MM/yyyy")
     private String dataExtracao;
+    
+    private String dataExtracaoOrdenacao;
 
     @ExcelColumn(header = "Especialidade")
     private String especialidade;
+    
+    @ExcelColumn(header = "Enfermaria")
+    private String enfermaria;    
 
     @ExcelColumn(header = "Total Disponível")
     private String totalDisponivel;
 
-    @ExcelColumn(header = "Reserva Interna")
+    @ExcelColumn(header = "Uso Interno")
     private String reservaInterna;
     
     @ExcelColumn(header = "Total Ocupado")
@@ -24,8 +29,11 @@ public class MonitoramentoLeitos {
     @ExcelColumn(header = "Regular")
     private String regularOcupado;
 
-    @ExcelColumn(header = "Extra")
-    private String extraOcupado;
+    @ExcelColumn(header = "Extra Pactuado")
+    private String extraPactuadoOcupado;
+    
+    @ExcelColumn(header = "Extra Não Pactuado")
+    private String extraNaoPactuadoOcupado;
 
     @ExcelColumn(header = "Interno")
     private String internoOcupado;
@@ -98,12 +106,12 @@ public class MonitoramentoLeitos {
 		this.regularOcupado = regularOcupado;
 	}
 
-	public String getExtraOcupado() {
-		return extraOcupado;
+	public String getExtraPactuadoOcupado() {
+		return extraPactuadoOcupado;
 	}
 
-	public void setExtraOcupado(String extraOcupado) {
-		this.extraOcupado = extraOcupado;
+	public void setExtraPactuadoOcupado(String extraPactuadoOcupado) {
+		this.extraPactuadoOcupado = extraPactuadoOcupado;
 	}
 
 	public String getTotalBloqueado() {
@@ -176,6 +184,30 @@ public class MonitoramentoLeitos {
 
 	public void setInternoOcupado(String internoOcupado) {
 		this.internoOcupado = internoOcupado;
+	}
+
+	public String getEnfermaria() {
+		return enfermaria;
+	}
+
+	public void setEnfermaria(String enfermaria) {
+		this.enfermaria = enfermaria;
+	}
+
+	public String getExtraNaoPactuadoOcupado() {
+		return extraNaoPactuadoOcupado;
+	}
+
+	public void setExtraNaoPactuadoOcupado(String extraNaoPactuadoOcupado) {
+		this.extraNaoPactuadoOcupado = extraNaoPactuadoOcupado;
+	}
+
+	public String getDataExtracaoOrdenacao() {
+		return dataExtracaoOrdenacao;
+	}
+
+	public void setDataExtracaoOrdenacao(String dataExtracaoOrdenacao) {
+		this.dataExtracaoOrdenacao = dataExtracaoOrdenacao;
 	}
 
 }

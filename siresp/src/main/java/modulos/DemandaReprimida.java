@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
@@ -71,7 +72,11 @@ public class DemandaReprimida {
 	private HashMap<String, String> relacaoUnidadeTipo;
 	HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas;
 	private IdentificadoresPastasCompartilhadasCDIDR diretoriosCDIDR; 
-	private IdentificadoresPastasCompartilhadasCDRA diretoriosCDRA; 
+	private IdentificadoresPastasCompartilhadasCDRA diretoriosCDRA;
+	private HashMap<String, Integer> demandaReprimidaPorEspecialidadeCDR;
+	private HashMap<String, Integer> maximoTempoEmDiasPorEspecialidadeCDR;
+	private HashMap<String, Integer> demandaReprimidaPorEspecialidadeRegulada;
+	private HashMap<String, Integer> maximoTempoEmDiasPorEspecialidadeRegulada;
 	
 	public String montarDemandaReprimidaDiaria(String ambiente)
 	{
@@ -218,6 +223,11 @@ public class DemandaReprimida {
 		int ano = dataDaColeta.getYear();
 		int mes = dataDaColeta.getMonthValue();
 		
+		demandaReprimidaPorEspecialidadeCDR = new HashMap<String, Integer>();
+		maximoTempoEmDiasPorEspecialidadeCDR = new HashMap<String, Integer>();
+		demandaReprimidaPorEspecialidadeRegulada = new HashMap<String, Integer>();
+		maximoTempoEmDiasPorEspecialidadeRegulada = new HashMap<String, Integer>();
+		
 		composicaoPastaNoMes = meses.getMeses().get(mes - 1).getMesNumero() + " " + meses.getMeses().get(mes - 1).getMesDescricao() + " " + ano;
 		
 		Pasta pasta = new Pasta(pastaArquivosFilasNominais + "\\" + ano + "\\" + composicaoPastaNoMes + "\\" + dataFormatada, false);
@@ -241,7 +251,7 @@ public class DemandaReprimida {
 		
 		arquivo = new Arquivo(pastaArquivosDemandaReprimidaTemporaria, nomeArquivoDemandaReprimida);
 		
-		procurarEConsolidarArquivo(pasta, false, "", "", arquivo.getCaminhoCompleto(), dataDaColeta);
+		procurarEConsolidarArquivo(pasta, false, "", "", arquivo.getCaminhoCompleto(), dataDaColeta, demandaReprimidaPorEspecialidadeCDR, maximoTempoEmDiasPorEspecialidadeCDR, demandaReprimidaPorEspecialidadeRegulada, maximoTempoEmDiasPorEspecialidadeRegulada);
 		atualizarTabelasDinamicas(arquivo.getCaminhoCompleto());
 		copiarTabelasDinamicas(arquivo.getCaminhoCompleto());
 		ocultarPlanilhasCopia(arquivo.getCaminhoCompleto());
@@ -325,69 +335,68 @@ public class DemandaReprimida {
 	{
 		AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(caminhoArquivo, 0);
 		
-		String[][] planilhasDemandaReprimida = new String[2][2];
-		planilhasDemandaReprimida[0][0] = ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_DINAMICA_CDR.getDescricao();
-		planilhasDemandaReprimida[1][0] = ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_DINAMICA_REGULADA.getDescricao();
-		planilhasDemandaReprimida[0][1] = ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CONSOLIDADO_CDR.getDescricao();
-		planilhasDemandaReprimida[1][1] = ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_CONSOLIDADO_REGULADA.getDescricao();
+		String[] planilhasDemandaReprimida = new String[2];
+		planilhasDemandaReprimida[0] = ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CONSOLIDADO_CDR.getDescricao();
+		planilhasDemandaReprimida[1] = ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_CONSOLIDADO_REGULADA.getDescricao();
+		
+		ArrayList<HashMap<String, Integer>> demandaReprimida = new ArrayList<HashMap<String,Integer>>();
+		demandaReprimida.add(demandaReprimidaPorEspecialidadeCDR);
+		demandaReprimida.add(demandaReprimidaPorEspecialidadeRegulada);
+		
+		ArrayList<HashMap<String, Integer>> maximoTempoEmDias = new ArrayList<HashMap<String,Integer>>();
+		maximoTempoEmDias.add(maximoTempoEmDiasPorEspecialidadeCDR);
+		maximoTempoEmDias.add(maximoTempoEmDiasPorEspecialidadeRegulada);
 				
-		for(String[] planilha : planilhasDemandaReprimida)
+		for(int indice = 0; indice < planilhasDemandaReprimida.length; indice++)
 		{
+			String nomePlanilha = planilhasDemandaReprimida[indice];
+			HashMap<String, Integer> demanda = demandaReprimida.get(indice);
+			HashMap<String, Integer> maximoDias = maximoTempoEmDias.get(indice);
+			
 			int linhaConsolidado = ParametrosArquivoDemandaReprimida.LINHA_INICIAL_TABELA_DINAMICA.getIndice();
 			
-			arquivoDemandaReprimida.abrirPlanilha(planilha[0], 0);
+			int demandaTotal = 0;
+			int maximoTotal = 0;
 			
-			int linha = arquivoDemandaReprimida.getPrimeiraLinhaPreenchidaComValorEmUmaColuna(ParametrosArquivoDemandaReprimida.TEXTO_ROTULOS_DE_LINHA.getDescricao(), ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice(), 50);
+			arquivoDemandaReprimida.abrirPlanilha(nomePlanilha, 0);
 			
 			ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
 			
-			if(linha >= 0)
+			System.out.println("Linha: " + linhaConsolidado);
+			
+			for(String especialidade : demanda.keySet())
 			{
-				System.out.println("Linha: " + linha);
-				
-				linha++;
-				String especialidade = arquivoDemandaReprimida.getValorDaCelulaString(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice()).toUpperCase().trim();
-				
-				if(especialidade == null)
-					especialidade = "";
-				
-				while(!especialidade.equals(ParametrosArquivoDemandaReprimida.TEXTO_TOTAL_GERAL.getDescricao().trim().toUpperCase()))
-				{
-					System.out.println(especialidade);
-					
-					celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice(), especialidade, "String"));
-					
-					int demandaReprimida = arquivoDemandaReprimida.getValorDaCelulaInt(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice());
-					celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice(), demandaReprimida, "Int"));
-					
-					int maximoDias = arquivoDemandaReprimida.getValorDaCelulaInt(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_MAX_TEMPO_ESPERA.getIndice());
-					celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_MAX_TEMPO_ESPERA.getIndice(), maximoDias, "Int"));
-					
-					linha++;
-					especialidade = arquivoDemandaReprimida.getValorDaCelulaString(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice()).toUpperCase().trim();;
-					if(especialidade == null)
-						especialidade = "";
-					
-					linhaConsolidado++;
-				}
+				System.out.println(especialidade);
 				
 				celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice(), especialidade, "String"));
 				
-				int demandaReprimida = arquivoDemandaReprimida.getValorDaCelulaInt(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice());
-				celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice(), demandaReprimida, "Int"));
+				int demandaDaEspecialidade = demanda.get(especialidade);
+				demandaTotal += demandaDaEspecialidade;
+				celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice(), demandaDaEspecialidade, "Int"));
 				
-				int maximoDias = arquivoDemandaReprimida.getValorDaCelulaInt(linha, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_MAX_TEMPO_ESPERA.getIndice());
-				celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_MAX_TEMPO_ESPERA.getIndice(), maximoDias, "Int"));
+				int maximoDiasDaEspecialidade = maximoDias.get(especialidade);
+				if(maximoDiasDaEspecialidade > maximoTotal)
+					maximoTotal = maximoDiasDaEspecialidade;
 				
-				arquivoDemandaReprimida.gravarDadosEmCelula(planilha[1], celulas, false, false, 0, null);
-				arquivoDemandaReprimida.forcarCalculos();
+				celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_MAX_TEMPO_ESPERA.getIndice(), maximoDiasDaEspecialidade, "Int"));
+				
+				linhaConsolidado++;
 			}
+			
+			celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_ESPECIALIDADE.getIndice(), ParametrosArquivoDemandaReprimida.TEXTO_TOTAL_GERAL.getDescricao(), "String"));
+			
+			celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_CONTAGEM_ESPECIALIDADE.getIndice(), demandaTotal, "Int"));
+			
+			celulas.add(new CelulaExcel(linhaConsolidado, ParametrosArquivoDemandaReprimida.INDICE_COLUNA_MAX_TEMPO_ESPERA.getIndice(), maximoTotal, "Int"));
+			
+			arquivoDemandaReprimida.gravarDadosEmCelula(nomePlanilha, celulas, false, false, 0, null);
+			arquivoDemandaReprimida.forcarCalculos();
 		}
 		
 		return "";
 	}
 	
-	private String procurarEConsolidarArquivo(Pasta pasta, boolean pastaRegulada, String nomePastaPrincipal, String consultaOuExame, String caminhoArquivo, LocalDate dataDaColeta)
+	private String procurarEConsolidarArquivo(Pasta pasta, boolean pastaRegulada, String nomePastaPrincipal, String consultaOuExame, String caminhoArquivo, LocalDate dataDaColeta, HashMap<String, Integer> demandaReprimidaPorExpecialidadeCDR, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidadeCDR, HashMap<String, Integer> demandaReprimidaPorExpecialidadeRegulada, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidadeRegulada)
 	{
 		System.out.println(pasta.getCaminhoDaPasta());
 		File[] conteudoDaPasta = pasta.listarDiretorio();
@@ -410,11 +419,11 @@ public class DemandaReprimida {
 				{
 					if(itemDaPasta.getAbsolutePath().toUpperCase().contains(ParametrosArquivoFilasNominaisRegulada.TEXTO_REGULADA.getDescricao()))
 					{
-						procurarEConsolidarArquivo(subpasta, true, nomePastaPrincipal, consultaOuExame, caminhoArquivo, dataDaColeta);
+						procurarEConsolidarArquivo(subpasta, true, nomePastaPrincipal, consultaOuExame, caminhoArquivo, dataDaColeta, demandaReprimidaPorExpecialidadeCDR, maximoTempoEmDiasPorExpecialidadeCDR, demandaReprimidaPorExpecialidadeRegulada, maximoTempoEmDiasPorExpecialidadeRegulada);
 					}
 					else
 					{
-						procurarEConsolidarArquivo(subpasta, pastaRegulada, nomePastaPrincipal, consultaOuExame, caminhoArquivo, dataDaColeta);
+						procurarEConsolidarArquivo(subpasta, pastaRegulada, nomePastaPrincipal, consultaOuExame, caminhoArquivo, dataDaColeta, demandaReprimidaPorExpecialidadeCDR, maximoTempoEmDiasPorExpecialidadeCDR, demandaReprimidaPorExpecialidadeRegulada, maximoTempoEmDiasPorExpecialidadeRegulada);
 					}
 				}
 			}
@@ -425,7 +434,7 @@ public class DemandaReprimida {
 					DemandasReguladas novasSolicitacoes = new DemandasReguladas();
 					
 					if((new File(itemDaPasta.getPath()).exists()))
-						novasSolicitacoes.agruparDadosPorEspecialidadeRegulada(pasta, pastaBaseAmbulatorialCDIDR, caminhoArquivo, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, itemDaPasta, diretoriosCDIDR);				
+						novasSolicitacoes.agruparDadosPorEspecialidadeRegulada(pasta, pastaBaseAmbulatorialCDIDR, caminhoArquivo, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, itemDaPasta, diretoriosCDIDR, demandaReprimidaPorExpecialidadeRegulada, maximoTempoEmDiasPorExpecialidadeRegulada);				
 				}
 				else
 				{
@@ -512,7 +521,7 @@ public class DemandaReprimida {
 							    	nomePadronizado = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getNomenclatura();
 							    	tipoAgendamento = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getFluxo();
 							    }
-								
+							    
 							    if(registro.get(colunaStatus).equals(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.TEXTO_STATUS_AGENDADO.getDescricao())) 
 							    {
 							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
@@ -532,6 +541,23 @@ public class DemandaReprimida {
 							    }
 							    else
 							    {
+								    if(demandaReprimidaPorExpecialidadeCDR.containsKey(nomePadronizado))
+								    {
+								    	int demandaReprimida = demandaReprimidaPorExpecialidadeCDR.get(nomePadronizado);
+								    	demandaReprimida++;
+								    	demandaReprimidaPorExpecialidadeCDR.put(nomePadronizado, demandaReprimida);
+								    	
+								    	int maximoDias = maximoTempoEmDiasPorExpecialidadeCDR.get(nomePadronizado);
+								    	if(tempoDeEsperaEmDias > maximoDias)
+								    		maximoDias = tempoDeEsperaEmDias;
+								    	maximoTempoEmDiasPorExpecialidadeCDR.put(nomePadronizado, maximoDias);
+								    }
+								    else
+								    {
+								    	demandaReprimidaPorExpecialidadeCDR.put(nomePadronizado, 1);
+								    	maximoTempoEmDiasPorExpecialidadeCDR.put(nomePadronizado, tempoDeEsperaEmDias);
+								    }
+							    	
 							    	celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
 								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
 								    							    

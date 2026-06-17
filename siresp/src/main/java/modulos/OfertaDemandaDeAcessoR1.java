@@ -40,6 +40,8 @@ import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoDemandaReprimida;
+import dadosGerais.ParametrosArquivoDemandaReprimidaCDR;
+import dadosGerais.ParametrosArquivoDemandaReprimidaRegulada;
 import dadosGerais.ParametrosArquivoFilasNominais;
 import dadosGerais.ParametrosArquivoFilasNominaisRegulada;
 import dadosGerais.ParametrosArquivoMapaDeOfertasOfertasParaDERAC;
@@ -542,6 +544,7 @@ public class OfertaDemandaDeAcessoR1 {
 							while(!unidadeEncontrada)
 								unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
 							
+							System.out.println(entidade.getExecutante());
 							paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
 							
 							try {
@@ -767,8 +770,8 @@ public class OfertaDemandaDeAcessoR1 {
 			AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(arquivoMaisRecente, 0);
 			
 			String[] planilhasDemandaReprimida = new String[2];
-			planilhasDemandaReprimida[0] = ParametrosArquivoDemandaReprimida.NOME_PLANILHA_DINAMICA_CDR.getDescricao();
-			planilhasDemandaReprimida[1] = ParametrosArquivoDemandaReprimida.NOME_PLANILHA_DINAMICA_REGULADA.getDescricao();
+			planilhasDemandaReprimida[0] = ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CONSOLIDADO_CDR.getDescricao();
+			planilhasDemandaReprimida[1] = ParametrosArquivoDemandaReprimidaRegulada.NOME_PLANILHA_CONSOLIDADO_REGULADA.getDescricao();
 			
 			for(String planilha : planilhasDemandaReprimida)
 			{

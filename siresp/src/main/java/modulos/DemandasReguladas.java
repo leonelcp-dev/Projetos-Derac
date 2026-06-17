@@ -49,7 +49,7 @@ public class DemandasReguladas {
 	private IdentificadoresPastasCompartilhadasCDIDR diretorios;
 
 	
-	public String agruparDadosPorEspecialidadeRegulada(Pasta pasta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, File itemDaPasta, IdentificadoresPastasCompartilhadasCDIDR diretorios)
+	public String agruparDadosPorEspecialidadeRegulada(Pasta pasta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, File itemDaPasta, IdentificadoresPastasCompartilhadasCDIDR diretorios, HashMap<String, Integer> demandaReprimidaPorExpecialidade, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidade)
 	{
 		System.out.println(pasta.getCaminhoDaPasta());
 		//File[] conteudoDaPasta = pasta.listarDiretorio();
@@ -89,22 +89,22 @@ public class DemandasReguladas {
 			
 			if(caminhoArquivoXLSX.contains("CONSULTA"))
 			{
-				extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Consulta", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas);
+				extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Consulta", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
 			}
 			if(caminhoArquivoXLSX.contains("EXAME"))
 			{
-				extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Exame", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas);
+				extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Exame", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
 			}
 		}
 		else if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao()))
 		{
 			if(caminhoArquivoXLSX.contains("CONSULTA"))
 			{
-				extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Consulta", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas);
+				extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Consulta", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
 			}
 			if(caminhoArquivoXLSX.contains("EXAME"))
 			{
-				extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Exame", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas);
+				extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Exame", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
 			}
 		}
 		
@@ -114,7 +114,7 @@ public class DemandasReguladas {
 		return "";
 	}
 	
-	private String extrairConsolidarDadosDeAgendamentosRegulada(String arquivo, String nomePlanilha, String TipoArquivoRegulada, String pastaDestinoArquivosNovasSolicitacoes, String tipoDeOferta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas)
+	private String extrairConsolidarDadosDeAgendamentosRegulada(String arquivo, String nomePlanilha, String TipoArquivoRegulada, String pastaDestinoArquivosNovasSolicitacoes, String tipoDeOferta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, HashMap<String, Integer> demandaReprimidaPorExpecialidade, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidade)
 	{
 		MesesFormatados meses = new MesesFormatados();
 		
@@ -243,12 +243,12 @@ public class DemandasReguladas {
 			arquivoDoMes.gravarDadosEmCelula(0, celulasArquivoMensal);
 		}
 		//DemandaReprimida
-		montarDemandaReprimidaReguladaDeAgendamentos(agendamentos, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas);
+		montarDemandaReprimidaReguladaDeAgendamentos(agendamentos, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
 		
 		return "";
 	}
 	
-	private String extrairConsolidarDadosDeSolicitacoesRegulada(String arquivo, String nomePlanilha, String TipoArquivoRegulada, String pastaDestinoArquivosNovasSolicitacoes, String tipoDeOferta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas)
+	private String extrairConsolidarDadosDeSolicitacoesRegulada(String arquivo, String nomePlanilha, String TipoArquivoRegulada, String pastaDestinoArquivosNovasSolicitacoes, String tipoDeOferta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, HashMap<String, Integer> demandaReprimidaPorExpecialidade, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidade)
 	{
 		MesesFormatados meses = new MesesFormatados();
 		
@@ -383,12 +383,12 @@ public class DemandasReguladas {
 		
 		
 		//DemandaReprimida
-		montarDemandaReprimidaReguladaDeSolicitacoes(solicitacoes, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas);
+		montarDemandaReprimidaReguladaDeSolicitacoes(solicitacoes, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
 		
 		return "";
 	}
 	
-	private String montarDemandaReprimidaReguladaDeAgendamentos(ArrayList<AgendamentosPendentesRegulada> agendamentos, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas)
+	private String montarDemandaReprimidaReguladaDeAgendamentos(ArrayList<AgendamentosPendentesRegulada> agendamentos, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, HashMap<String, Integer> demandaReprimidaPorExpecialidade, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidade)
 	{
 		AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(caminhoArquivoDemandaReprimida, 0);
 
@@ -429,6 +429,23 @@ public class DemandasReguladas {
 		    	nomePadronizado = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getNomenclatura();
 		    }
 		    
+		    if(demandaReprimidaPorExpecialidade.containsKey(nomePadronizado))
+		    {
+		    	int demandaReprimida = demandaReprimidaPorExpecialidade.get(nomePadronizado);
+		    	demandaReprimida++;
+		    	demandaReprimidaPorExpecialidade.put(nomePadronizado, demandaReprimida);
+		    	
+		    	int maximoDias = maximoTempoEmDiasPorExpecialidade.get(nomePadronizado);
+		    	if(tempoDeEsperaEmDias > maximoDias)
+		    		maximoDias = tempoDeEsperaEmDias;
+		    	maximoTempoEmDiasPorExpecialidade.put(nomePadronizado, maximoDias);
+		    }
+		    else
+		    {
+		    	demandaReprimidaPorExpecialidade.put(nomePadronizado, 1);
+		    	maximoTempoEmDiasPorExpecialidade.put(nomePadronizado, tempoDeEsperaEmDias);
+		    }
+		    
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_GRUPO_DE_COTAS_E_ESPECIALIDADES_NOMENCLATURA.getIndice(), nomePadronizado, "String"));
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_ESPECIALIDADE_EXAME.getIndice(), agendamento.getEspecialidadeExame(), "String"));
 		    
@@ -444,7 +461,7 @@ public class DemandasReguladas {
 		return "";
 	}
 	
-	private String montarDemandaReprimidaReguladaDeSolicitacoes(ArrayList<SolicitacoesPendentesRegulada> solicitacoes, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas)
+	private String montarDemandaReprimidaReguladaDeSolicitacoes(ArrayList<SolicitacoesPendentesRegulada> solicitacoes, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, HashMap<String, Integer> demandaReprimidaPorExpecialidade, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidade)
 	{
 		AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(caminhoArquivoDemandaReprimida, 0);
 
@@ -483,6 +500,23 @@ public class DemandasReguladas {
 		    if(nomenclaturasPadronizadas.containsKey(especialidadeExame.toUpperCase().trim()))
 		    {
 		    	nomePadronizado = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getNomenclatura();
+		    }
+		    
+		    if(demandaReprimidaPorExpecialidade.containsKey(nomePadronizado))
+		    {
+		    	int demandaReprimida = demandaReprimidaPorExpecialidade.get(nomePadronizado);
+		    	demandaReprimida++;
+		    	demandaReprimidaPorExpecialidade.put(nomePadronizado, demandaReprimida);
+		    	
+		    	int maximoDias = maximoTempoEmDiasPorExpecialidade.get(nomePadronizado);
+		    	if(tempoDeEsperaEmDias > maximoDias)
+		    		maximoDias = tempoDeEsperaEmDias;
+		    	maximoTempoEmDiasPorExpecialidade.put(nomePadronizado, maximoDias);
+		    }
+		    else
+		    {
+		    	demandaReprimidaPorExpecialidade.put(nomePadronizado, 1);
+		    	maximoTempoEmDiasPorExpecialidade.put(nomePadronizado, tempoDeEsperaEmDias);
 		    }
 		    
 		    celulasRegulada.add(new CelulaExcel(linhaPlanilhaRegulada, ParametrosArquivoDemandaReprimidaRegulada.INDICE_COLUNA_GRUPO_DE_COTAS_E_ESPECIALIDADES_NOMENCLATURA.getIndice(), nomePadronizado, "String"));
