@@ -1,18 +1,18 @@
 package dadosGerais;
 
-public enum IdentificadoresPastasCompartilhadasCDIDRLeitos {
+public enum IdentificadoresPastasCompartilhadasCDIDRUrgencia {
 
 	REFERENCIA_PASTAS_MONITORAMENTO_LEITOS_CDIDR(1, "Demanda Reprimida CDIDR"),
 	
 	MASCARA_NOMES_DINAMICOS(12, "######"),
 	
 	TESTE_PASTA_LEITOS_URGENCIA(9, "Urgencia"),
-	TESTE_ARQUIVO_CONSOLIDADO_URGENCIA(9, TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador() + "\\Consolidado Leitos.xlsx"),
+	TESTE_ARQUIVO_CONSOLIDADO_URGENCIA(9, TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador() + "\\Consolidado Urgencia.xlsx"),
 	TESTE_ARQUIVO_ENTIDADES(9,"Urgencia\\entidadesMonitoramentoLeitos.csv"),
 	TESTE_PASTA_ARQUIVOS_CENSO(9, "Leitos"),
 
 	PROD_PASTA_LEITOS_URGENCIA(9, "Urgencia"),
-	PROD_ARQUIVO_CONSOLIDADO_URGENCIA(9, TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador() + "\\Consolidado Leitos.xlsx"),
+	PROD_ARQUIVO_CONSOLIDADO_URGENCIA(9, TESTE_PASTA_LEITOS_URGENCIA.getTextoIdentificador() + "\\Consolidado Urgencia.xlsx"),
 	PROD_ARQUIVO_ENTIDADES(9, "Urgencia\\entidadesMonitoramentoLeitos.csv"),
 	PROD_PASTA_ARQUIVOS_CENSO(9, "Leitos"),
 
@@ -30,13 +30,13 @@ public enum IdentificadoresPastasCompartilhadasCDIDRLeitos {
 	private int indice;
 	private String textoIdentificador;
 	
-	IdentificadoresPastasCompartilhadasCDIDRLeitos(int indice, String textoIdentificador)
+	IdentificadoresPastasCompartilhadasCDIDRUrgencia(int indice, String textoIdentificador)
 	{
 		this.setIndice(indice);
 		this.textoIdentificador = textoIdentificador;
 	}
 	
-	IdentificadoresPastasCompartilhadasCDIDRLeitos(String pastaLeitosUrgencia, String arquivoConsolidadoUrgencia, String arquivoEntidades, String pastaArquivosCenso)
+	IdentificadoresPastasCompartilhadasCDIDRUrgencia(String pastaLeitosUrgencia, String arquivoConsolidadoUrgencia, String arquivoEntidades, String pastaArquivosCenso)
 	{
 		this.pastaLeitosUrgencia = pastaLeitosUrgencia;
 		this.arquivoConsolidadoUrgencia = arquivoConsolidadoUrgencia;

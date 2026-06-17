@@ -36,7 +36,7 @@ public class InteracaoComSIRESP
     	//ChromeOptions options = new ChromeOptions();
     	
     	int escolha = -1;
-    	int maximoEscolha = 9;
+    	int maximoEscolha = 10;
     	boolean abrirMenuInicial = false;
     	String ambiente;
     	
@@ -195,6 +195,10 @@ public class InteracaoComSIRESP
         	RemoverDuplicadoDeFila filaCentralReg = new RemoverDuplicadoDeFila();
         	filaCentralReg.remvoverRegistrosCentralReg(driver);
         	*/
+        }
+        else if(escolha == 10)
+        {
+        	
         }
         
         driver.quit();

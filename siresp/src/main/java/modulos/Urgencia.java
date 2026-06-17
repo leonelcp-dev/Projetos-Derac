@@ -49,7 +49,7 @@ import modelosDados.MonitoramentoLeitos;
 import modelosDados.NomenclaturaPadronizada;
 import modelosDados.OfertaEDemanda;
 
-public class LeitosUrgencia 
+public class Urgencia 
 {
 	private IdentificadoresPastasCompartilhadasCDIDRLeitos diretoriosCDIDR;
 	private String pastaBase;

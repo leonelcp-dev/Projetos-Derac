@@ -2,7 +2,7 @@ package extracao_dados.siresp;
 
 import modulos.LeitosUrgencia;
 
-public class ConsolidacaoLeitosUrgencia {
+public class ConsolidacaoUrgencia {
 
 	public static void main( String[] args )
     {

@@ -2,8 +2,9 @@ package extracao_dados.siresp;
 
 import modulos.LeitosUrgencia;
 import modulos.OfertaDemandaDeAcessoR1;
+import modulos.Urgencia;
 
-public class Testador {
+public class ConsolidacaoLeitos {
 	
 	public static void main( String[] args )
     {
@@ -12,7 +13,7 @@ public class Testador {
 //		oferta.ordenarPlanilhaDeOfertas();
 //		oferta.ordenarPlanilhaDeDemandas();
 		
-		LeitosUrgencia leitosUrgencia = new LeitosUrgencia();
+		Urgencia urgencia = new Urgencia();
 		
 
 Runtime rt = Runtime.getRuntime();
@@ -22,7 +23,7 @@ System.out.println("Total memory: " + rt.totalMemory() / (1024 * 1024) + " MB");
 System.out.println("Free memory: " + rt.freeMemory() / (1024 * 1024) + " MB");
 
 		
-		leitosUrgencia.consolidarDadosDeLeitos("TESTE");
+		urgencia.consolidarDadosDeLeitos("TESTE");
 	}
 
 
