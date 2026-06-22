@@ -1,9 +1,11 @@
 package modelosDados;
 
-public class UrgenciaAguardando 
+public class UrgenciaAguardandoDetalhado 
 {
 	@ExcelColumn(header = "Data", pattern = "dd/MM/yyyy")
 	private String data;
+	
+	private String dataOrdenacao;
 	
 	@ExcelColumn(header = "Horário Extração", pattern = "HH:mm:ss")
 	private String horarioExtracao;
@@ -23,7 +25,11 @@ public class UrgenciaAguardando
 	@ExcelColumn(header = "Quantidade")
 	private String quantidade;
 	
+	private int horasDeEsperaOrdenacao;
+	
 	private int linhaExcel;
+	
+	private boolean linhaUtilizada;
 	
 	public String getSolicitante() {
 		return solicitante;
@@ -89,4 +95,29 @@ public class UrgenciaAguardando
 		this.quantidade = quantidade;
 	}
 	
+	public boolean isLinhaUtilizada()
+	{
+		return linhaUtilizada;
+	}
+	
+	public void setLinhaUtilizada(boolean linhaUtilizada)
+	{
+		this.linhaUtilizada = linhaUtilizada;
+	}
+
+	public String getDataOrdenacao() {
+		return dataOrdenacao;
+	}
+
+	public void setDataOrdenacao(String dataOrdenacao) {
+		this.dataOrdenacao = dataOrdenacao;
+	}
+
+	public int getHorasDeEsperaOrdenacao() {
+		return horasDeEsperaOrdenacao;
+	}
+
+	public void setHorasDeEsperaOrdenacao(int horasDeEsperaOrdenacao) {
+		this.horasDeEsperaOrdenacao = horasDeEsperaOrdenacao;
+	}
 }

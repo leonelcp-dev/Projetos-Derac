@@ -1,5 +1,8 @@
 package extracao_dados.siresp;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import javax.swing.JOptionPane;
 
 import org.openqa.selenium.BuildInfo;
@@ -10,6 +13,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import interacao_externa.AcoesGeraisPaginaWeb;
+import modelosDados.UrgenciaAguardandoDetalhado;
 import modulos.AbrirGoogleChrome;
 import modulos.Absenteismo;
 import modulos.CadastroUsuarioSIRESPDigital;
@@ -22,6 +26,8 @@ import modulos.OfertaDemandaDeAcesso;
 import modulos.OfertaDemandaDeAcessoR1;
 import modulos.RemoverDaFilaCentralReg;
 import modulos.RemoverDuplicadoDeFila;
+import modulos.UrgenciaAguardando;
+import modulos.UrgenciaFinalizado;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -36,7 +42,7 @@ public class InteracaoComSIRESP
     	//ChromeOptions options = new ChromeOptions();
     	
     	int escolha = -1;
-    	int maximoEscolha = 10;
+    	int maximoEscolha = 11;
     	boolean abrirMenuInicial = false;
     	String ambiente;
     	
@@ -198,7 +204,28 @@ public class InteracaoComSIRESP
         }
         else if(escolha == 10)
         {
+        	UrgenciaAguardando urgenciaAguardando = new UrgenciaAguardando();
+        	urgenciaAguardando.obterAgrupamentoDeEsperaUrgencia(driver, ambiente);
+        }
+        
+        else if(escolha == 11)
+        {
+        	UrgenciaFinalizado urgenciaFinalizado = new UrgenciaFinalizado();
         	
+        	String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+    		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+        	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
+        	
+        	LocalDate dataInicial = LocalDate.of(2026, 6, 1);
+        	LocalDate dataFinal = LocalDate.of(2026, 6, 21);
+        	
+        	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))
+        	{
+        		String dataString = data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        		System.out.println(dataString);
+        	    
+        		urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
+        	}
         }
         
         driver.quit();

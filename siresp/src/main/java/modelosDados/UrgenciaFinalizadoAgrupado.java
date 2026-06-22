@@ -1,14 +1,11 @@
 package modelosDados;
 
-public class UrgenciaAguardandoAgrupado 
+public class UrgenciaFinalizadoAgrupado 
 {
 	@ExcelColumn(header = "Data", pattern = "dd/MM/yyyy")
 	private String data;
 	
 	private String dataOrdenacao;
-	
-	@ExcelColumn(header = "Horário Extração", pattern = "HH:mm:ss")
-	private String horarioExtracao;
 	
 	@ExcelColumn(header = "Solicitante")
 	private String solicitante;
@@ -229,14 +226,6 @@ public class UrgenciaAguardandoAgrupado
 
 	public void setPeriodo_30_dias_acima(String periodo_30_dias_acima) {
 		this.periodo_30_dias_acima = periodo_30_dias_acima;
-	}
-
-	public String getHorarioExtracao() {
-		return horarioExtracao;
-	}
-
-	public void setHorarioExtracao(String horarioExtracao) {
-		this.horarioExtracao = horarioExtracao;
 	}
 
 	public int getLinhaExcel() {

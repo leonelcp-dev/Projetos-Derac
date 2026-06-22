@@ -190,7 +190,26 @@ public enum IdentificadoresPaginaWebSIRESP {
 	//TEXTO_UNIDADE_CRI(0, "CRI DE CAMPINAS"),
 	TEXTO_USUARIO_IMPORTACAO_MANUAL(0, "IMPORTACAO MANUAL"),
 	
-	VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO(0, "DT_HR_ACAO");
+	VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO(0, "DT_HR_ACAO"),
+	
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_BOTAO_PESQUISAR(0, "/html/body/table/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr[3]/td/table/tbody/tr/td[14]/input[1]"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_TABELA_RESULTADOS(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[2]/table"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_BOTAO_VOLTAR_PRIMEIRA_PAGINA(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[3]/img[1]"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_BOTAO_VOLTAR_UMA_PAGINA(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[3]/img[2]"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_TEXT_PAGINA_ATUAL(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[3]/input"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_TEXTO_QUANTIDADE_PAGINAS(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[3]/span[2]"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_BOTAO_AVANCAR_UMA_PAGINA(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[3]/img[3]"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_BOTAO_AVANCAR_ULTIMA_PAGINA(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[3]/img[4]"),
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_DIV_CARREGANDO(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[1]/div"), //display: block ou none
+	XPATH_SOLICITACOES_PENDENTES_URGENCIA_CABECALHO_TABELA_RESULTADOS(0, "/html/body/table/tbody/tr[2]/td/div[7]/div[1]/table"),
+	XPATH_RELATORIO_PRODUTIVIDADE_URGENCIA_TRANSFERIDOS_PELA_REGULACAO(0, "/html/body/form/table[2]/tbody/tr/td/table/tbody/tr[3]/td/table/tbody/tr[2]/td[1]/input[1]"),
+	XPATH_RELATORIO_PRODUTIVIDADE_URGENCIA_NAO_TRANSFERIDOS_PELA_REGULACAO(0, "/html/body/form/table[2]/tbody/tr/td/table/tbody/tr[3]/td/table/tbody/tr[2]/td[1]/input[2]"),
+	XPATH_RELATORIO_PRODUTIVIDADE_URGENCIA_BOTAO_EXPORTAR(0, "/html/body/form/table[2]/tbody/tr/td/table/tbody/tr[3]/td/table/tbody/tr[3]/td/input[3]"),
+	XPATH_RELATORIO_PRODUTIVIDADE_URGENCIA_DIV_AGUARDANDO(0, "/html/body/div[5]"),
+	ID_RELATORIO_PRODUTIVIDADE_URGENCIA_DATA_INICIAL(0, "TXT_DATA_DE"),
+	ID_RELATORIO_PRODUTIVIDADE_URGENCIA_DATA_FINAL(0, "TXT_DATA_ATE");
+	
+	
 		
 	private int indice;
 	private String textoIdentificador;

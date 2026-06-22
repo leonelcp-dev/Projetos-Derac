@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoUrgenciaPlanilhaAguardando {
+public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
 		
 	INDICE_COLUNA_DATA(0, 1, "Data", "Date", "dd/MM/yyyy"),
 	INDICE_COLUNA_HORARIO_EXTRACAO(1, 2, "Data", "Time", "HH:mm:ss"),
@@ -17,10 +17,9 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardando {
 	
 	LINHA_INICIAL_ARQUIVO(21, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_MONITORAMENTO(22, 0, "Monitoramento de Leitos", "", ""),
+	NOME_PLANILHA_MONITORAMENTO(22, 0, "Detalhado Urgência Aguardando", "", ""),
 	
-	DIVISOR_UNIDADE_ESPECIALIDADE(23, 0, "####", "", ""),
-	DIVISOR_ESPECIALIDADE_ENFERMARIA(24, 0, "@@@@", "", ""),
+	DIVISOR_CAMPOS(23, 0, "####", "", ""),
 	
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(25, 0, "xlsx", "", ""),
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(26, 0, "xls", "", ""),
@@ -35,7 +34,7 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardando {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoUrgenciaPlanilhaAguardando(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);
@@ -84,10 +83,10 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardando {
 		this.formato = formato;
 	}	
 	
-    private static final Map<Integer, ParametrosArquivoUrgenciaPlanilhaAguardando> POR_ID_UNICO =
-        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoUrgenciaPlanilhaAguardando::getIdUnico, Function.identity()));
+    private static final Map<Integer, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado> POR_ID_UNICO =
+        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado::getIdUnico, Function.identity()));
 
-    public static ParametrosArquivoUrgenciaPlanilhaAguardando poIdUnico(int idUnico) {
+    public static ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado poIdUnico(int idUnico) {
         return POR_ID_UNICO.get(idUnico); // pode retornar null se não existir
     }
 

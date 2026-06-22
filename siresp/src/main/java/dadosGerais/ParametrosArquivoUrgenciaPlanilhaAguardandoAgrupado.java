@@ -31,16 +31,15 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardandoAgrupado {
 	
 	LINHA_INICIAL_ARQUIVO(21, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_MONITORAMENTO(22, 0, "Monitoramento de Leitos", "", ""),
+	NOME_PLANILHA_MONITORAMENTO(22, 0, "Consolidado Urgência Aguardando", "", ""),
 	
-	DIVISOR_UNIDADE_ESPECIALIDADE(23, 0, "####", "", ""),
-	DIVISOR_ESPECIALIDADE_ENFERMARIA(24, 0, "@@@@", "", ""),
+	DIVISOR_CAMPOS(23, 0, "####", "", ""),
 	
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(25, 0, "xlsx", "", ""),
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(26, 0, "xls", "", ""),
 	
 	INDICE_COLUNA_DATA_PROCESSAMENTO(27, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
-	INDICE_LINHA_DATA_PROCESSAMENTO(28, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),;
+	INDICE_LINHA_DATA_PROCESSAMENTO(28, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", "");
 	
 
 	private int idUnico;

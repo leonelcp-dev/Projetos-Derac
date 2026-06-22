@@ -447,13 +447,20 @@ public class AcoesArquivoExcel {
 			dateStyle.setDataFormat(df.getFormat("HH:mm"));
 			cell.setCellStyle(dateStyle);
         }
+        else if (tipo.equals("Time/Seconds"))
+        {
+        	DataFormat df = arquivoXLSX.createDataFormat();
+			CellStyle dateStyle = cell.getCellStyle();
+			dateStyle.setDataFormat(df.getFormat("HH:mm:ss"));
+			cell.setCellStyle(dateStyle);
+        }
         else if(tipo.equals("String"))
         {
         	CellStyle general = cell.getCellStyle();
 			general.setDataFormat((short) 0); // General
 			cell.setCellStyle(general);
         }
-        else if(tipo.equals("Integer"))
+        else if(tipo.equals("Integer") || tipo.equals("Int"))
         {
         	CellStyle general = cell.getCellStyle();
 			general.setDataFormat((short) 0); // General
@@ -849,6 +856,46 @@ public class AcoesArquivoExcel {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+	
+	public void apagarLinha(String nomePlanilha, int indiceLinha) 
+	{
+        Path caminho = Paths.get(nomeDoAquivo); // ajuste o caminho
+        abrirPlanilha(nomePlanilha, 0);
+		
+		try 
+		{
+			Sheet sheet = arquivoXLSX.getSheet(nomePlanilha);
+			
+			int lastRowNum = sheet.getLastRowNum();
+			
+	        if (indiceLinha >= 0 && indiceLinha < lastRowNum) {
+	            // Remove a linha
+	            Row row = sheet.getRow(indiceLinha);
+	            if (row != null) {
+	                sheet.removeRow(row);
+	            }
+	
+	            // Move as linhas de baixo para cima
+	            sheet.shiftRows(indiceLinha + 1, lastRowNum, -1);
+	        } else if (indiceLinha == lastRowNum) {
+	            // Se for a última linha, só remove
+	            Row row = sheet.getRow(indiceLinha);
+	            if (row != null) {
+	                sheet.removeRow(row);
+	            }
+	        }
+
+			   
+			    // Salvar arquivo
+			try (FileOutputStream fos = new FileOutputStream(nomeDoAquivo)) {
+				arquivoXLSX.write(fos);
+			}
+		
+		//System.out.println("Formatação copiada com sucesso!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 	
 	public void copiarFormato(int indiceLinhaOrigem, int indiceLinhaDestino) 

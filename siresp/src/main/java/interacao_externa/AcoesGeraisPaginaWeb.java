@@ -388,6 +388,21 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public String obterTextoPorXPathDeSpan(WebDriver driverPagina, String xpath)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.xpath(xpath));
+			return item.getText();
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return "";
+		}
+
+	}
+	
 	public boolean tirarFocoDoCampoTexto(WebDriver driverPagina, String id)
 	{
 
@@ -915,7 +930,7 @@ public class AcoesGeraisPaginaWeb {
 			item.click();
 			
 		}catch(Exception e) {
-			System.out.println(e.toString());
+			System.out.println(xpath + "\r\n" + e.toString());
 			return false;
 		}
 		
@@ -1081,6 +1096,27 @@ public class AcoesGeraisPaginaWeb {
 		}
 		
 		return visivel;
+	}
+	
+	public boolean compararValorAtributoCSSPorXPATH(WebDriver driverPagina, String xpath, String atributo, String valor)
+	{
+		boolean valorEsperado = false;
+		
+		try
+		{
+			WebElement elemento = driverPagina.findElement(By.xpath(xpath));
+			
+			String valorAtributo = elemento.getCssValue(atributo);
+			
+			if(valor.equals(valorAtributo))
+				valorEsperado = true;
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+
+		return valorEsperado;
 	}
 	
 	public boolean elementoEstaHabilitado(WebDriver driverPagina, String id)

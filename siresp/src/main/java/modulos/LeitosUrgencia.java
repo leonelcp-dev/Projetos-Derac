@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -1010,6 +1011,18 @@ public class LeitosUrgencia
 		        LocalDate data = LocalDate.parse(valor, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
 		        celula = new CelulaExcel(linha, coluna, data, tipo);
+		        
+			 } catch (DateTimeParseException e) {
+		    	celula = new CelulaExcel(linha, coluna, valor, "String");
+		    }
+		}
+		else if(tipo.equals("Time"))
+		{
+			 try 
+			 {
+		        LocalTime horario = LocalTime.parse(valor, DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+		        celula = new CelulaExcel(linha, coluna, horario, tipo);
 		        
 			 } catch (DateTimeParseException e) {
 		    	celula = new CelulaExcel(linha, coluna, valor, "String");
