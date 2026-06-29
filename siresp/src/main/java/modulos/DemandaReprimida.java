@@ -214,6 +214,8 @@ public class DemandaReprimida {
 		
 		consolidarDemandaReprimida(dataInformada, dataDeAnalise.replaceAll("/", "."));
 		
+		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		
 		return "";
 	}
 	

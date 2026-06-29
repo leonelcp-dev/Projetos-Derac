@@ -351,18 +351,19 @@ public class LeitosUrgencia
 					linhaArquivo++;
 				}
 				
-				//parei aqui, escrever arquivo
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getNomeSIRESP(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_DATA.getIndice(), dataInformada, "Date"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ESPECIALIDADE.getIndice(), especialidade.toUpperCase(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ENFERMARIA.getIndice(), enfermaria.toUpperCase(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_DISPONIVEL.getIndice(), dadosLeito.getTotalDisponivel(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA.getIndice(), dadosLeito.getReservaInterna(), "Int"));
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_USO_NAO_CONVENIADO.getIndice(), dadosLeito.getUsoNaoConveniado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_OCUPADO.getIndice(), dadosLeito.getTotalOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_REGULAR_OCUPADO.getIndice(), dadosLeito.getRegularOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO.getIndice(), dadosLeito.getExtraPactuadoOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO.getIndice(), dadosLeito.getExtraNaoPactuadoOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_INTERNO_OCUPADO.getIndice(), dadosLeito.getInternoOcupado(), "Int"));
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_NAO_CONVENIADO_OCUPADO.getIndice(), dadosLeito.getNaoConveniadoOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_BLOQUEADO.getIndice(), dadosLeito.getTotalBloqueado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getIndice(), dadosLeito.getBloqueadoIsolamento(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getIndice(), dadosLeito.getBloqueadoAguardandoPaciente(), "Int"));
@@ -438,11 +439,13 @@ public class LeitosUrgencia
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ENFERMARIA.getIndice(), enfermaria.toUpperCase(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_DISPONIVEL.getIndice(), dadosLeito.getTotalDisponivel(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA.getIndice(), dadosLeito.getReservaInterna(), "Int"));
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_USO_NAO_CONVENIADO.getIndice(), dadosLeito.getUsoNaoConveniado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_OCUPADO.getIndice(), dadosLeito.getTotalOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_REGULAR_OCUPADO.getIndice(), dadosLeito.getRegularOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO.getIndice(), dadosLeito.getExtraPactuadoOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO.getIndice(), dadosLeito.getExtraNaoPactuadoOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_INTERNO_OCUPADO.getIndice(), dadosLeito.getInternoOcupado(), "Int"));
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_NAO_CONVENIADO_OCUPADO.getIndice(), dadosLeito.getNaoConveniadoOcupado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_BLOQUEADO.getIndice(), dadosLeito.getTotalBloqueado(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getIndice(), dadosLeito.getBloqueadoIsolamento(), "Int"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getIndice(), dadosLeito.getBloqueadoAguardandoPaciente(), "Int"));
@@ -487,7 +490,7 @@ public class LeitosUrgencia
 				String statusLeito = arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_STATUS.getIndice());
 				
 				String tipoDeLeito = arquivoCenso.getValorDaCelulaComoString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_TIPO_DE_LEITO_3.getIndice(), "");
-				String pactuado = ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_PACTUADO.getDescricao();
+				String pactuado = ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao();
 				
 				LeitoCadastrado leito;
 				
@@ -501,7 +504,7 @@ public class LeitosUrgencia
 					leito.setAtividade("");
 					leito.setEspecialidade(arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_ESPECIALIDADE.getIndice()).toUpperCase().trim());
 					leito.setStatus(statusLeito);
-					leito.setContabilizaNaTaxaDeOcupacao(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO.getDescricao());
+					leito.setContabilizaNaTaxaDeOcupacao(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO.getDescricao());
 					
 					if(leitosExtrasCadastrados.containsKey(descricaoEnfermaria + descricaoLeito))
 					{
@@ -550,12 +553,20 @@ public class LeitosUrgencia
 					}
 					
 					//Leitos Disponiveis
-					if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO.getDescricao()))
+					if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO.getDescricao()))
 					{
 						if(!tipoDeLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_EXTRA.getDescricao()))
 						{
 							consolidadoPorHospitalEspecialidade.incrementarReservaInterna();
 							consolidadoPorEspecialidade.incrementarReservaInterna();
+						}
+					}
+					else if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_NAO_CONVENIADO.getDescricao()))
+					{
+						if(!tipoDeLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_EXTRA.getDescricao()))
+						{
+							consolidadoPorHospitalEspecialidade.incrementarUsoNaoConveniado();
+							consolidadoPorEspecialidade.incrementarUsoNaoConveniado();
 						}
 					}
 					else
@@ -592,10 +603,15 @@ public class LeitosUrgencia
 								consolidadoPorEspecialidade.incrementarExtraPactuadoOcupado();
 							}
 						}
-						else if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO.getDescricao()))
+						else if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO.getDescricao()))
 						{
 							consolidadoPorHospitalEspecialidade.incrementarInternoOcupado();
 							consolidadoPorEspecialidade.incrementarInternoOcupado();		
+						}
+						else if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_NAO_CONVENIADO.getDescricao()))
+						{
+							consolidadoPorHospitalEspecialidade.incrementarNaoConveniadoOcupado();;
+							consolidadoPorEspecialidade.incrementarNaoConveniadoOcupado();		
 						}
 						else
 						{
@@ -607,7 +623,7 @@ public class LeitosUrgencia
 					{
 						if(!tipoDeLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_EXTRA.getDescricao()) && !statusLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_BLOQUEADO.getDescricao()) &&
 								!statusLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_INATIVO.getDescricao()) && 
-								!leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO.getDescricao()))
+								!leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO.getDescricao()))
 						{
 							consolidadoPorHospitalEspecialidade.incrementarLeitosVagos();
 							consolidadoPorEspecialidade.incrementarLeitosVagos();	
@@ -886,11 +902,13 @@ public class LeitosUrgencia
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ENFERMARIA.getIndice(), leito.getEnfermaria(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ENFERMARIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_DISPONIVEL.getIndice(), leito.getTotalDisponivel(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_DISPONIVEL.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA.getIndice(), leito.getReservaInterna(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_USO_NAO_CONVENIADO.getIndice(), leito.getUsoNaoConveniado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_USO_NAO_CONVENIADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_OCUPADO.getIndice(), leito.getTotalOcupado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_REGULAR_OCUPADO.getIndice(), leito.getRegularOcupado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_REGULAR_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO.getIndice(), leito.getExtraPactuadoOcupado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO.getIndice(), leito.getExtraNaoPactuadoOcupado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_INTERNO_OCUPADO.getIndice(), leito.getInternoOcupado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_INTERNO_OCUPADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_NAO_CONVENIADO_OCUPADO.getIndice(), leito.getNaoConveniadoOcupado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_NAO_CONVENIADO_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_BLOQUEADO.getIndice(), leito.getTotalBloqueado(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_TOTAL_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getIndice(), leito.getBloqueadoIsolamento(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getIndice(), leito.getBloqueadoAguardandoPaciente(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getTipo()));
@@ -949,11 +967,13 @@ public class LeitosUrgencia
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ENFERMARIA.getIndice(), leito.getEnfermaria(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ENFERMARIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_DISPONIVEL.getIndice(), leito.getTotalDisponivel(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_DISPONIVEL.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA.getIndice(), leito.getReservaInterna(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_USO_NAO_CONVENIADO.getIndice(), leito.getUsoNaoConveniado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_USO_NAO_CONVENIADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_OCUPADO.getIndice(), leito.getTotalOcupado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_REGULAR_OCUPADO.getIndice(), leito.getRegularOcupado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_REGULAR_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO.getIndice(), leito.getExtraPactuadoOcupado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO.getIndice(), leito.getExtraNaoPactuadoOcupado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_INTERNO_OCUPADO.getIndice(), leito.getInternoOcupado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_INTERNO_OCUPADO.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_NAO_CONVENIADO_OCUPADO.getIndice(), leito.getNaoConveniadoOcupado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_NAO_CONVENIADO_OCUPADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_BLOQUEADO.getIndice(), leito.getTotalBloqueado(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_TOTAL_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getIndice(), leito.getBloqueadoIsolamento(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getIndice(), leito.getBloqueadoAguardandoPaciente(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getTipo()));

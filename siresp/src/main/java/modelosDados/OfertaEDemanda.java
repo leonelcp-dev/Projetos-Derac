@@ -111,8 +111,14 @@ public class OfertaEDemanda {
     
     private String observacao;
 
-    @ExcelColumn(header = "Diferença de oferta")
+    @ExcelColumn(header = "Atual")
     private String diferencaDeOferta;
+    
+    @ExcelColumn(header = "Anterior")
+    private String diferencaDeOfertaAnterior;
+    
+    @ExcelColumn(header = "Anterior 2")
+    private String diferencaDeOfertaAnterior2;
     
     private int linhaExcel;
 
@@ -426,6 +432,22 @@ public class OfertaEDemanda {
 
 	public void setPerdaPrimaria(String perdaPrimaria) {
 		this.perdaPrimaria = perdaPrimaria;
+	}
+
+	public String getDiferencaDeOfertaAnterior() {
+		return diferencaDeOfertaAnterior;
+	}
+
+	public void setDiferencaDeOfertaAnterior(String diferencaDeOfertaAnterior) {
+		this.diferencaDeOfertaAnterior = diferencaDeOfertaAnterior;
+	}
+
+	public String getDiferencaDeOfertaAnterior2() {
+		return diferencaDeOfertaAnterior2;
+	}
+
+	public void setDiferencaDeOfertaAnterior2(String diferencaDeOfertaAnterior2) {
+		this.diferencaDeOfertaAnterior2 = diferencaDeOfertaAnterior2;
 	}
 
 }

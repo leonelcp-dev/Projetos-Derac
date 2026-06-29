@@ -41,23 +41,25 @@ public enum ParametrosArquivoOfertaDemanda {
 	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(31, 32,"Cálculos Tempo de Espera", "Int", ""),
 	INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS(32, 33,"Maior tempo de espera em dias", "Int", ""),
 	INDICE_COLUNA_RECEPCAO_FECHADA(33, 34,"Recepção Fechada", "String", ""),
-	INDICE_COLUNA_OBSERVACAO(34, 35,"Recepção Fechada", "String", ""),
-	INDICE_COLUNA_DIFERENCA_DE_OFERTA(35, 35,"Diferença de oferta", "Int", ""),
+	INDICE_COLUNA_OBSERVACAO(34, 35,"Observação", "String", ""),
+	INDICE_COLUNA_DIFERENCA_DE_OFERTA(35, 35,"Atual", "Int", ""),
+	INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR(36, 36,"Anterior", "Int", ""),
+	INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR_2(37, 37,"Anterior 2", "Int", ""),
 	
-	LINHA_INICIAL_ARQUIVO(36, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	LINHA_INICIAL_ARQUIVO(38, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(37, 0, "Ofertas", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(39, 0, "Ofertas", "", ""),
 	
-	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(38, 0, "Erro ao selecionar o grupo de cota", "", ""),
+	TEXTO_ERRO_SELECIONAR_GRUPO_DE_COTA(40, 0, "Erro ao selecionar o grupo de cota", "", ""),
 	
-	INDICE_COLUNA_DATA_PROCESSAMENTO(39, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
-	INDICE_LINHA_DATA_PROCESSAMENTO(40, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	INDICE_COLUNA_DATA_PROCESSAMENTO(41, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
+	INDICE_LINHA_DATA_PROCESSAMENTO(42, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
 	
-	NOME_ARQUIVO_CONSOLIDADO(41, 0, "ConsolidadoOfertaEDemanda.xlsx", "", ""),
-	NOME_ARQUIVO_CONSOLIDADO_EM_PROCESSAMENTO(42, 0, "ConsolidadoOfertaEDemanda-temp.xlsx", "", ""),
+	NOME_ARQUIVO_CONSOLIDADO(43, 0, "ConsolidadoOfertaEDemanda.xlsx", "", ""),
+	NOME_ARQUIVO_CONSOLIDADO_EM_PROCESSAMENTO(44, 0, "ConsolidadoOfertaEDemanda-temp.xlsx", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(43, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(44, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(45, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(46, 0, "xls", "", "");
 	
 
 	private int idUnico;

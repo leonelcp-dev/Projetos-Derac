@@ -6,11 +6,13 @@ public class DadosAcumuladosLeitos {
     private String especialidade;
     private int totalDisponivel;
     private int reservaInterna;
+    private int usoNaoConveniado;
     private int totalOcupado;
     private int regularOcupado;
     private int extraPactuadoOcupado;
     private int extraNaoPactuadoOcupado;
     private int internoOcupado;
+    private int naoConveniadoOcupado;
     private int totalBloqueado;
     private int bloqueadoIsolamento;
     private int bloqueadoAguardandoPaciente;
@@ -21,11 +23,13 @@ public class DadosAcumuladosLeitos {
     {
          totalDisponivel = 0;
          reservaInterna = 0;
+         usoNaoConveniado = 0;
          totalOcupado = 0;
          regularOcupado = 0;
          extraPactuadoOcupado = 0;
          extraNaoPactuadoOcupado = 0;
          internoOcupado = 0;
+         naoConveniadoOcupado = 0;
          totalBloqueado = 0;
          bloqueadoIsolamento = 0;
          bloqueadoAguardandoPaciente = 0;
@@ -91,6 +95,16 @@ public class DadosAcumuladosLeitos {
     public void incrementarLeitosVagos()
     {
     	leitosVagos++;
+    }
+    
+    public void incrementarUsoNaoConveniado()
+    {
+    	usoNaoConveniado++;
+    }
+    
+    public void incrementarNaoConveniadoOcupado()
+    {
+    	naoConveniadoOcupado++;
     }
     
 	public String getEspecialidade() {
@@ -195,6 +209,22 @@ public class DadosAcumuladosLeitos {
 
 	public void setInternoOcupado(int internoOcupado) {
 		this.internoOcupado = internoOcupado;
+	}
+
+	public int getUsoNaoConveniado() {
+		return usoNaoConveniado;
+	}
+
+	public void setUsoNaoConveniado(int usoNaoConveniado) {
+		this.usoNaoConveniado = usoNaoConveniado;
+	}
+
+	public int getNaoConveniadoOcupado() {
+		return naoConveniadoOcupado;
+	}
+
+	public void setNaoConveniadoOcupado(int naoConveniadoOcupado) {
+		this.naoConveniadoOcupado = naoConveniadoOcupado;
 	}
 
 }

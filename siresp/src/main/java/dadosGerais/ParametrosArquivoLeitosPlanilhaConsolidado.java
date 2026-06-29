@@ -12,24 +12,26 @@ public enum ParametrosArquivoLeitosPlanilhaConsolidado {
 	INDICE_COLUNA_ENFERMARIA(2, 3, "Enfermaria", "String", ""),
 	INDICE_COLUNA_TOTAL_DISPONIVEL(3, 4,"Total Disponível", "Int", ""),
 	INDICE_COLUNA_RESERVA_INTERNA(4, 5, "Reserva Interna", "Int", ""),
-	INDICE_COLUNA_TOTAL_OCUPADO(5, 6, "Total Ocupado", "Int", ""),
-	INDICE_COLUNA_REGULAR_OCUPADO(6, 7, "Regular", "Int", ""),
-	INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO(7, 8, "Extra Pactuado", "Int", ""),
-	INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO(8, 9, "Extra Não Pactuado", "Int", ""),
-	INDICE_COLUNA_INTERNO_OCUPADO(9, 10, "Interno", "Int", ""),
-	INDICE_COLUNA_TOTAL_BLOQUEADO(10, 11, "Total Bloqueado", "Int", ""),
-	INDICE_COLUNA_ISOLAMENTO_BLOQUEADO(11, 12, "Isolamento", "Int", ""),
-	INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO(12, 13, "Aguardando Paciente", "Int", ""),
-	INDICE_COLUNA_OUTROS_BLOQUEADO(13, 14, "Outros", "Int", ""),
-	INDICE_COLUNA_LEITOS_VAGOS(14, 15, "Vagos", "Int", ""),
-	INDICE_COLUNA_TAXA_DE_OCUPACAO(15, 16, "Taxa de Ocupação", "Porcentagem", ""),
+	INDICE_COLUNA_USO_NAO_CONVENIADO(5, 6, "Uso Não Conveniado", "Int", ""),
+	INDICE_COLUNA_TOTAL_OCUPADO(6, 7, "Total Ocupado", "Int", ""),
+	INDICE_COLUNA_REGULAR_OCUPADO(7, 8, "Regular", "Int", ""),
+	INDICE_COLUNA_EXTRA_PACTUADO_OCUPADO(8, 9, "Extra Pactuado", "Int", ""),
+	INDICE_COLUNA_EXTRA_NAO_PACTUADO_OCUPADO(9, 10, "Extra Não Pactuado", "Int", ""),
+	INDICE_COLUNA_INTERNO_OCUPADO(10, 11, "Interno", "Int", ""),
+	INDICE_COLUNA_NAO_CONVENIADO_OCUPADO(11, 12, "Não Conveniado", "Int", ""),
+	INDICE_COLUNA_TOTAL_BLOQUEADO(12, 13, "Total Bloqueado", "Int", ""),
+	INDICE_COLUNA_ISOLAMENTO_BLOQUEADO(13, 14, "Isolamento", "Int", ""),
+	INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO(14, 15, "Aguardando Paciente", "Int", ""),
+	INDICE_COLUNA_OUTROS_BLOQUEADO(15, 16, "Outros", "Int", ""),
+	INDICE_COLUNA_LEITOS_VAGOS(16, 17, "Vagos", "Int", ""),
+	INDICE_COLUNA_TAXA_DE_OCUPACAO(17, 18, "Taxa de Ocupação", "Porcentagem", ""),
 	
-	LINHA_INICIAL_ARQUIVO(16, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
+	LINHA_INICIAL_ARQUIVO(18, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(17, 0, "Consolidado Leitos", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(19, 0, "Consolidado Leitos", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(18, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(19, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(20, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(21, 0, "xls", "", "");
 	
 
 	private int idUnico;

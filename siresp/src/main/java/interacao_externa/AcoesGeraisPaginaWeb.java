@@ -91,6 +91,43 @@ public class AcoesGeraisPaginaWeb {
 		
 	}
 	
+	public boolean clicarMenuULPeloXPATH(WebDriver driverPagina, String xpath, List<String> SequenciaMenus)
+	{
+		try
+		{			
+			WebElement menu = driverPagina.findElement(By.xpath(xpath));
+	
+			for(String itemMenu : SequenciaMenus)
+			{
+				List<WebElement> opcoes = menu.findElements(By.tagName("li"));
+		
+				for (WebElement opcao : opcoes) { 
+					
+					System.out.println(opcao.getText() + " - " + itemMenu);
+					
+					if (opcao.getText().trim().equals(itemMenu))
+					{
+						opcao.click();
+						menu = opcao;
+						try {
+							Thread.sleep(3000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						break;
+					}
+				}
+			}
+			
+			return true;
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+	}
+	
 	
 	public boolean selecionarItemSelect(WebDriver driverPagina, String id, String textoASelecionar)
 	{
@@ -377,6 +414,23 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{		
 			WebElement item = driverPagina.findElement(By.id(id));
+			item.clear();
+			item.sendKeys(texto);
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+	public boolean preencherInputTextPeloXPATH(WebDriver driverPagina, String xpath, String texto)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.xpath(xpath));
 			item.clear();
 			item.sendKeys(texto);
 			
@@ -737,6 +791,46 @@ public class AcoesGeraisPaginaWeb {
 		return tabela;
 	}
 	
+	public ArrayList<ArrayList<String>> obterTableComDivPeloXPath(WebDriver driverPagina, String xpath, String classNameLinha, String classNameCelula)
+	{
+		ArrayList<ArrayList<String>> tabela = new ArrayList();
+		
+		try
+		{		
+			WebElement elementoComTabela = driverPagina.findElement(By.xpath(xpath));
+	
+			List<WebElement> linhas = driverPagina.findElements(By.cssSelector(classNameLinha));
+
+            // Percorrer as linhas e imprimir o conteúdo das células
+            for (WebElement tr : linhas) {
+            	
+            	ArrayList<String> linha = new ArrayList<String>();
+          	
+            	List<WebElement> colunas;
+            	
+            	if(classNameCelula.equals(""))
+                	colunas = tr.findElements(By.tagName("div"));
+            	else
+            		colunas = tr.findElements(By.cssSelector("." + classNameCelula));
+            		
+                for (WebElement coluna : colunas) 
+                {                    
+                	linha.add(coluna.getText());
+                }
+                                
+	            tabela.add(linha);
+            }
+
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			System.out.println("Chegou aqui");
+			return null;
+		}
+		
+		return tabela;
+	}
+	
 	public ArrayList<ArrayList<String>> obterTableComIdDaLinhaEPaginacao(WebDriver driverPagina, String id, String ClassNamePaginacao)
 	{
 		ArrayList<ArrayList<String>> tabela = new ArrayList();
@@ -868,6 +962,25 @@ public class AcoesGeraisPaginaWeb {
 		}
 		
 		return true;
+	}
+	
+	public boolean verificarRadioSelectedByValue(WebDriver driverPagina, String value)
+	{
+		boolean selecionado;
+		
+		try
+		{	
+			WebElement radio = driverPagina.findElement(By.xpath("//input[@type='radio' and @value='" + value + "']"));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			selecionado = radio.isSelected();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return selecionado;
 	}
 	
 	public boolean clicarRadioInputPeloId(WebDriver driverPagina, String id)

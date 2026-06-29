@@ -23,9 +23,10 @@ public enum ParametrosArquivoCensoPlanilhaCadastro {
 	
 	TEXTO_STATUS_LEITO_ATIVO(17, 0, "ativo", "", ""),
 	TEXTO_STATUS_LEITO_INATIVO(18, 0, "i n a t i v o", "", ""),
-	TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO(19, 0, "NÃO", "", ""),
+	TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO(19, 0, "INTERNO", "", ""),
+	TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_NAO_CONVENIADO(20, 0, "NÃO CONVENIADO", "", ""),
 	
-	EXTENSAO_ARQUIVO(20, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO(21, 0, "xlsx", "", "");
 	
 
 	private int idUnico;

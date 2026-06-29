@@ -34,6 +34,8 @@ import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFormaResolucao;
+import dadosGerais.ParametrosArquivoUrgenciaPlanilhaProducaoRegulador;
+import dadosGerais.ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaVagaZero;
 import dadosGerais.ParametrosArquivoUrgenciaRelatorioProdutividade;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado;
@@ -49,6 +51,8 @@ import modelosDados.EntidadeLeito;
 import modelosDados.IntervalosUrgencia;
 import modelosDados.UrgenciaFinalizadoDetalhado;
 import modelosDados.UrgenciaFormaResolucao;
+import modelosDados.UrgenciaProducaoRegulador;
+import modelosDados.UrgenciaProducaoReguladorMensal;
 import modelosDados.UrgenciaVagaZero;
 import tratamentoDeArquivos.Arquivo;
 import tratamentoDeArquivos.Pasta;
@@ -74,6 +78,8 @@ public class UrgenciaFinalizado
 	HashMap<String, UrgenciaFinalizadoDetalhado> urgenciasDetalhadasJaRegistradas;
 	HashMap<String, UrgenciaVagaZero> urgenciasVagaZero;
 	HashMap<String, UrgenciaFormaResolucao> urgenciasFormaDeResolucao;
+	HashMap<String, UrgenciaProducaoRegulador> urgenciasProducaoRegulador;
+	HashMap<String, UrgenciaProducaoReguladorMensal> urgenciasProducaoreguladorMensal;
 	private IdentificadoresPastasCompartilhadasCDIDRUrgencia diretoriosCDIDR; 
 
 	public UrgenciaFinalizado(String pastaBase, String ambiente)
@@ -213,7 +219,7 @@ public class UrgenciaFinalizado
 		
 		for(UrgenciaFinalizadoAgrupado urgencia : listaUrgencias)
 		{
-			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData()));
+			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
 			urgencia.setLinhaExcel(linhaArquivo);
 			
 			urgenciasAgrupadasJaRegistradas.put(urgencia.getData() + urgencia.getSolicitante() + urgencia.getRecurso() + urgencia.getFicha(), urgencia);
@@ -239,7 +245,7 @@ public class UrgenciaFinalizado
 		
 		for(UrgenciaFinalizadoDetalhado urgencia : listaUrgenciasPorHora)
 		{
-			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData()));
+			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
 			urgencia.setLinhaExcel(linhaArquivo);
 			urgencia.setLinhaUtilizada(false);
 			
@@ -266,7 +272,7 @@ public class UrgenciaFinalizado
 		
 		for(UrgenciaVagaZero urgencia : listaVagasZero)
 		{
-			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData()));
+			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
 			urgencia.setLinhaExcel(linhaArquivo);
 			urgencia.setLinhaUtilizada(false);
 			
@@ -275,7 +281,7 @@ public class UrgenciaFinalizado
 			linhaArquivo++;
 		}
 		
-		//Vagas zero
+		//Formas de Resolução
     	ArrayList<UrgenciaFormaResolucao> listaFormasDeResolucao = new ArrayList<>();
     	
     	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
@@ -293,11 +299,65 @@ public class UrgenciaFinalizado
 		
 		for(UrgenciaFormaResolucao urgencia : listaFormasDeResolucao)
 		{
-			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData()));
+			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
 			urgencia.setLinhaExcel(linhaArquivo);
 			urgencia.setLinhaUtilizada(false);
 			
 			urgenciasFormaDeResolucao.put(urgencia.getData() + urgencia.getFormaDeResolucao() + urgencia.getSolicitante() + urgencia.getExecutante() + urgencia.getLocalDeRegulacao() + urgencia.getRecurso() + urgencia.getFicha(), urgencia);
+			
+			linhaArquivo++;
+		}
+		
+		//Produção Regulador Detalhada
+    	ArrayList<UrgenciaProducaoRegulador> listaProducaoRegulador = new ArrayList<>();
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaProducaoRegulador = ExcelBinder.readSheet(in, UrgenciaProducaoRegulador.class, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+    	
+		urgenciasProducaoRegulador = new HashMap<String, UrgenciaProducaoRegulador>();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaVagaZero.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaProducaoRegulador urgencia : listaProducaoRegulador)
+		{
+			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
+			urgencia.setLinhaExcel(linhaArquivo);
+			urgencia.setLinhaUtilizada(false);
+			
+			urgenciasProducaoRegulador.put(urgencia.getData() + urgencia.getRegulador() + urgencia.getExecutante() + urgencia.getRecurso() + urgencia.getFicha(), urgencia);
+			
+			linhaArquivo++;
+		}
+		
+		//Produção Regulador Detalhada Mensal
+    	ArrayList<UrgenciaProducaoReguladorMensal> listaProducaoReguladorMensal = new ArrayList<>();
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaProducaoReguladorMensal = ExcelBinder.readSheet(in, UrgenciaProducaoReguladorMensal.class, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+    	
+		urgenciasProducaoreguladorMensal = new HashMap<String, UrgenciaProducaoReguladorMensal>();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaVagaZero.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaProducaoReguladorMensal urgencia : listaProducaoReguladorMensal)
+		{
+			urgencia.setCompetencia(normalizarDataParaDiaMesAno(urgencia.getCompetencia(), "MMM/yyyy"));
+			urgencia.setLinhaExcel(linhaArquivo);
+			urgencia.setLinhaUtilizada(false);
+			
+			urgenciasProducaoreguladorMensal.put(urgencia.getCompetencia() + urgencia.getRegulador(), urgencia);
 			
 			linhaArquivo++;
 		}
@@ -336,6 +396,8 @@ public class UrgenciaFinalizado
 		HashMap<String, Integer> urgenciasDetalhadas = new HashMap<String, Integer>();
 		HashMap<String, DadosAcumuladosVagaZero> vagasZero = new HashMap<String, DadosAcumuladosVagaZero>();
 		HashMap<String, Integer> urgenciasFormaDeResolucao = new HashMap<String, Integer>();
+		HashMap<String, Integer> urgenciasProducaoRegulador = new HashMap<String, Integer>();
+		HashMap<String, Integer> urgenciasProducaoReguladorMensal = new HashMap<String, Integer>();
 		
 		for(String opcaoRegulacao : opcoesTranferenciaPelaRegulacao)
 		{
@@ -354,7 +416,7 @@ public class UrgenciaFinalizado
 			
 			System.out.println("Abrindo: " + arquivo.getCaminhoCompleto());
 
-			montarDadosDeUrgenciaFinalizados(arquivo.getCaminhoCompleto(), dataInformada, urgenciasAgrupadas, urgenciasDetalhadas, vagasZero, urgenciasFormaDeResolucao);
+			montarDadosDeUrgenciaFinalizados(arquivo.getCaminhoCompleto(), dataInformada, urgenciasAgrupadas, urgenciasDetalhadas, vagasZero, urgenciasFormaDeResolucao, urgenciasProducaoRegulador);
 			
 			arquivo.apagar();
 		}
@@ -373,11 +435,17 @@ public class UrgenciaFinalizado
 		montarPlanilhaUrgenciaDetalhada(dataInformada, textoDataFinalizacao, urgenciasDetalhadas);		
 		montarPlanilhaVagaZero(dataInformada, textoDataFinalizacao, vagasZero);
 		montarPlanilhaFormaDeResolucao(dataInformada, textoDataFinalizacao, urgenciasFormaDeResolucao);
+		montarPlanilhaProducaoRegulador(dataInformada, textoDataFinalizacao, urgenciasProducaoRegulador);
+		
+		montarDadosProducaoReguladorMensal(urgenciasProducaoReguladorMensal);
+		montarPlanilhaProducaoReguladorMensal(dataInformada, urgenciasProducaoReguladorMensal);
 		
 		ordenarPlanilhaAgrupada();
 		ordenarPlanilhaDetalhada();
 		ordenarPlanilhaVagaZero();
 		ordenarPlanilhaFormasDeResolucao();
+		ordenarPlanilhaProducaoRegulador();
+		ordenarPlanilhaProducaoReguladorMensal();
 		//atualizarCopiaOriginalRelatorioProducao();
 		//copiarRelatorioProducaoParaCDIDR();
 		//copiarRelatorioProducaoParaCDRA();
@@ -434,7 +502,7 @@ public class UrgenciaFinalizado
 		return intervalos;
 	}
 	
-	private String montarDadosDeUrgenciaFinalizados(String caminhoArquivo, LocalDate dataHoraDeExtracao, HashMap<String, ArrayList<IntervalosUrgencia>> urgenciasAgrupadas, HashMap<String, Integer> urgenciasDetalhadas, HashMap<String, DadosAcumuladosVagaZero> vagasZero, HashMap<String, Integer> urgenciasFormaDeResolucao)
+	private String montarDadosDeUrgenciaFinalizados(String caminhoArquivo, LocalDate dataHoraDeExtracao, HashMap<String, ArrayList<IntervalosUrgencia>> urgenciasAgrupadas, HashMap<String, Integer> urgenciasDetalhadas, HashMap<String, DadosAcumuladosVagaZero> vagasZero, HashMap<String, Integer> urgenciasFormaDeResolucao, HashMap<String, Integer> urgenciasProducaoRegulador)
 	{
 		
 		String textoDataFinalizacao = dataHoraDeExtracao.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -571,11 +639,74 @@ public class UrgenciaFinalizado
 					}
 				}
 				
+				if(localDeRegulacao.equals(ParametrosArquivoUrgenciaRelatorioProdutividade.TEXTO_CENTRAL_MUNICIPAL_REGULACAO_CAMPINAS.getDescricao()))
+				{
+					String textoMapa = textoDataFinalizacao + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao() + 
+							registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_REGULADOR_FINAl.getIndice()) + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+					
+					if(entidadeExecutante.equals(""))
+						textoMapa += ParametrosArquivoUrgenciaPlanilhaFormaResolucao.TEXTO_EXECUTANTE_VAZIO.getDescricao() + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+					else
+						textoMapa += entidadeExecutante + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+					
+					textoMapa += registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_RECURSO_SOLICITADO_1.getIndice()).trim() + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao() +
+							registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_TIPO_DE_FICHA.getIndice()).replace("Ficha ", "").trim();
+					
+					if(urgenciasProducaoRegulador.containsKey(textoMapa))
+					{
+						int quantidade = urgenciasProducaoRegulador.get(textoMapa);
+						quantidade++;
+						urgenciasProducaoRegulador.put(textoMapa, quantidade);
+					}
+					else
+					{
+						urgenciasProducaoRegulador.put(textoMapa, 1);
+					}
+				}
+				
 			}
 			reader.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		
+		return "";
+	}
+	
+	public String montarDadosProducaoReguladorMensal(HashMap<String, Integer> producaoReguladorMensal)
+	{
+		ArrayList<UrgenciaProducaoRegulador> listaUrgencias = new ArrayList<UrgenciaProducaoRegulador>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaUrgencias = ExcelBinder.readSheet(in, UrgenciaProducaoRegulador.class, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+	
+		for(UrgenciaProducaoRegulador urgencia : listaUrgencias)
+		{
+			String competencia = normalizarDataParaDiaMesAno(urgencia.getData(), "MMM/yyyy");
+
+			String chave = competencia + ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.DIVISOR_CAMPOS.getDescricao() + urgencia.getRegulador();
+			if(producaoReguladorMensal.containsKey(chave))
+			{
+				int quantidade = producaoReguladorMensal.get(chave);
+				quantidade += Integer.parseInt(urgencia.getQuantidade());
+				producaoReguladorMensal.put(chave, quantidade);
+			}
+			else
+			{
+				int quantidade = Integer.parseInt(urgencia.getQuantidade());
+				producaoReguladorMensal.put(chave, quantidade);
+			}
 		}
 		
 		return "";
@@ -827,6 +958,123 @@ public class UrgenciaFinalizado
 		return "";
 	}
 	
+	private String montarPlanilhaProducaoRegulador(LocalDate dataHoraDeExtracao, String textoDataExtracao, HashMap<String, Integer> producaoRegulador)
+	{
+		AcoesArquivoExcel arquivoCenso = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoCenso.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		int linhaArquivo = arquivoCenso.getUltimaLinhaPreenchida();
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(String chave : producaoRegulador.keySet())
+		{
+			String chaveJaRegistrada = chave.replaceAll(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.DIVISOR_CAMPOS.getDescricao(), "").replace(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.TEXTO_EXECUTANTE_VAZIO.getDescricao(), "");
+			
+			UrgenciaProducaoRegulador urgencia;
+			int linha;
+			
+			System.out.println(chaveJaRegistrada);
+			if(urgenciasProducaoRegulador.containsKey(chaveJaRegistrada))
+			{
+				urgencia = urgenciasProducaoRegulador.get(chaveJaRegistrada);
+				urgencia.setLinhaUtilizada(true);
+				
+				linha = urgencia.getLinhaExcel();
+			}
+			else
+			{
+				String[] componentesChave = chave.split(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.DIVISOR_CAMPOS.getDescricao());
+				
+				urgencia = new UrgenciaProducaoRegulador();
+				urgencia.setData(textoDataExtracao);
+				urgencia.setRegulador(componentesChave[1]);
+				
+				if(componentesChave[2].equals(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.TEXTO_EXECUTANTE_VAZIO.getDescricao()))
+					urgencia.setExecutante("");
+				else
+					urgencia.setExecutante(componentesChave[2]);
+				
+				urgencia.setRecurso(componentesChave[3]);
+				urgencia.setFicha(componentesChave[4]);
+				
+				linhaArquivo++;
+				linha = linhaArquivo;
+				urgencia.setLinhaExcel(linha);
+				
+				urgenciasProducaoRegulador.put(chaveJaRegistrada, urgencia);
+				
+			}
+			
+			int quantidade = producaoRegulador.get(chave);
+			
+			//System.out.println(textoDataExtracao);
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_DATA.getIndice(), LocalDate.parse(textoDataExtracao, DateTimeFormatter.ofPattern("dd/MM/yyyy")), "Date"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_EXECUTANTE.getIndice(), urgencia.getExecutante(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_QUANTIDADE.getIndice(), quantidade, "Integer"));
+			
+		}
+		
+		arquivoCenso.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	private String montarPlanilhaProducaoReguladorMensal(LocalDate dataHoraDeExtracao, HashMap<String, Integer> producaoRegulador)
+	{
+		AcoesArquivoExcel arquivoCenso = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoCenso.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		int linhaArquivo = arquivoCenso.getUltimaLinhaPreenchida();
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(String chave : producaoRegulador.keySet())
+		{
+			String chaveJaRegistrada = chave.replaceAll(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.DIVISOR_CAMPOS.getDescricao(), "");
+			
+			UrgenciaProducaoReguladorMensal urgencia;
+			int linha;
+			
+			System.out.println(chaveJaRegistrada);
+			if(urgenciasProducaoreguladorMensal.containsKey(chaveJaRegistrada))
+			{
+				urgencia = urgenciasProducaoreguladorMensal.get(chaveJaRegistrada);
+				urgencia.setLinhaUtilizada(true);
+				
+				linha = urgencia.getLinhaExcel();
+			}
+			else
+			{
+				String[] componentesChave = chave.split(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.DIVISOR_CAMPOS.getDescricao());
+				
+				urgencia = new UrgenciaProducaoReguladorMensal();
+				urgencia.setCompetencia(componentesChave[0]);
+				urgencia.setRegulador(componentesChave[1]);
+								
+				linhaArquivo++;
+				linha = linhaArquivo;
+				urgencia.setLinhaExcel(linha);
+				
+				urgenciasProducaoreguladorMensal.put(chaveJaRegistrada, urgencia);
+				
+			}
+			
+			int quantidade = producaoRegulador.get(chave);
+			
+			//System.out.println(textoDataExtracao);
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_COMPENTENCIA.getIndice(), urgencia.getCompetencia(), "Date"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_QUANTIDADE.getIndice(), quantidade, "Integer"));
+			
+		}
+		
+		arquivoCenso.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
 	public boolean acessarMenu(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, ArrayList<String> opcoes)
 	{
 		paginaWeb.voltarAoTopoDaPagina(driver);	
@@ -864,11 +1112,11 @@ public class UrgenciaFinalizado
 		return visivel;
 	}
 	
-	private static String normalizarDataParaDiaMesAno(String valor) {
+	private static String normalizarDataParaDiaMesAno(String valor, String formato) {
 	    if (valor == null || valor.isBlank())
 	        return null;
 	
-	    DateTimeFormatter fmtMesAno = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	    DateTimeFormatter fmtMesAno = DateTimeFormatter.ofPattern(formato);
 	
 	    // 1️ Caso seja número serial do Excel
 	    if (valor.matches("\\d+")) {
@@ -954,7 +1202,7 @@ public class UrgenciaFinalizado
 		for(UrgenciaFinalizadoAgrupado urgencia : listaUrgencias)
 		{
 			String dataExtracao = urgencia.getData();
-			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao));
+			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao, "dd/MM/yyyy"));
 			urgencia.setDataOrdenacao(normalizarDataParaAnoMesDia(dataExtracao));
 		}
 		
@@ -1022,7 +1270,7 @@ public class UrgenciaFinalizado
 		for(UrgenciaFinalizadoDetalhado urgencia : listaUrgencias)
 		{
 			String dataExtracao = urgencia.getData();
-			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao));
+			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao, "dd/MM/yyyy"));
 			urgencia.setDataOrdenacao(normalizarDataParaAnoMesDia(dataExtracao));
 			
 			urgencia.setHorasDeEsperaOrdenacao(Integer.parseInt(urgencia.getHorasDeEspera()));
@@ -1080,7 +1328,7 @@ public class UrgenciaFinalizado
 		for(UrgenciaVagaZero urgencia : listaUrgencias)
 		{
 			String dataExtracao = urgencia.getData();
-			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao));
+			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao, "dd/MM/yyyy"));
 			urgencia.setDataOrdenacao(normalizarDataParaAnoMesDia(dataExtracao));
 		}
 		
@@ -1133,12 +1381,12 @@ public class UrgenciaFinalizado
 			
 		}
 		
-		int linhaArquivo = ParametrosArquivoUrgenciaPlanilhaVagaZero.LINHA_INICIAL_ARQUIVO.getIndice();
+		int linhaArquivo = ParametrosArquivoUrgenciaPlanilhaFormaResolucao.LINHA_INICIAL_ARQUIVO.getIndice();
 		
 		for(UrgenciaFormaResolucao urgencia : listaUrgencias)
 		{
 			String dataExtracao = urgencia.getData();
-			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao));
+			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao, "dd/MM/yyyy"));
 			urgencia.setDataOrdenacao(normalizarDataParaAnoMesDia(dataExtracao));
 		}
 		
@@ -1171,6 +1419,108 @@ public class UrgenciaFinalizado
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaFormaResolucao.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
 		
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFormaResolucao.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaFormaResolucao.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	public String ordenarPlanilhaProducaoRegulador()
+	{
+		ArrayList<UrgenciaProducaoRegulador> listaUrgencias = new ArrayList<UrgenciaProducaoRegulador>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaUrgencias = ExcelBinder.readSheet(in, UrgenciaProducaoRegulador.class, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		int linhaArquivo = ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaProducaoRegulador urgencia : listaUrgencias)
+		{
+			String dataExtracao = urgencia.getData();
+			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao, "dd/MM/yyyy"));
+			urgencia.setDataOrdenacao(normalizarDataParaAnoMesDia(dataExtracao));
+		}
+		
+		Collections.sort(listaUrgencias, Comparator
+		    .comparing(UrgenciaProducaoRegulador::getDataOrdenacao).reversed()
+		    .thenComparing(UrgenciaProducaoRegulador::getRegulador)
+		    .thenComparing(UrgenciaProducaoRegulador::getExecutante)
+		    .thenComparing(UrgenciaProducaoRegulador::getRecurso)
+		    .thenComparing(UrgenciaProducaoRegulador::getFicha)
+		);		
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(UrgenciaProducaoRegulador urgencia : listaUrgencias)
+		{
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_DATA.getIndice(), urgencia.getData(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_DATA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_REGULADOR.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_EXECUTANTE.getIndice(), urgencia.getExecutante(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_EXECUTANTE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_RECURSO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_FICHA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_QUANTIDADE.getIndice(), urgencia.getQuantidade(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_QUANTIDADE.getTipo()));			
+			linhaArquivo++;
+		}
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	public String ordenarPlanilhaProducaoReguladorMensal()
+	{
+		ArrayList<UrgenciaProducaoReguladorMensal> listaUrgencias = new ArrayList<UrgenciaProducaoReguladorMensal>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaUrgencias = ExcelBinder.readSheet(in, UrgenciaProducaoReguladorMensal.class, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		int linhaArquivo = ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaProducaoReguladorMensal urgencia : listaUrgencias)
+		{
+			String competencia = urgencia.getCompetencia();
+			urgencia.setCompetencia(normalizarDataParaDiaMesAno(competencia, "MMM/yyyy"));
+			urgencia.setCompetenciaOrdenacao(normalizarDataParaAnoMesDia(competencia));
+		}
+		
+		Collections.sort(listaUrgencias, Comparator
+		    .comparing(UrgenciaProducaoReguladorMensal::getCompetenciaOrdenacao).reversed()
+		    .thenComparing(UrgenciaProducaoReguladorMensal::getRegulador)
+		);		
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(UrgenciaProducaoReguladorMensal urgencia : listaUrgencias)
+		{
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_COMPENTENCIA.getIndice(), urgencia.getCompetencia(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_COMPENTENCIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_REGULADOR.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_QUANTIDADE.getIndice(), urgencia.getQuantidade(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_QUANTIDADE.getTipo()));			
+			linhaArquivo++;
+		}
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		
 		return "";
 	}
@@ -1225,6 +1575,20 @@ public class UrgenciaFinalizado
 		        LocalTime horario = LocalTime.parse(valor, DateTimeFormatter.ofPattern("HH:mm:ss"));
 
 		        celula = new CelulaExcel(linha, coluna, horario, tipo);
+		        
+			 } catch (DateTimeParseException e) {
+		    	celula = new CelulaExcel(linha, coluna, valor, "String");
+		    }
+		}
+		else if(tipo.equals("Date mes/ano"))
+		{
+			 try 
+			 {
+				Locale localeBR = Locale.of("pt", "BR"); // Java 21
+		        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy", localeBR));
+
+		        celula = new CelulaExcel(linha, coluna, data, tipo);
 		        
 			 } catch (DateTimeParseException e) {
 		    	celula = new CelulaExcel(linha, coluna, valor, "String");

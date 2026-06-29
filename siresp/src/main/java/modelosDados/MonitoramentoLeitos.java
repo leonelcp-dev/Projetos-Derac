@@ -23,6 +23,9 @@ public class MonitoramentoLeitos {
     @ExcelColumn(header = "Uso Interno")
     private String reservaInterna;
     
+    @ExcelColumn(header = "Uso Não Conveniado")
+    private String usoNaoConveniado;
+    
     @ExcelColumn(header = "Total Ocupado")
     private String totalOcupado;
 
@@ -37,6 +40,9 @@ public class MonitoramentoLeitos {
 
     @ExcelColumn(header = "Interno")
     private String internoOcupado;
+    
+    @ExcelColumn(header = "Não Conveniado")
+    private String naoConveniadoOcupado;
     
     @ExcelColumn(header = "Total Bloqueado")
     private String totalBloqueado;
@@ -208,6 +214,22 @@ public class MonitoramentoLeitos {
 
 	public void setDataExtracaoOrdenacao(String dataExtracaoOrdenacao) {
 		this.dataExtracaoOrdenacao = dataExtracaoOrdenacao;
+	}
+
+	public String getUsoNaoConveniado() {
+		return usoNaoConveniado;
+	}
+
+	public void setUsoNaoConveniado(String usoNaoConveniado) {
+		this.usoNaoConveniado = usoNaoConveniado;
+	}
+	
+	public String getNaoConveniadoOcupado() {
+		return naoConveniadoOcupado;
+	}
+
+	public void setNaoConveniadoOcupado(String naoConveniadoOcupado) {
+		this.naoConveniadoOcupado = naoConveniadoOcupado;
 	}
 
 }

@@ -283,6 +283,11 @@ public class OfertaDemandaDeAcessoR1 {
 		for(OfertaEDemanda oferta : ofertasEDemandasJaRegistradas)
 		{
 			oferta.setCompetencia(normalizarDataParaMesAno(oferta.getCompetencia()));
+//			oferta.setDiferencaDeOfertaAnterior2("" + oferta.getDiferencaDeOfertaAnterior());
+//			oferta.setDiferencaDeOfertaAnterior("" + oferta.getDiferencaDeOferta());
+//			
+//			System.out.println("Anterior: " + oferta.getDiferencaDeOfertaAnterior());
+//			System.out.println("Anterior 2: " + oferta.getDiferencaDeOfertaAnterior2());
 			
 			System.out.println(oferta.getUnidade() + oferta.getCompetencia());
 			
@@ -538,11 +543,24 @@ public class OfertaDemandaDeAcessoR1 {
 							paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
 						
 							paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+
 							
-							boolean unidadeEncontrada = false;
+							boolean unidadeSelecionada = false;
 							
-							while(!unidadeEncontrada)
-								unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
+							while(!unidadeSelecionada)
+							{
+								paginaWeb.clicarRadioInputByValue(driver, value);
+								unidadeSelecionada = paginaWeb.verificarRadioSelectedByValue(driver, value);
+								
+								System.out.println("Valor: " + value);
+								
+								try {
+									Thread.sleep(2000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
 							
 							System.out.println(entidade.getExecutante());
 							paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
@@ -576,7 +594,11 @@ public class OfertaDemandaDeAcessoR1 {
 							
 						}
 						else
+						{
 							System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
+							JOptionPane.showMessageDialog(null, "Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante() + ".\r\n Pressione OK para continuar e avise a equipe da CDIDR sobre a ocorrência.");
+						}
+							
 					}
 					
 					HashMap<String, Integer> entradasPorOferta = new HashMap<String, Integer>();
@@ -632,6 +654,8 @@ public class OfertaDemandaDeAcessoR1 {
 		atualizarCopiaOriginalRelatorioProducao();
 		copiarRelatorioProducaoParaCDIDR();
 		copiarRelatorioProducaoParaCDRA();
+		
+		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";	
 	}
@@ -1474,9 +1498,12 @@ public class OfertaDemandaDeAcessoR1 {
 		{
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tiposDeBusca[i]);
 			
-			paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
-			paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataInicioFormatada.replaceAll("-", ""));
-					
+			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()).trim().equals(""))
+			{			
+				paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
+				paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataInicioFormatada.replaceAll("-", ""));
+			}
+			
 			paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
 			paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replaceAll("-", ""));
 			paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
@@ -3335,6 +3362,16 @@ public class OfertaDemandaDeAcessoR1 {
 				else
 					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), Double.parseDouble(oferta.getDiferencaDeOferta()), "Int"));
 				
+				if(oferta.getDiferencaDeOfertaAnterior().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR.getIndice(), Double.parseDouble(oferta.getDiferencaDeOfertaAnterior()), "Int"));
+				
+				if(oferta.getDiferencaDeOfertaAnterior2().equals("-"))
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR_2.getIndice(), "-", "String"));
+				else
+					celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR_2.getIndice(), Double.parseDouble(oferta.getDiferencaDeOfertaAnterior2()), "Int"));
+				
 				if(mapaEspecialidade != null)
 				{
 					System.out.println("(" + oferta.getLinhaExcel() + ") " + oferta.getTipoDeOferta() + oferta.getEspecialidade().toUpperCase().trim());
@@ -3369,6 +3406,9 @@ public class OfertaDemandaDeAcessoR1 {
 		oferta.setRecepcaoDesistencia(dadosSequenciais.get(10));
 		oferta.setRecepcaoDispensado(dadosSequenciais.get(11));
 		oferta.setRecepcaoNaoInformado(dadosSequenciais.get(12));
+		
+		System.out.println("Anterior: " + oferta.getDiferencaDeOfertaAnterior());
+		System.out.println("Anterior 2: " + oferta.getDiferencaDeOfertaAnterior2());
 		
 		if(oferta.getAgendamentoTotal().trim().equals("0"))
 		{
@@ -3430,6 +3470,16 @@ public class OfertaDemandaDeAcessoR1 {
 				oferta.setTaxaNaoInformado("-");
 			}
 		}
+		
+		if(oferta.getDiferencaDeOfertaAnterior() == null || oferta.getDiferencaDeOfertaAnterior().equals(""))
+			oferta.setDiferencaDeOfertaAnterior2("-");
+		else
+			oferta.setDiferencaDeOfertaAnterior2("" + oferta.getDiferencaDeOfertaAnterior());
+		
+		if(oferta.getDiferencaDeOferta() == null || oferta.getDiferencaDeOferta().equals(""))
+			oferta.setDiferencaDeOfertaAnterior("-");
+		else
+			oferta.setDiferencaDeOfertaAnterior("" + oferta.getDiferencaDeOferta());
 		
 		if(ofertaPreExistente >= 0)
 			oferta.setDiferencaDeOferta(String.valueOf(Integer.parseInt(oferta.getOfertasSIRESP()) - ofertaPreExistente));
@@ -4031,6 +4081,8 @@ public class OfertaDemandaDeAcessoR1 {
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), oferta.getMaisVelhoNaFila(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_MAIOR_TEMPO_DE_ESPERA_EM_DIAS.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_RECEPCAO_FECHADA.getIndice(), oferta.getRecepcaoFechada(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_RECEPCAO_FECHADA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getIndice(), oferta.getDiferencaDeOferta(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR.getIndice(), oferta.getDiferencaDeOfertaAnterior(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR_2.getIndice(), oferta.getDiferencaDeOfertaAnterior2(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_DIFERENCA_DE_OFERTA_ANTERIOR_2.getTipo()));
 			
 			linhaArquivo++;
 		}
