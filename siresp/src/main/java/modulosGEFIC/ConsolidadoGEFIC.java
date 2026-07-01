@@ -52,7 +52,9 @@ import modelosDados.DadosAcumuladosVagaZero;
 import modelosDados.EntidadeGEFIC;
 import modelosDados.IntervalosUrgencia;
 import modelosDados.OfertaEDemanda;
+import modelosDados.StatusNormalizadosGEFIC;
 import modelosDados.UrgenciaAguardandoDetalhado;
+import modelosDados.UrgenciaFinalizadoAgrupado;
 import tratamentoDeArquivos.Arquivo;
 import tratamentoDeArquivos.Pasta;
 import modelosDados.UrgenciaAguardandoAgrupado;
@@ -156,7 +158,8 @@ public class ConsolidadoGEFIC
 			return "";
 		}
 		
-		HashMap<String, String> deParaNomesEntidades = new HashMap<String, String>();    	
+		HashMap<String, String> deParaNomesEntidades = new HashMap<String, String>();
+		HashMap<String, String> deParaSiglasEntidades = new HashMap<String, String>();   
 		try {
 			Reader reader = new InputStreamReader(new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoEntidades()), StandardCharsets.ISO_8859_1);
 
@@ -182,6 +185,7 @@ public class ConsolidadoGEFIC
 				{
 					EntidadeGEFIC entidade = new EntidadeGEFIC(registro.get(0), registro.get(1), registro.get(2));
 					deParaNomesEntidades.put(registro.get(1).toUpperCase(), registro.get(0).toUpperCase());
+					deParaSiglasEntidades.put(registro.get(0).toUpperCase(), registro.get(1));
 					entidades.add(entidade);
 				}
 			}
@@ -191,9 +195,56 @@ public class ConsolidadoGEFIC
 			e.printStackTrace();
 		}
 		
+		ArrayList<StatusNormalizadosGEFIC> listaStatus = new ArrayList<StatusNormalizadosGEFIC>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoStatusNormalizados());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoStatusNormalizados())) {
+    		listaStatus = ExcelBinder.readSheet(in, StatusNormalizadosGEFIC.class, 0, 0, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+    	
+    	ArrayList<String> statusRealizadosCirurgiaEletiva = new ArrayList<String>();
+    	ArrayList<String> statusRealizadosOPM = new ArrayList<String>();
+    	
+    	HashMap<String, String> deParaStatusCirurgiasEletivas = new HashMap<String, String>();
+    	HashMap<String, String> deParaStatusOPM = new HashMap<String, String>();
+    	
+    	for(StatusNormalizadosGEFIC status : listaStatus)
+    	{
+    		if(status.getModulo().toUpperCase().equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_CIRURGIA_ELETIVA.getDescricao()))
+    		{
+    			if(status.getRealizado().equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SIM.getDescricao()))
+    				statusRealizadosCirurgiaEletiva.add(status.getStatus());
+    			else
+    				deParaStatusCirurgiasEletivas.put(status.getStatus(), status.getNormalizado());
+    		}
+    		else if(status.getModulo().toUpperCase().equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_OPM.getDescricao()))
+    		{
+    			if(status.getRealizado().equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SIM.getDescricao()))
+    				statusRealizadosOPM.add(status.getStatus());
+    			else
+    				deParaStatusOPM.put(status.getStatus(), status.getNormalizado());
+    		}
+    			
+    	}
 		
-    	atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
-    	atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaNomesEntidades, competencia);
+    	//atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
+    	//atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
+    	
+    	if(ehOPM)
+    	{
+    		atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosOPM, deParaStatusOPM);
+    	}
+    	else
+    	{
+    		atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosCirurgiaEletiva, deParaStatusCirurgiasEletivas);
+    	}
 		
 		
 		//driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
@@ -332,7 +383,7 @@ public class ConsolidadoGEFIC
 		return "";
 	}
 	
-	private String atualizarQuantidadeEntradaSaidaDePacientes(AcoesGeraisPaginaWeb paginaWeb, WebDriver driver, HashMap<String, String> deParaNomesEntidades, String competencia)
+	private String atualizarQuantidadeEntradaSaidaDePacientes(AcoesGeraisPaginaWeb paginaWeb, WebDriver driver, HashMap<String, String> deParaSiglasEntidades, String competencia)
 	{
 		dataFormatadaInicioCompetencia = "01/" + competencia;
 		
@@ -349,9 +400,159 @@ public class ConsolidadoGEFIC
 		
 		HashMap<String, Integer> entradas = new HashMap<String, Integer>();
 		HashMap<String, Integer> saidas = new HashMap<String, Integer>();
-		contabilizarEntradas(paginaWeb, driver, competencia, competencia, entradas);
-		contabilizarSaidas(paginaWeb, driver, competencia, competencia, saidas);
+		contabilizarEntradas(paginaWeb, driver, dataFormatadaInicioCompetencia, dataFormatadaFinalCompetencia, entradas);
 		
+		for(String entrada : entradas.keySet())
+			System.out.println(entrada + ": " + entradas.get(entrada));
+		
+		contabilizarSaidas(paginaWeb, driver, dataFormatadaInicioCompetencia, dataFormatadaFinalCompetencia, saidas);
+		
+		for(String saida : saidas.keySet())
+			System.out.println(saida + ": " + saidas.get(saida));
+		
+		preencherPlanilhaEntradaSaida(deParaSiglasEntidades, dataInicioCompetencia, entradas, saidas);
+		
+		return "";
+	}
+	
+	private ArrayList<CelulaExcel> preencherTabelaPlanilhaEntradaSaida(AcoesArquivoExcel arquivoConsolidado, int linhaInicial, int colunaExcel, HashMap<String, String> deParaSiglasEntidades, HashMap<String, Integer> entradas, HashMap<String, Integer> saidas, String somarOuSubtrairTransferencias)
+	{
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		int colunaEntrada = colunaExcel;
+		int colunaSaida = colunaEntrada + 1;
+		int linhaExcel = linhaInicial;
+		
+		int somaQuantidadeEntradas = 0;
+		int somaQuantidadeSaidas = 0;
+		
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+		{
+			String unidade = deParaSiglasEntidades.get(conteudoCelula).toUpperCase();
+			
+			if(unidade != null)
+			{
+				int quantidade = 0;
+				
+				if(entradas.containsKey(unidade))
+				{
+					quantidade = entradas.get(unidade);
+				}
+				if(somarOuSubtrairTransferencias != null)
+				{
+					if(transferidosPorDestino.containsKey(unidade))
+					{
+						int quantidadeOperacao = transferidosPorDestino.get(unidade);
+						
+						if(somarOuSubtrairTransferencias.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SOMAR.getDescricao()))
+							quantidade = quantidade + quantidadeOperacao;
+						else if(somarOuSubtrairTransferencias.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SUBTRAIR.getDescricao()))
+							quantidade = quantidade - quantidadeOperacao;
+					}
+				}
+				somaQuantidadeEntradas += quantidade;
+				
+				celulas.add(new CelulaExcel(linhaExcel, colunaEntrada, quantidade, "Integer"));
+				
+				quantidade = 0;
+				
+				if(saidas.containsKey(unidade))
+				{
+					quantidade = saidas.get(unidade);
+				}
+				if(somarOuSubtrairTransferencias != null)
+				{
+					if(transferidosPorOrigem.containsKey(unidade))
+					{
+						int quantidadeOperacao = transferidosPorOrigem.get(unidade);
+						
+						if(somarOuSubtrairTransferencias.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SOMAR.getDescricao()))
+							quantidade = quantidade + quantidadeOperacao;
+						else if(somarOuSubtrairTransferencias.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SUBTRAIR.getDescricao()))
+							quantidade = quantidade - quantidadeOperacao;
+					}
+				}
+				
+				somaQuantidadeSaidas += quantidade;
+				
+				celulas.add(new CelulaExcel(linhaExcel, colunaSaida, quantidade, "Integer"));
+			}
+			else
+			{
+				celulas.add(new CelulaExcel(linhaExcel, colunaEntrada, 0, "Integer"));
+				celulas.add(new CelulaExcel(linhaExcel, colunaSaida, 0, "Integer"));
+			}
+			
+			linhaExcel++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			
+			System.out.println(conteudoCelula);
+		}
+		
+		celulas.add(new CelulaExcel(linhaExcel, colunaEntrada, somaQuantidadeEntradas, "Integer"));
+		celulas.add(new CelulaExcel(linhaExcel, colunaSaida, somaQuantidadeSaidas, "Integer"));
+		
+		return celulas;
+	}
+	
+	private String preencherPlanilhaEntradaSaida(HashMap<String, String> deParaSiglasEntidades, LocalDate data, HashMap<String, Integer> entradas, HashMap<String, Integer> saidas)
+	{
+		String mesAnalise = (new MesesFormatados()).getMeses().get(data.getMonthValue() - 1).getMesDescricao();
+		
+		AcoesArquivoExcel arquivoConsolidado;
+		if(ehOPM)
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICOPM().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(data.getYear())), 0);
+		else
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(data.getYear())), 0);
+		
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_ENTRADA_SAIDA.getDescricao(), 0);
+		
+		int colunaExcelEntrada = ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice();
+		int linhaExcelTabelaGeral = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_ENTRADA_SAIDA.getIndice();
+		
+		int linhaExcelTabelaEntradaSaida = linhaExcelTabelaGeral;
+		
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelTabelaEntradaSaida, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SERVICO.getDescricao()))
+		{
+			linhaExcelTabelaEntradaSaida++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelTabelaEntradaSaida, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			
+			System.out.println(conteudoCelula);
+		}
+		
+		linhaExcelTabelaEntradaSaida+=3;
+		
+		int linhaExcelTabelaTransferencias = linhaExcelTabelaEntradaSaida;
+		conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelTabelaTransferencias, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_SERVICO.getDescricao()))
+		{
+			linhaExcelTabelaTransferencias++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelTabelaTransferencias, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			
+			System.out.println(conteudoCelula);
+		}
+		
+		linhaExcelTabelaTransferencias+=3;
+				
+		conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelTabelaGeral - 2, colunaExcelEntrada, "");
+		while(!conteudoCelula.equals(mesAnalise) && colunaExcelEntrada < 40)
+		{
+			colunaExcelEntrada++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelTabelaGeral - 2, colunaExcelEntrada, ""); 
+			System.out.println(conteudoCelula);
+		}
+		
+		if(colunaExcelEntrada < 40)
+		{
+			ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+			
+			celulas.addAll(preencherTabelaPlanilhaEntradaSaida(arquivoConsolidado, linhaExcelTabelaGeral, colunaExcelEntrada, deParaSiglasEntidades, entradas, saidas, ParametrosArquivoConsolidadoGEFIC.TEXTO_SOMAR.getDescricao()));
+			celulas.addAll(preencherTabelaPlanilhaEntradaSaida(arquivoConsolidado, linhaExcelTabelaEntradaSaida, colunaExcelEntrada, deParaSiglasEntidades, entradas, saidas, null));
+			celulas.addAll(preencherTabelaPlanilhaEntradaSaida(arquivoConsolidado, linhaExcelTabelaTransferencias, colunaExcelEntrada, deParaSiglasEntidades, transferidosPorDestino, transferidosPorOrigem, null));
+			
+			arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_ENTRADA_SAIDA.getDescricao(), celulas, false, false, 0, null);
+		}
 		
 		return "";
 	}
@@ -366,29 +567,48 @@ public class ConsolidadoGEFIC
 		}
 		else
 		{
-			opcoes.add("Quantidade de pacientes por serviço");
+			opcoes.add("Quantidade de entradas de pacientes");
 		}
 			
 		paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_MENU_PRINCIPAL.getTextoIdentificador(), opcoes);
 		
 		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+
+		paginaWeb.limparInputTextPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_ENTRADAS_DATA_INDICACAO_INICIAL.getTextoIdentificador());
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_ENTRADAS_DATA_INDICACAO_INICIAL.getTextoIdentificador());
+		paginaWeb.limparInputTextPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPAHT_RELATORIO_ENTRADAS_DATA_INDICACAO_FINAL.getTextoIdentificador());
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPAHT_RELATORIO_ENTRADAS_DATA_INDICACAO_FINAL.getTextoIdentificador());
 		
 		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_ENTRADAS_DATA_INICIAL.getTextoIdentificador(), dataInicial);
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_ENTRADAS_DATA_INICIAL.getTextoIdentificador());
 		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPAHT_RELATORIO_ENTRADAS_DATA_FINAL.getTextoIdentificador(), dataFinal);
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPAHT_RELATORIO_ENTRADAS_DATA_FINAL.getTextoIdentificador());
 		
 		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_PESQUISAR.getTextoIdentificador(), "id");
 		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
 		Arquivo arquivo = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICEntradaPacientes.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
 		
-		AcoesArquivoExcel arquivoTransferencias = new AcoesArquivoExcel(dataFinal, 0);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		AcoesArquivoExcel arquivoEntradas = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), 0);
+		
 		
 		int primeiraLinha = ParametrosArquivoGEFICEntradaPacientes.LINHA_INICIAL_ARQUIVO.getIndice();
-		int ultimaLinha = arquivoTransferencias.getUltimaLinhaPreenchida();
+		arquivoEntradas.abrirPlanilha(0, 0);
+		int ultimaLinha = arquivoEntradas.getUltimaLinhaPreenchida();
 		
+		System.out.println(arquivo.getCaminhoCompleto() + " - " + ultimaLinha);
 		for(int linhaExcel = primeiraLinha; linhaExcel <= ultimaLinha; linhaExcel++)
 		{
-			String estabelecimento = arquivoTransferencias.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICEntradaPacientes.INDICE_COLUNA_ESTABELECIMENTO.getIndice()).toUpperCase();
-			int quantidadeEntrada = arquivoTransferencias.getValorDaCelulaInt(linhaExcel, ParametrosArquivoGEFICEntradaPacientes.INDICE_COLUNA_QTDE_ENTRADA.getIndice());
+			String estabelecimento = arquivoEntradas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICEntradaPacientes.INDICE_COLUNA_ESTABELECIMENTO.getIndice()).toUpperCase();
+			int quantidadeEntrada = arquivoEntradas.getValorDaCelulaInt(linhaExcel, ParametrosArquivoGEFICEntradaPacientes.INDICE_COLUNA_QTDE_ENTRADA.getIndice());
 			
 			if(entradas.containsKey(estabelecimento))
 			{
@@ -400,7 +620,7 @@ public class ConsolidadoGEFIC
 				entradas.put(estabelecimento, quantidadeEntrada);
 		}
 		
-		arquivo.apagar();
+		//arquivo.apagar();
 		
 		return "";
 	}
@@ -411,11 +631,11 @@ public class ConsolidadoGEFIC
 		
 		if(ehOPM)
 		{
-			opcoes.add("Quantidade de entradas de pacientes OPM");
+			opcoes.add("Quantidade de saídas de pacientes OPM");
 		}
 		else
 		{
-			opcoes.add("Quantidade de pacientes por serviço");
+			opcoes.add("Quantidade de saídas de pacientes");
 		}
 			
 		paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_MENU_PRINCIPAL.getTextoIdentificador(), opcoes);
@@ -424,20 +644,30 @@ public class ConsolidadoGEFIC
 		
 		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_INICIAL.getTextoIdentificador(), dataInicial);
 		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_FINAL.getTextoIdentificador(), dataFinal);
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_FINAL.getTextoIdentificador());
 		
 		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_BOTAO_PESQUISAR.getTextoIdentificador(), "id");
 		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_SAIDA.getTextoIdentificador()));
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Arquivo arquivo = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICSaidaPacientes.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
 		
-		AcoesArquivoExcel arquivoTransferencias = new AcoesArquivoExcel(dataFinal, 0);
+		AcoesArquivoExcel arquivoSaidas = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), 0);
 		
 		int primeiraLinha = ParametrosArquivoGEFICSaidaPacientes.LINHA_INICIAL_ARQUIVO.getIndice();
-		int ultimaLinha = arquivoTransferencias.getUltimaLinhaPreenchida();
+		int ultimaLinha = arquivoSaidas.getUltimaLinhaPreenchida();
 		
 		for(int linhaExcel = primeiraLinha; linhaExcel <= ultimaLinha; linhaExcel++)
 		{
-			String estabelecimento = arquivoTransferencias.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_ESTABELECIMENTO.getIndice()).toUpperCase();
-			int quantidadeEntrada = arquivoTransferencias.getValorDaCelulaInt(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_QTDE_SAIDA.getIndice());
+			String estabelecimento = arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_ESTABELECIMENTO.getIndice()).toUpperCase();
+			int quantidadeEntrada = arquivoSaidas.getValorDaCelulaInt(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_QTDE_SAIDA.getIndice());
 			
 			if(saidas.containsKey(estabelecimento))
 			{
@@ -454,8 +684,6 @@ public class ConsolidadoGEFIC
 		return "";
 	}
 	
-
-
 	private String contabilizarTransferencias(AcoesGeraisPaginaWeb paginaWeb, WebDriver driver, String dataInicial, String dataFinal)
 	{
 		ArrayList<String> opcoes = new ArrayList<String>();
@@ -467,12 +695,22 @@ public class ConsolidadoGEFIC
 		
 		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_TRANSFERENCIAS_DATA_INICIAL.getTextoIdentificador(), dataInicial);
 		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_TRANSFERENCIAS_DATA_FINAL.getTextoIdentificador(), dataFinal);
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_FINAL.getTextoIdentificador());
 		
 		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_PESQUISAR.getTextoIdentificador(), "id");
 		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
 		Arquivo arquivo = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICTransferenciaPacientes.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
 		
-		AcoesArquivoExcel arquivoTransferencias = new AcoesArquivoExcel(dataFinal, 0);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		AcoesArquivoExcel arquivoTransferencias = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), 0);
 		
 		int primeiraLinha = ParametrosArquivoGEFICTransferenciaPacientes.LINHA_INICIAL_ARQUIVO.getIndice();
 		int ultimaLinha = arquivoTransferencias.getUltimaLinhaPreenchida();
@@ -506,13 +744,139 @@ public class ConsolidadoGEFIC
 		return "";
 	}
 	
+	private String atualizarStatusDasSaidasDePacientes(AcoesGeraisPaginaWeb paginaWeb, WebDriver driver, HashMap<String, String> deParaSiglasEntidades, String competencia, ArrayList<String> statusRealizados, HashMap<String, String> deParaStatus)
+	{
+		dataFormatadaInicioCompetencia = "01/" + competencia;
+		
+		dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		
+		dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
+		dataFormatadaFinalCompetencia = dataFinalCompetencia.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		String mesAnalise = (new MesesFormatados()).getMeses().get(dataInicioCompetencia.getMonthValue() - 1).getMesDescricao();
+		
+		String planilhaRealizado;
+		String planilhaCancelado;
+		String statusRealizado;
+		
+		ArrayList<String> opcoes = new ArrayList<String>();
+		
+		if(ehOPM)
+		{
+			opcoes.add("Quantidade de saídas de pacientes OPM");
+			planilhaRealizado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_OPM_ENTREGUES.getDescricao();
+			planilhaCancelado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_OPM_CANCELADAS.getDescricao();
+			statusRealizado = ParametrosArquivoConsolidadoGEFIC.TEXTO_OPM_ENTREGUE.getDescricao();
+		}
+		else
+		{
+			opcoes.add("Quantidade de saídas de pacientes");
+			planilhaRealizado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_CIRURGIAS_REALIZADAS.getDescricao();
+			planilhaCancelado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_CIRURGIAS_CANCELADAS.getDescricao();
+			statusRealizado = ParametrosArquivoConsolidadoGEFIC.TEXTO_CIRURGIA_REALIZADA.getDescricao();
+		}
+			
+		paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_MENU_PRINCIPAL.getTextoIdentificador(), opcoes);
+		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
+		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_INICIAL.getTextoIdentificador(), dataFormatadaInicioCompetencia);
+		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_FINAL.getTextoIdentificador(), dataFormatadaFinalCompetencia);
+		paginaWeb.tirarFocoDoCampoTextoPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_DATA_FINAL.getTextoIdentificador());
+		
+		paginaWeb.clicarRadioInputPeloId(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_OPCAO_ANALITICO.getTextoIdentificador());
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
+		AcoesArquivoExcel arquivoConsolidado;
+		if(ehOPM)
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICOPM().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
+		else
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
+		
+		arquivoConsolidado.abrirPlanilha(planilhaRealizado, 0);
+		
+		int colunaExcel = ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice();
+		int linhaExcelRealizado = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
+		
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelRealizado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+		{
+			paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_ESTABELECIMENTO.getTextoIdentificador());
+			
+			String estabelecimento = deParaSiglasEntidades.get(conteudoCelula);
+			
+			if(estabelecimento != null)
+			{
+				ArrayList<String> opcoesEstabelecimentos = new ArrayList<String>();
+				opcoesEstabelecimentos.add(estabelecimento);
+				
+				System.out.print(estabelecimento);
+				
+				//paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_UL_ESTABELECIMENTO.getTextoIdentificador(), opcoesEstabelecimentos);
+				//paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_TEXT_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
+				while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_SAIDA.getTextoIdentificador()));
+				
+				//paginaWeb.digitarEmInputTextPorXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_TEXT_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
+				paginaWeb.selecionarItemSelectULLIPeloTitleDeUmaLinha(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_UL_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
+				
+				while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_SAIDA.getTextoIdentificador()));
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_BOTAO_PESQUISAR.getTextoIdentificador(), "id");
+				while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_SAIDA.getTextoIdentificador()));
+				
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				Arquivo arquivo = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICSaidaPacientes.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
+				
+	//			AcoesArquivoExcel arquivoSaidas = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), 0);
+	//			
+	//			int primeiraLinha = ParametrosArquivoGEFICSaidaPacientes.LINHA_INICIAL_ARQUIVO.getIndice();
+	//			int ultimaLinha = arquivoSaidas.getUltimaLinhaPreenchida();
+	//			
+	//			for(int linhaExcel = primeiraLinha; linhaExcel <= ultimaLinha; linhaExcel++)
+	//			{
+	//				String estabelecimento = arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_ESTABELECIMENTO.getIndice()).toUpperCase();
+	//				int quantidadeEntrada = arquivoSaidas.getValorDaCelulaInt(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_QTDE_SAIDA.getIndice());
+	//		
+	//
+	//			}
+				
+				paginaWeb.clicarLinkPeloCSSSelector(driver, IdentificadoresPaginaWebGEFIC.CLASS_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO.getTextoIdentificador());
+			}
+			
+			linhaExcelRealizado++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelRealizado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			
+			System.out.println(conteudoCelula);
+		}
+		
+		
+		
+
+		
+		//arquivo.apagar();
+		
+		return "";
+	}
+	
 	private Arquivo baixarArquivos(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String idBotaoExcel, String formatoArquivo) 
 	{
 		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
 		
 		String ultimoRecente = pastaOrigem.arquivoRecentementeModificado();
 		
-		paginaWeb.clicarLinkPeloXPath(driver, idBotaoExcel);
+		paginaWeb.clicarBotaoSubmit(driver, idBotaoExcel, "id");
 		
 		String arquivoMaisRecente;
 			
@@ -533,4 +897,6 @@ public class ConsolidadoGEFIC
 
 		return arquivo;
 	}
+	
+	
 }

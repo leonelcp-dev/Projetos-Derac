@@ -218,6 +218,32 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean selecionarItemSelectULLIPeloTitleDeUmaLinha(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
+	{
+
+		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+		
+		try
+		{		
+			WebElement linha = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xPathLinha)));
+			
+			WebElement opcao = wait.until(
+			    ExpectedConditions.elementToBeClickable(
+			        linha.findElement(By.cssSelector("li[title='" + textoASelecionar + "']"))
+			    )
+			);
+			
+			opcao.click();
+			
+						
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 	public boolean selecionarItemSelectULLIPeloDataValueDeUmOption(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
 	{
 
@@ -382,6 +408,23 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean limparInputTextPeloXPath(WebDriver driverPagina, String xpath)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.xpath(xpath));
+	
+			item.clear();
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 	public boolean limparInputTextByName(WebDriver driverPagina, String name)
 	{
 
@@ -457,6 +500,22 @@ public class AcoesGeraisPaginaWeb {
 
 	}
 	
+	public boolean tirarFocoDoCampoTextoPeloXPath(WebDriver driverPagina, String xpath)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.xpath(xpath));
+			item.sendKeys(Keys.TAB);
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
 	public boolean tirarFocoDoCampoTexto(WebDriver driverPagina, String id)
 	{
 
@@ -501,7 +560,33 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
-	
+	public boolean digitarEmInputTextPorXPATH(WebDriver driverPagina, String xpath, String texto)
+	{
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.xpath(xpath));
+			//item.click();
+			
+			item.clear();
+			for (char c : texto.toCharArray()) {
+			    item.sendKeys(String.valueOf(c));
+			    try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // pausa entre teclas (100 ms ou outro valor)
+			}
+
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
 	
 	public boolean preencherInputTextByName(WebDriver driverPagina, String name, String texto)
 	{
@@ -1044,6 +1129,23 @@ public class AcoesGeraisPaginaWeb {
 			
 		}catch(Exception e) {
 			System.out.println(xpath + "\r\n" + e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean clicarLinkPeloCSSSelector(WebDriver driverPagina, String className)
+	{
+		try
+		{	
+			WebElement item = driverPagina.findElement(By.cssSelector(className));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			item.click();
+			
+		}catch(Exception e) {
+			System.out.println(className + "\r\n" + e.toString());
 			return false;
 		}
 		

@@ -11,6 +11,7 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_LOTACAO_ACESSO_LINHA(0, "/html/body/div[2]/div/div/div/div/div/div[1]/div[2]/div[2]/table/tbody/tr[" + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + "]/td/p"),
 	XPATH_MENU_PRINCIPAL(0, "/html/body/div[1]/nav/ul"),
 	XPATH_AGUARDANDO(0, "/html/body/div[7]/div"),
+	XPATH_AGUARDANDO_SAIDA(0, "/html/body/div[6]/div"),
 	
 	XPATH_RELATORIO_QUANTIDADE_PACIENTES_DIV_RODAPE_TABELA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[2]/div[1]/div[2]/div[2]/table/tfoot/tr/th/div[1]"),
 	CLASS_NAME_RELATORIO_QUANTIDADE_PACIENTES_LINHA_RODAPE_TABELA(0, ".row.no-gutters"),
@@ -22,8 +23,20 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_RELATORIO_TRANSFERENCIAS_DATA_INICIAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[2]"),
 	XPATH_RELATORIO_TRANSFERENCIAS_DATA_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[4]"),
 	
-	XPATH_RELATORIO_ENTRADAS_DATA_INICIAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[2]"),
-	XPAHT_RELATORIO_ENTRADAS_DATA_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[4]"),
+	XPATH_RELATORIO_ENTRADAS_DATA_INDICACAO_INICIAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[2]"),
+	XPAHT_RELATORIO_ENTRADAS_DATA_INDICACAO_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[4]"),
+	
+	XPATH_RELATORIO_ENTRADAS_DATA_INICIAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[3]/div/div/input[2]"),
+	XPAHT_RELATORIO_ENTRADAS_DATA_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[3]/div/div/input[4]"),
+	
+	XPATH_RELATORIO_SAIDAS_ESTABELECIMENTO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[1]/div/span/span[1]/span/span[1]"),
+	XPATH_RELATORIO_SAIDAS_TEXT_ESTABELECIMENTO(0, "/html/body/span/span/span[1]/input"),
+	XPATH_RELATORIO_SAIDAS_UL_ESTABELECIMENTO(0, "/html/body/span/span/span[2]/ul"),
+	XPATH_RELATORIO_SAIDAS_PRIMEIRA_LI_ESTABELECIMENTO(0, "/html/body/span/span/span[2]/ul/li"),
+	XPATH_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[1]/div/span/span[1]/span/span[1]/span"),
+	
+	CLASS_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO(0, "select2-selection__clear"),
+	
 	
 	XPATH_RELATORIO_SAIDAS_DATA_INICIAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[2]"),
 	XPATH_RELATORIO_SAIDAS_DATA_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[4]"),
@@ -36,6 +49,8 @@ public enum IdentificadoresPaginaWebGEFIC {
 	ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL(0, "excel"),
+	
+	ID_RELATORIO_SAIDA_PACIENTES_OPCAO_ANALITICO(0, "analitico"),
 	
 	XPATH_RELATORIO_QUANTIDADE_PACIENTES_RODAPE_TABELA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[2]/div[1]/div[2]/div[2]/table/tfoot"),
 	

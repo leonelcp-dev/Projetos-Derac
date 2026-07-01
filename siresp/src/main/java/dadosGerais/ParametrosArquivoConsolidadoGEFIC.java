@@ -9,12 +9,30 @@ public enum ParametrosArquivoConsolidadoGEFIC {
 		
 	INDICE_COLUNA_INICIAL_RELATORIOS(0, 1, "Coluna ajustada de acordo com a coluna B do arquivo", "", ""),
 	INDICE_LINHA_INICIAL_RELATORIOS(1, 4, "Ajustado de acordo com a linha 5 do arquivo", "", ""),
+	INDICE_LINHA_INICIAL_ENTRADA_SAIDA(2, 5, "Ajustado de acordo com a linha 5 do arquivo", "", ""),
 	
 	NOME_PLANILHA_GERAL(16, 0, "GERAL", "", ""),
+	NOME_PLANILHA_ENTRADA_SAIDA(17, 0, "ENTRADA_SAIDA", "", ""),
+	NOME_PLANILHA_CIRURGIAS_REALIZADAS(18, 0, "CIRURGIAS REALIZADAS", "", ""),
+	NOME_PLANILHA_CIRURGIAS_CANCELADAS(19, 0, "CIRURGIAS CANCELADAS", "", ""),
+	NOME_PLANILHA_OPM_ENTREGUES(20, 0, "OPM ENTREGUES", "", ""),
+	NOME_PLANILHA_OPM_CANCELADAS(21, 0, "OPM CANCELADAS", "", ""),
 	
-	TEXTO_TOTAL(17, 0, "TOTAL", "", ""),
+	TEXTO_TOTAL(22, 0, "TOTAL", "", ""),
 	
-	EXTENSAO_ARQUIVO(18, 0, "xlsx", "", "");
+	TEXTO_SERVICO(23, 0, "SERVIÇO", "", ""),
+	TEXTO_SOMAR(24, 0, "SOMAR", "", ""),
+	TEXTO_SUBTRAIR(25, 0, "SUBTRAIR", "", ""),
+	TEXTO_CIRURGIA_REALIZADA(26, 0, "Realizou a cirurgia", "", ""),
+	TEXTO_OPM_ENTREGUE(27, 0, "Entrega realizada", "", ""),
+	
+	TEXTO_CIRURGIA_ELETIVA(28, 0, "CIRURGIA ELETIVA", "", ""),
+	TEXTO_OPM(29, 0, "OPM", "", ""),
+	
+	TEXTO_SIM(30, 0, "SIM", "", ""),
+	TEXTO_NAO(31, 0, "NÃO", "", ""),
+	
+	EXTENSAO_ARQUIVO(32, 0, "xlsx", "", "");
 	
 
 	private int idUnico;

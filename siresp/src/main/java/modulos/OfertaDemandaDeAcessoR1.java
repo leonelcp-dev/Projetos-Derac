@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.csv.CSVFormat;
@@ -596,7 +597,13 @@ public class OfertaDemandaDeAcessoR1 {
 						else
 						{
 							System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante());
-							JOptionPane.showMessageDialog(null, "Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante() + ".\r\n Pressione OK para continuar e avise a equipe da CDIDR sobre a ocorrência.");
+							
+							JOptionPane optionPane = new JOptionPane("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante() + ".\r\n Avise a equipe da CDIDR sobre a ocorrência.", JOptionPane.INFORMATION_MESSAGE);
+							JDialog dialog = optionPane.createDialog("Aviso");
+							dialog.setModal(false); // não bloqueia
+							dialog.setVisible(true);
+							
+							//JOptionPane.showMessageDialog(null, "Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante() + ".\r\n Pressione OK para continuar e avise a equipe da CDIDR sobre a ocorrência.");
 						}
 							
 					}
@@ -1499,13 +1506,29 @@ public class OfertaDemandaDeAcessoR1 {
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tiposDeBusca[i]);
 			
 			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()).trim().equals(""))
-			{			
+			{		
+				System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()));
+				
 				paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
 				paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataInicioFormatada.replaceAll("-", ""));
 			}
+			paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
+			
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+			
+			System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()));
 			
 			paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
 			paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replaceAll("-", ""));
+			
+			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()).trim().equals(""))
+			{		
+				System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()));
+				
+				paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
+				paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replaceAll("-", ""));
+			}
+			
 			paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
 			
 			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));

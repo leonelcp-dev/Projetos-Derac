@@ -13,23 +13,27 @@ public enum IdentificadoresPastasCompartilhadasCDIDRGEFIC {
 	TESTE_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA(9, TESTE_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	TESTE_ARQUIVO_CONSOLIDADO_GEFIC_OPM(9, TESTE_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC OPM " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	TESTE_ARQUIVO_ENTIDADES(9,"GEFIC\\unidadesGEFIC.csv"),
+	TESTE_ARQUIVO_STATUS_NORMALIZADO(9,"GEFIC\\StatusNormalizados.csv"),
 
 	PROD_PASTA_RELATORIOS_GEFIC(9, "Urgencia"),
 	PROD_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA(9, PROD_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC OPM " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	PROD_ARQUIVO_CONSOLIDADO_GEFIC_OPM(9, PROD_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC OPM " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	PROD_ARQUIVO_ENTIDADES(9, "GEFIC\\unidadesGEFIC.csv"),
+	PROD_ARQUIVO_STATUS_NORMALIZADO(9,"GEFIC\\StatusNormalizados.csv"),
 
 	TESTE(TESTE_PASTA_RELATORIOS_GEFIC.getTextoIdentificador(), TESTE_ARQUIVO_ENTIDADES.getTextoIdentificador(), 
-			TESTE_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA.getTextoIdentificador(), TESTE_ARQUIVO_CONSOLIDADO_GEFIC_OPM.getTextoIdentificador()),
+			TESTE_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA.getTextoIdentificador(), TESTE_ARQUIVO_CONSOLIDADO_GEFIC_OPM.getTextoIdentificador(),
+			TESTE_ARQUIVO_STATUS_NORMALIZADO.getTextoIdentificador()),
 	
 	PRODUCAO(PROD_PASTA_RELATORIOS_GEFIC.getTextoIdentificador(), PROD_ARQUIVO_ENTIDADES.getTextoIdentificador(), 
-			PROD_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA.getTextoIdentificador(), PROD_ARQUIVO_CONSOLIDADO_GEFIC_OPM.getTextoIdentificador());
+			PROD_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA.getTextoIdentificador(), PROD_ARQUIVO_CONSOLIDADO_GEFIC_OPM.getTextoIdentificador(), 
+			PROD_ARQUIVO_STATUS_NORMALIZADO.getTextoIdentificador());
 	
 	private String pastaDadosGEFIC;
 	private String arquivoConsolidadoGEFICCirurgiasEletivas;
 	private String arquivoConsolidadoGEFICOPM;
 	private String arquivoEntidades;
-	private String pastaArquivosCenso;
+	private String arquivoStatusNormalizados;
 	
 	private int indice;
 	private String textoIdentificador;
@@ -41,12 +45,13 @@ public enum IdentificadoresPastasCompartilhadasCDIDRGEFIC {
 	}
 	
 	IdentificadoresPastasCompartilhadasCDIDRGEFIC(String pastaDadosGEFIC, String arquivoEntidades, String arquivoConsolidadoGEFICCirurgiasEletivas, 
-			String arquivoConsolidadoGEFICOPM)
+			String arquivoConsolidadoGEFICOPM, String arquivoStatusNormalizados)
 	{
 		this.pastaDadosGEFIC = pastaDadosGEFIC;
 		this.arquivoConsolidadoGEFICCirurgiasEletivas = arquivoConsolidadoGEFICCirurgiasEletivas;
 		this.arquivoEntidades = arquivoEntidades;
 		this.arquivoConsolidadoGEFICOPM = arquivoConsolidadoGEFICOPM;
+		this.arquivoStatusNormalizados = arquivoStatusNormalizados;
 	}
 
 	public String getTextoIdentificador() {
@@ -89,19 +94,19 @@ public enum IdentificadoresPastasCompartilhadasCDIDRGEFIC {
 		this.arquivoEntidades = arquivoEntidades;
 	}
 
-	public String getPastaArquivosCenso() {
-		return pastaArquivosCenso;
-	}
-
-	public void setPastaArquivosCenso(String pastaArquivosCenso) {
-		this.pastaArquivosCenso = pastaArquivosCenso;
-	}
-
 	public String getArquivoConsolidadoGEFICOPM() {
 		return arquivoConsolidadoGEFICOPM;
 	}
 
 	public void setArquivoConsolidadoGEFICOPM(String arquivoConsolidadoGEFICOPM) {
 		this.arquivoConsolidadoGEFICOPM = arquivoConsolidadoGEFICOPM;
+	}
+
+	public String getArquivoStatusNormalizados() {
+		return arquivoStatusNormalizados;
+	}
+
+	public void setArquivoStatusNormalizados(String arquivoStatusNormalizados) {
+		this.arquivoStatusNormalizados = arquivoStatusNormalizados;
 	}
 }
