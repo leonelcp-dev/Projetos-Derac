@@ -610,7 +610,7 @@ public class OfertaDemandaDeAcessoR1 {
 					
 					HashMap<String, Integer> entradasPorOferta = new HashMap<String, Integer>();
 					
-					if(dataInicioCompetencia.isBefore(LocalDate.now()))
+					if(!dataInicioCompetencia.isAfter(LocalDate.now()))
 					{
 					
 						if(executarNovasSolicitacoesCDR)
@@ -1505,6 +1505,8 @@ public class OfertaDemandaDeAcessoR1 {
 		{
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tiposDeBusca[i]);
 			
+			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+			
 			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()).trim().equals(""))
 			{		
 				System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()));
@@ -1517,9 +1519,6 @@ public class OfertaDemandaDeAcessoR1 {
 			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 			
 			System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()));
-			
-			paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
-			paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replaceAll("-", ""));
 			
 			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()).trim().equals(""))
 			{		
@@ -1794,7 +1793,7 @@ public class OfertaDemandaDeAcessoR1 {
 		ArrayList<EntidadeExecutanteR1> entidades = lerEntidadesR1(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoUnidadesExecutantes());
 		EntidadeExecutanteR1 entidade = new EntidadeExecutanteR1("5416655", "PRÓPRIO", "SMS - CAMPINAS", "SMS - CAMPINAS", "SMS - CAMPINAS");
 		
-		if(dataInicioCompetencia.isBefore(LocalDate.now()))
+		if(!dataInicioCompetencia.isAfter(LocalDate.now()))
 		{
 		
 			if(executarNovasSolicitacoesCDR)
@@ -2493,7 +2492,7 @@ public class OfertaDemandaDeAcessoR1 {
 			preencherInformacoesRelacionadasABloqueio(driver, paginaWeb, entidade, buscas);
 		}
 		
-		if(preencherRecepcao && dataInicioCompetencia.isBefore(LocalDate.now()))
+		if(preencherRecepcao && !dataInicioCompetencia.isAfter(LocalDate.now()))
 		{
 			String[] buscas = new String[2];
 			buscas[0] = "Consulta";

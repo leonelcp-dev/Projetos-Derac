@@ -42,6 +42,8 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_RELATORIO_SAIDAS_DATA_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[4]"),
 	
 	
+	ID_RELATORIO_SAIDA_PACIENTES_SELECT_ESTABELECIMENTOS(0, "select2-estabelecimento-gt-results"),
+	
 	ID_RELATORIO_QUANTIDADE_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),
 	ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),
 	ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),

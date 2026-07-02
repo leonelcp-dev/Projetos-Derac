@@ -26,13 +26,15 @@ public enum ParametrosArquivoConsolidadoGEFIC {
 	TEXTO_CIRURGIA_REALIZADA(26, 0, "Realizou a cirurgia", "", ""),
 	TEXTO_OPM_ENTREGUE(27, 0, "Entrega realizada", "", ""),
 	
-	TEXTO_CIRURGIA_ELETIVA(28, 0, "CIRURGIA ELETIVA", "", ""),
-	TEXTO_OPM(29, 0, "OPM", "", ""),
+	TEXTO_FINAL_RELATORIO(28, 0, "Final do relatório", "", ""),
 	
-	TEXTO_SIM(30, 0, "SIM", "", ""),
-	TEXTO_NAO(31, 0, "NÃO", "", ""),
+	TEXTO_CIRURGIA_ELETIVA(29, 0, "CIRURGIA ELETIVA", "", ""),
+	TEXTO_OPM(30, 0, "OPM", "", ""),
 	
-	EXTENSAO_ARQUIVO(32, 0, "xlsx", "", "");
+	TEXTO_SIM(31, 0, "SIM", "", ""),
+	TEXTO_NAO(32, 0, "NÃO", "", ""),
+	
+	EXTENSAO_ARQUIVO(33, 0, "xlsx", "", "");
 	
 
 	private int idUnico;

@@ -13,13 +13,13 @@ public enum IdentificadoresPastasCompartilhadasCDIDRGEFIC {
 	TESTE_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA(9, TESTE_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	TESTE_ARQUIVO_CONSOLIDADO_GEFIC_OPM(9, TESTE_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC OPM " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	TESTE_ARQUIVO_ENTIDADES(9,"GEFIC\\unidadesGEFIC.csv"),
-	TESTE_ARQUIVO_STATUS_NORMALIZADO(9,"GEFIC\\StatusNormalizados.csv"),
+	TESTE_ARQUIVO_STATUS_NORMALIZADO(9,"GEFIC\\StatusNormalizados.xlsx"),
 
 	PROD_PASTA_RELATORIOS_GEFIC(9, "Urgencia"),
 	PROD_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA(9, PROD_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC OPM " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	PROD_ARQUIVO_CONSOLIDADO_GEFIC_OPM(9, PROD_PASTA_RELATORIOS_GEFIC.getTextoIdentificador() + "\\Consolidado\\GEFIC OPM " + MASCARA_NOMES_DINAMICOS.getTextoIdentificador() + ".xlsx"),
 	PROD_ARQUIVO_ENTIDADES(9, "GEFIC\\unidadesGEFIC.csv"),
-	PROD_ARQUIVO_STATUS_NORMALIZADO(9,"GEFIC\\StatusNormalizados.csv"),
+	PROD_ARQUIVO_STATUS_NORMALIZADO(9,"GEFIC\\StatusNormalizados.xlsx"),
 
 	TESTE(TESTE_PASTA_RELATORIOS_GEFIC.getTextoIdentificador(), TESTE_ARQUIVO_ENTIDADES.getTextoIdentificador(), 
 			TESTE_ARQUIVO_CONSOLIDADO_GEFIC_CIRURGIA_ELETIVA.getTextoIdentificador(), TESTE_ARQUIVO_CONSOLIDADO_GEFIC_OPM.getTextoIdentificador(),

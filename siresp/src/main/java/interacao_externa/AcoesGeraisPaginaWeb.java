@@ -218,7 +218,7 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
-	public boolean selecionarItemSelectULLIPeloTitleDeUmaLinha(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
+	public boolean selecionarItemSelectULLIPeloTitleDeUmaLinhaPeloXPath(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
 	{
 
 		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
@@ -243,6 +243,34 @@ public class AcoesGeraisPaginaWeb {
 				
 		return true;
 	}
+	
+	public boolean selecionarItemSelectULLIPeloTitleDeUmaLinha(WebDriver driverPagina, String id, String textoASelecionar)
+	{
+
+		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+		
+		try
+		{		
+			WebElement linha = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
+			
+
+			WebElement opcao = linha.findElement(
+			    By.xpath(".//li[@title='" + textoASelecionar + "']")
+			);
+
+			
+			opcao.click();
+			
+						
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+	
 	
 	public boolean selecionarItemSelectULLIPeloDataValueDeUmOption(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
 	{

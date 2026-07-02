@@ -17,6 +17,8 @@ public enum ParametrosArquivoGEFICSaidaPacientesAnalitico {
 	INDICE_COLUNA_SUBESPECIALIDADE(6, 6, "Subespecialidade", "String", ""),
 	INDICE_COLUNA_PROCEDIMENTO(7, 7, "Procedimento", "String", ""),
 	
+	TEXTO_MOTIVO_OUTROS(42, 0, "OUTROS", "", ""),
+	
 	LINHA_INICIAL_ARQUIVO(43, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
 	
 	EXTENSAO_ARQUIVO_RELATORIO_BAIXADO(44, 0, "xlsx", "", "");

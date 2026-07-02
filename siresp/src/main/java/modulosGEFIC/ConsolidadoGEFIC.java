@@ -34,6 +34,7 @@ import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoConsolidadoGEFIC;
 import dadosGerais.ParametrosArquivoGEFICEntradaPacientes;
 import dadosGerais.ParametrosArquivoGEFICSaidaPacientes;
+import dadosGerais.ParametrosArquivoGEFICSaidaPacientesAnalitico;
 import dadosGerais.ParametrosArquivoGEFICTransferenciaPacientes;
 import dadosGerais.ParametrosArquivoLeitosPlanilhaMonitoramento;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado;
@@ -48,6 +49,7 @@ import interacao_externa.AcoesGeraisPaginaWeb;
 import interacao_externa.ExcelBinder;
 import interacao_externa.AcoesGeraisPaginaWeb.OpenStrategy;
 import modelosDados.CelulaExcel;
+import modelosDados.DadoAnaliticoSaidaPacienteGEFIC;
 import modelosDados.DadosAcumuladosVagaZero;
 import modelosDados.EntidadeGEFIC;
 import modelosDados.IntervalosUrgencia;
@@ -620,7 +622,7 @@ public class ConsolidadoGEFIC
 				entradas.put(estabelecimento, quantidadeEntrada);
 		}
 		
-		//arquivo.apagar();
+		arquivo.apagar();
 		
 		return "";
 	}
@@ -756,7 +758,6 @@ public class ConsolidadoGEFIC
 		
 		String planilhaRealizado;
 		String planilhaCancelado;
-		String statusRealizado;
 		
 		ArrayList<String> opcoes = new ArrayList<String>();
 		
@@ -765,14 +766,12 @@ public class ConsolidadoGEFIC
 			opcoes.add("Quantidade de saídas de pacientes OPM");
 			planilhaRealizado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_OPM_ENTREGUES.getDescricao();
 			planilhaCancelado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_OPM_CANCELADAS.getDescricao();
-			statusRealizado = ParametrosArquivoConsolidadoGEFIC.TEXTO_OPM_ENTREGUE.getDescricao();
 		}
 		else
 		{
 			opcoes.add("Quantidade de saídas de pacientes");
 			planilhaRealizado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_CIRURGIAS_REALIZADAS.getDescricao();
 			planilhaCancelado = ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_CIRURGIAS_CANCELADAS.getDescricao();
-			statusRealizado = ParametrosArquivoConsolidadoGEFIC.TEXTO_CIRURGIA_REALIZADA.getDescricao();
 		}
 			
 		paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_MENU_PRINCIPAL.getTextoIdentificador(), opcoes);
@@ -795,9 +794,22 @@ public class ConsolidadoGEFIC
 		arquivoConsolidado.abrirPlanilha(planilhaRealizado, 0);
 		
 		int colunaExcel = ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice();
-		int linhaExcelRealizado = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
+		int linhaExcelArquivoConsolidado = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
+		int linhaExcelArquivoBaixado = ParametrosArquivoGEFICSaidaPacientesAnalitico.LINHA_INICIAL_ARQUIVO.getIndice();
 		
-		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelRealizado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado - 1, colunaExcel, "");
+		while(!conteudoCelula.equals(mesAnalise) && colunaExcel < 20)
+		{
+			colunaExcel++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado - 1, colunaExcel, ""); 
+			System.out.println(conteudoCelula);
+		}
+		
+		HashMap<String, Integer> quantidadeRealizadaPorUnidade = new HashMap<String, Integer>();
+		HashMap<String, Integer> quantidadeCanceladaPorUnidade = new HashMap<String, Integer>();
+		HashMap<String, HashMap<String, Integer>> quantidadeCanceladaPorMotivoPorUnidade = new HashMap<String, HashMap<String, Integer>>();
+		
+		conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
 		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
 		{
 			paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_ESTABELECIMENTO.getTextoIdentificador());
@@ -806,6 +818,8 @@ public class ConsolidadoGEFIC
 			
 			if(estabelecimento != null)
 			{
+				String siglaEstabelecimento = conteudoCelula;
+				
 				ArrayList<String> opcoesEstabelecimentos = new ArrayList<String>();
 				opcoesEstabelecimentos.add(estabelecimento);
 				
@@ -815,8 +829,16 @@ public class ConsolidadoGEFIC
 				//paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_TEXT_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
 				while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_SAIDA.getTextoIdentificador()));
 				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				//paginaWeb.digitarEmInputTextPorXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_TEXT_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
-				paginaWeb.selecionarItemSelectULLIPeloTitleDeUmaLinha(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_UL_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
+				//paginaWeb.selecionarItemSelectULLIPeloTitleDeUmaLinha(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_SELECT_ESTABELECIMENTOS.getTextoIdentificador(), estabelecimento);
+				paginaWeb.selecionarItemSelectULLIPeloTitleDeUmaLinhaPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_RELATORIO_SAIDAS_UL_ESTABELECIMENTO.getTextoIdentificador(), estabelecimento);
 				
 				while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_SAIDA.getTextoIdentificador()));
 				
@@ -839,35 +861,192 @@ public class ConsolidadoGEFIC
 				
 				Arquivo arquivo = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICSaidaPacientes.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
 				
-	//			AcoesArquivoExcel arquivoSaidas = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), 0);
-	//			
-	//			int primeiraLinha = ParametrosArquivoGEFICSaidaPacientes.LINHA_INICIAL_ARQUIVO.getIndice();
-	//			int ultimaLinha = arquivoSaidas.getUltimaLinhaPreenchida();
-	//			
-	//			for(int linhaExcel = primeiraLinha; linhaExcel <= ultimaLinha; linhaExcel++)
-	//			{
-	//				String estabelecimento = arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_ESTABELECIMENTO.getIndice()).toUpperCase();
-	//				int quantidadeEntrada = arquivoSaidas.getValorDaCelulaInt(linhaExcel, ParametrosArquivoGEFICSaidaPacientes.INDICE_COLUNA_QTDE_SAIDA.getIndice());
-	//		
-	//
-	//			}
+				AcoesArquivoExcel arquivoSaidas = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), 0);
+				int primeiraLinha = ParametrosArquivoGEFICSaidaPacientesAnalitico.LINHA_INICIAL_ARQUIVO.getIndice();
+				int ultimaLinha = arquivoSaidas.getUltimaLinhaPreenchida();
+
+				int quantidadeRealizada = 0;
+				int quantidadeCancelada = 0; 
+
+				HashMap<String, Integer> quantidadeCanceladaPorMotivo = new HashMap<String, Integer>();
+				ArrayList<DadoAnaliticoSaidaPacienteGEFIC> casosMotivoOutros = new ArrayList<DadoAnaliticoSaidaPacienteGEFIC>();
+				
+				for(int linhaExcel = primeiraLinha; linhaExcel <= ultimaLinha; linhaExcel++)
+				{
+					String motivoSaida = arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_MOTIVO_SAIDA.getIndice());
+	
+					if(statusRealizados.contains(motivoSaida))
+					{
+						quantidadeRealizada++;
+					}
+					else
+					{
+						quantidadeCancelada++;
+						
+						String motivoSaidaNormalizado = deParaStatus.get(motivoSaida);
+						
+						if(motivoSaidaNormalizado != null)
+						{
+							if(quantidadeCanceladaPorMotivo.containsKey(motivoSaidaNormalizado)) 
+							{
+								int quantidade = quantidadeCanceladaPorMotivo.get(motivoSaidaNormalizado);
+								quantidade++;
+								quantidadeCanceladaPorMotivo.put(motivoSaidaNormalizado, quantidade);
+							}
+							else
+							{
+								quantidadeCanceladaPorMotivo.put(motivoSaidaNormalizado, 1);
+							}
+							
+							if(motivoSaidaNormalizado.equals(ParametrosArquivoGEFICSaidaPacientesAnalitico.TEXTO_MOTIVO_OUTROS.getDescricao()))
+							{
+								DadoAnaliticoSaidaPacienteGEFIC motivoOutros = new DadoAnaliticoSaidaPacienteGEFIC();
+								motivoOutros.setSiglaEstabelecimento(siglaEstabelecimento);
+								motivoOutros.setEstabelecimento(estabelecimento);
+								motivoOutros.setPaciente(arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_PACIENTE.getIndice()));
+								motivoOutros.setDataSaida(arquivoSaidas.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_DATA_SAIDA.getIndice(), "dd/MM/yyyy"));
+								motivoOutros.setMotivoSaida(arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_MOTIVO_SAIDA.getIndice()));
+								motivoOutros.setDataNascimento(arquivoSaidas.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_DATA_NASCIMENTO.getIndice(), "dd/MM/yyyy"));
+								motivoOutros.setIdade(arquivoSaidas.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_IDADE.getIndice(), ""));
+								motivoOutros.setEspecialidade(arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_ESPECIALIDADE.getIndice()));
+								motivoOutros.setSubespecialidade(arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_SUBESPECIALIDADE.getIndice()));
+								motivoOutros.setProcedimento(arquivoSaidas.getValorDaCelulaString(linhaExcel, ParametrosArquivoGEFICSaidaPacientesAnalitico.INDICE_COLUNA_PROCEDIMENTO.getIndice()));
+								
+								casosMotivoOutros.add(motivoOutros);
+							}
+						}
+					}
+				}
+				
+				quantidadeRealizadaPorUnidade.put(siglaEstabelecimento, quantidadeRealizada);
+				quantidadeCanceladaPorUnidade.put(siglaEstabelecimento, quantidadeCancelada);
+				quantidadeCanceladaPorMotivoPorUnidade.put(siglaEstabelecimento, quantidadeCanceladaPorMotivo);
+				
+				arquivo.apagar();
 				
 				paginaWeb.clicarLinkPeloCSSSelector(driver, IdentificadoresPaginaWebGEFIC.CLASS_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO.getTextoIdentificador());
 			}
-			
-			linhaExcelRealizado++;
-			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelRealizado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+
+			linhaExcelArquivoConsolidado++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
 			
 			System.out.println(conteudoCelula);
 		}
 		
+		ArrayList<CelulaExcel> celulasAtendidos = obterCelulasPacienteAtendido(arquivoConsolidado, planilhaRealizado, colunaExcel, quantidadeRealizadaPorUnidade);
+		ArrayList<CelulaExcel> celulasCancelados = obterCelulasPacienteCancelado(arquivoConsolidado, planilhaCancelado, colunaExcel, quantidadeCanceladaPorUnidade, quantidadeCanceladaPorMotivoPorUnidade);
+		
+		arquivoConsolidado.forcarCalculos();
+		arquivoConsolidado.gravarDadosEmCelula(planilhaRealizado, celulasAtendidos, false, false, 0, null);
+		arquivoConsolidado.gravarDadosEmCelula(planilhaCancelado, celulasCancelados, false, false, 0, null);
 		
 		
-
-		
-		//arquivo.apagar();
 		
 		return "";
+	}
+	
+	private ArrayList<CelulaExcel> obterCelulasPacienteAtendido(AcoesArquivoExcel arquivoConsolidado, String nomePlanilha, int coluna, HashMap<String, Integer> quantidadePorEstabelecimento)
+	{
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		int linhaExcel = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
+		
+		arquivoConsolidado.abrirPlanilha(nomePlanilha, 0);
+		
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+		{
+			int quantidade = 0;
+			if(quantidadePorEstabelecimento.containsKey(conteudoCelula))
+				quantidade = quantidadePorEstabelecimento.get(conteudoCelula);
+			else
+				quantidade = 0;
+
+			celulas.add(new CelulaExcel(linhaExcel, coluna, quantidade, "Integer"));
+			
+			linhaExcel++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			
+			System.out.println(conteudoCelula);
+		}
+		
+		return celulas;
+	}
+	
+	private ArrayList<CelulaExcel> obterCelulasPacienteCancelado(AcoesArquivoExcel arquivoConsolidado, String nomePlanilha, int coluna, HashMap<String, Integer> quantidadePorEstabelecimento, HashMap<String, HashMap<String, Integer>> motivosPorEstabelecimento)
+	{
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		int linhaExcel = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
+		
+		arquivoConsolidado.abrirPlanilha(nomePlanilha, 0);
+		
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+		{
+			int quantidade = 0;
+			
+			String siglaEstabelecimento = conteudoCelula;
+			
+			if(quantidadePorEstabelecimento.containsKey(conteudoCelula))
+				quantidade = quantidadePorEstabelecimento.get(conteudoCelula);
+			else
+				quantidade = 0;
+
+			celulas.add(new CelulaExcel(linhaExcel, coluna, quantidade, "Integer"));
+			
+			int linhaTabelaMotivosDetalhados = linhaExcel + 1;
+			
+			String conteudoCelulaMotivos = arquivoConsolidado.getValorDaCelulaComoString(linhaTabelaMotivosDetalhados, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			while(!conteudoCelulaMotivos.equals(siglaEstabelecimento) && !conteudoCelulaMotivos.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_FINAL_RELATORIO.getDescricao()))
+			{
+				linhaTabelaMotivosDetalhados++;
+				conteudoCelulaMotivos = arquivoConsolidado.getValorDaCelulaComoString(linhaTabelaMotivosDetalhados, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			}
+			
+			if(conteudoCelulaMotivos.equals(siglaEstabelecimento))
+			{
+				linhaTabelaMotivosDetalhados+=2;
+				
+				conteudoCelulaMotivos = arquivoConsolidado.getValorDaCelulaComoString(linhaTabelaMotivosDetalhados, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+				
+				HashMap<String, Integer> motivosCancelamento = motivosPorEstabelecimento.get(siglaEstabelecimento);
+				
+				if(motivosCancelamento != null)
+				{
+					while(!conteudoCelulaMotivos.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+					{
+						int quantidadeMotivo;
+						if(motivosCancelamento.containsKey(conteudoCelulaMotivos))
+							quantidadeMotivo = motivosCancelamento.get(conteudoCelulaMotivos);
+						else
+							quantidadeMotivo = 0;
+							
+						celulas.add(new CelulaExcel(linhaTabelaMotivosDetalhados, coluna, quantidadeMotivo, "Integer"));
+						
+						linhaTabelaMotivosDetalhados++;
+						conteudoCelulaMotivos = arquivoConsolidado.getValorDaCelulaComoString(linhaTabelaMotivosDetalhados, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+					}
+				}
+				else
+				{
+					while(!conteudoCelulaMotivos.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+					{
+						celulas.add(new CelulaExcel(linhaTabelaMotivosDetalhados, coluna, 0, "Integer"));
+						
+						linhaTabelaMotivosDetalhados++;
+						conteudoCelulaMotivos = arquivoConsolidado.getValorDaCelulaComoString(linhaTabelaMotivosDetalhados, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+					}
+				}
+			}
+			
+			linhaExcel++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcel, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+			
+			System.out.println(conteudoCelula);
+		}
+		
+		return celulas;
 	}
 	
 	private Arquivo baixarArquivos(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String idBotaoExcel, String formatoArquivo) 

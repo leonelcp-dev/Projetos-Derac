@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.csv.CSVFormat;
@@ -182,7 +183,17 @@ public class FilaNominalCDRNaoRegulada {
 				
 			}
 			else
+			{
 				System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade() + "(" + entidade.getDistrito() + ")");
+				
+				JOptionPane optionPane = new JOptionPane("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade() + "(" + entidade.getDistrito() + ")" + ".\r\n Avise a equipe da CDIDR sobre a ocorrência.", JOptionPane.INFORMATION_MESSAGE);
+				JDialog dialog = optionPane.createDialog("Aviso");
+				dialog.setModal(false); // não bloqueia
+				dialog.setVisible(true);
+				
+				//JOptionPane.showMessageDialog(null, "Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getExecutante() + ".\r\n Pressione OK para continuar e avise a equipe da CDIDR sobre a ocorrência.");
+			}
+
 		}
 		
 		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
