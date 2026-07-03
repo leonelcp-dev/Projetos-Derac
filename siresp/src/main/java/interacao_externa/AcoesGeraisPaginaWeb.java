@@ -105,7 +105,7 @@ public class AcoesGeraisPaginaWeb {
 					
 					System.out.println(opcao.getText() + " - " + itemMenu);
 					
-					if (opcao.getText().trim().equals(itemMenu))
+					if (opcao.getText().trim().equals(itemMenu) && !opcao.findElements(By.tagName("a")).isEmpty())
 					{
 						opcao.click();
 						menu = opcao;
@@ -411,7 +411,43 @@ public class AcoesGeraisPaginaWeb {
 			Select select = new Select(item);
 			valor = select.getFirstSelectedOption().getText();
 			
-		}catch(Error e) {
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return "";
+		}
+				
+		return valor;
+	}
+	
+	public String obterValorDeUmAtributoDeUmElemento(WebDriver driverPagina, String idElemento, String atributo)
+	{
+		String valor;
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.id(idElemento));
+	
+			valor = item.getAttribute(atributo);
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return "";
+		}
+				
+		return valor;
+	}
+	
+	public String obterValorDeUmAtributoDeUmElementoPeloXPath(WebDriver driverPagina, String xpathElemento, String atributo)
+	{
+		String valor;
+
+		try
+		{		
+			WebElement item = driverPagina.findElement(By.xpath(xpathElemento));
+	
+			valor = item.getAttribute(atributo);
+			
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return "";
 		}

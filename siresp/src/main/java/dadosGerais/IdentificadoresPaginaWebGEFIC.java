@@ -35,6 +35,45 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_RELATORIO_SAIDAS_PRIMEIRA_LI_ESTABELECIMENTO(0, "/html/body/span/span/span[2]/ul/li"),
 	XPATH_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[1]/div/span/span[1]/span/span[1]/span"),
 	
+	XPATH_FILAS_BOTAO_FILTROS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[1]/div/div/div[1]/button"),
+	XPATH_FILAS_FILTRO_STATUS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[1]/div/div/div[2]/span/span[1]/span/span[1]"),
+	XPATH_FILAS_FILTRO_STATUS_UL(0, "/html/body/span/span/span[2]/ul"),
+	XPATH_FILAS_FILTRO_NOME_PACIENTE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[1]/div[1]/div[1]/div/input"),
+	XPATH_FILAS_BOTAO_MAIS_COLUNAS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/button"),
+	
+	XPATH_FILAS_CHECK_BOX_DINAMICO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[" + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + "]/input"),
+	XPATH_FILAS_CHECK_BOX_POSICAO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[1]/input"),
+	XPATH_FILAS_CHECK_BOX_TELEFONE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[2]/input"),
+	XPATH_FILAS_CHECK_BOX_DATA_NASCIMENTO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[3]/input"),
+	XPATH_FILAS_CHECK_BOX_IDADE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[4]/input"),
+	XPATH_FILAS_CHECK_BOX_PRIORIZACAO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[5]/input"),
+	XPATH_FILAS_CHECK_BOX_ESPECIALIDADE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[6]/input"),
+	XPATH_FILAS_CHECK_BOX_SUBESPECIALIDADE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[7]/input"),
+	XPATH_FILAS_CHECK_BOX_PROCEDIMENTO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[8]/input"),
+	XPATH_FILAS_CHECK_BOX_CID(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[9]/input"),
+	XPATH_FILAS_CHECK_BOX_DATA_INDICACAO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[10]/input"),
+	XPATH_FILAS_CHECK_BOX_DATA_INSERCAO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[11]/input"),
+	XPATH_FILAS_CHECK_BOX_DATA_EXECUCAO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[12]/input"),
+	XPATH_FILAS_CHECK_BOX_DATA_SAIDA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[13]/input"),
+	XPATH_FILAS_CHECK_BOX_ESTABELECIMENTO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[14]/input"),
+	XPATH_FILAS_CHECK_BOX_SITUACAO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[15]/input"),
+	XPATH_FILAS_CHECK_BOX_CIDADE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[16]/input"),
+	XPATH_FILAS_CHECK_BOX_TELEFONE_ADICIONAL_1(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[17]/input"),
+	XPATH_FILAS_CHECK_BOX_TELEFONE_ADICIONAL_2(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[18]/input"),
+	XPATH_FILAS_CHECK_BOX_UNIDADE_BASICA_REFERENCIA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[19]/input"),
+	XPATH_FILAS_CHECK_BOX_UNIDADE_SOLICITANTE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[20]/input"),
+	XPATH_FILAS_CHECK_BOX_TEMPO_DE_ESPERA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[21]/input"),
+	XPATH_FILAS_CHECK_BOX_TEMPO_MEDIO_DE_ESPERA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[22]/input"),
+	XPATH_FILAS_CHECK_BOX_TEMPO_MAXIMO_DE_ESPERA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[23]/input"),
+	XPATH_FILAS_CHECK_BOX_OBSERVACOES(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[24]/input"),
+	XPATH_FILAS_CHECK_BOX_ACOES(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[25]/input"),
+	
+	XPATH_FILAS_TABELA_RESULTADOS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[2]/table"),
+	XPATH_FILAS_BOTAO_ACAO_DINAMICO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[2]/table/tbody/tr[ " + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + " ]/td[10]/div/button"),
+	XPATH_FILAS_PROXIMA_PAGINA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[3]/div[2]/ul/li[9]/a"),
+	
+	XPATH_FILAS_TEXT_AREA_OBSERVACAO_HISTORICO(0, "/html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/div/div[2]/div[1]/div/div/div/form/div[2]/div/div/textarea"),
+	
 	CLASS_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO(0, "select2-selection__clear"),
 	
 	
@@ -44,10 +83,14 @@ public enum IdentificadoresPaginaWebGEFIC {
 	
 	ID_RELATORIO_SAIDA_PACIENTES_SELECT_ESTABELECIMENTOS(0, "select2-estabelecimento-gt-results"),
 	
+	ID_RELATORIO_SAIDA_PACIENTES_SPAN_ESTABELECIMENTO(0, "select2-estabelecimento-ub-container"),
+	
 	ID_RELATORIO_QUANTIDADE_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),
 	ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),
 	ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),
 	ID_RELATORIO_SAIDA_PACIENTES_BOTAO_PESQUISAR(0, "pesquisar"),
+	ID_FILAS_BOTAO_PESQUISAR(0, "pesquisar"),
+	ID_FILAS_BOTAO_LIMPAR_FILTRO(0, "limpar"),
 	ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL(0, "excel"),
@@ -62,7 +105,8 @@ public enum IdentificadoresPaginaWebGEFIC {
 	
 	NAME_LOGIN_BOTAO_ENTRAR(0, "login"),
 	
-	TEXTO_UNIDADE_REGULACAO(0, "Regulacao");
+	TEXTO_UNIDADE_REGULACAO(0, "Regulacao"),
+	TEXTO_STATUS_REGISTRO_CANCELADO(0, "Registros cancelados");
 	
 	
 		

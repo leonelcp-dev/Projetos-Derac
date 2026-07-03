@@ -259,6 +259,30 @@ public class LeitosUrgencia
 			e.printStackTrace();
 		}
 		
+		HashMap<String, String> deParaEspecialidadeLeitos = new HashMap<String, String>();
+		
+		//obter tipos de unidades
+		try {
+			br = new BufferedReader(new FileReader(pastaBaseMonitoramentoLeitosCDIDR + "\\" + diretoriosCDIDR.getArquivoDeParaEspecialidades(), StandardCharsets.ISO_8859_1));
+			
+			String linha;
+			
+			//lendo e descartando cabeçalho
+			linha = br.readLine();
+			
+			while ((linha = br.readLine()) != null) {
+			    String[] colunas = linha.split(";");
+			    
+			    deParaEspecialidadeLeitos.put(colunas[0] + colunas[1], colunas[2]);
+			}
+			
+			br.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		String composicaoMesAno = meses.getMeses().get(dataInformada.getMonthValue() - 1).getMesNumero() + " " + meses.getMeses().get(dataInformada.getMonthValue() - 1).getMesDescricao() + " " + dataInformada.getYear();
 		String textoAEncontrar = "EM " + meses.getMeses().get(dataInformada.getMonthValue() - 1).getMesDescricao() + " " + dataInformada.getYear() + ":";
 		
@@ -291,7 +315,7 @@ public class LeitosUrgencia
 			{
 				HashMap<String, LeitoCadastrado> leitosCadastrados = obterCadastroDeLeitosDaUnidade(arquivoCenso, planilhaDeCadastro);
 				HashMap<String, LeitoExtraCadastrado> leitosExtrasCadastrados = obterCadastroDeLeitosExtrasDaUnidade(arquivoCenso);
-				obterDadosDaPlanilhaMonitoramentoDosLeitos(arquivoCenso, leitosCadastrados, leitosExtrasCadastrados, dadosConsolidados);
+				obterDadosDaPlanilhaMonitoramentoDosLeitos(arquivoCenso, leitosCadastrados, leitosExtrasCadastrados, dadosConsolidados, deParaEspecialidadeLeitos);
 				preencherPlanilhaMonitoramentoDosLeitos(entidade, dataDeAnalise, dadosConsolidados);	
 			}
 			else
@@ -470,7 +494,7 @@ public class LeitosUrgencia
 		return "";
 	}
 	
-	private String obterDadosDaPlanilhaMonitoramentoDosLeitos(AcoesArquivoExcel arquivoCenso, HashMap<String, LeitoCadastrado> leitosCadastrados, HashMap<String, LeitoExtraCadastrado> leitosExtrasCadastrados, HashMap<String, DadosAcumuladosLeitos> dadosConsolidados)
+	private String obterDadosDaPlanilhaMonitoramentoDosLeitos(AcoesArquivoExcel arquivoCenso, HashMap<String, LeitoCadastrado> leitosCadastrados, HashMap<String, LeitoExtraCadastrado> leitosExtrasCadastrados, HashMap<String, DadosAcumuladosLeitos> dadosConsolidados, HashMap<String, String> deParaEspecialidadesLeitos)
 	{
 		arquivoCenso.abrirPlanilha(ParametrosArquivoCenso.NOME_PLANILHA_CENSO.getDescricao(), 0);
 		
@@ -525,7 +549,10 @@ public class LeitosUrgencia
 				}
 				
 				if(leito != null && (statusLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_ATIVO.getDescricao()) || statusLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_BLOQUEADO.getDescricao())))
-				{				
+				{
+					if(deParaEspecialidadesLeitos.containsKey(leito.getUnidade() + leito.getEspecialidade()))
+						leito.setEspecialidade(deParaEspecialidadesLeitos.get(leito.getUnidade() + leito.getEspecialidade()));
+					
 					String especialidade = leito.getEspecialidade().toUpperCase().trim();
 					String enfermaria = leito.getEnfermaria().toUpperCase().trim();
 					

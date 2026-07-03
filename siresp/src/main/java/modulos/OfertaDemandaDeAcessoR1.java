@@ -1506,27 +1506,37 @@ public class OfertaDemandaDeAcessoR1 {
 			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_TIPO_RELATORIO.getTextoIdentificador(), tiposDeBusca[i]);
 			
 			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
+
+			paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
+			paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataInicioFormatada.replaceAll("-", ""));
 			
-			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()).trim().equals(""))
+			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()).trim().equals(IdentificadoresPaginaWebSIRESP.MASCARA_CAMPO_DATA.getTextoIdentificador()))
 			{		
-				System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()));
+				System.out.println("****" + paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()) + "****");
 				
 				paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
 				paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador(), dataInicioFormatada.replaceAll("-", ""));
 			}
+			System.out.println("Fora do loop ****" + paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()) + "****");
+			
 			paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador());
 			
 			while(paginaWeb.divEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_REGULADA_SOLICITACOES_DIV_ESPERANDO.getTextoIdentificador()));
 			
 			System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_INICIAL.getTextoIdentificador()));
 			
-			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()).trim().equals(""))
+			paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
+			paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replaceAll("-", ""));
+			
+			while(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()).trim().equals(IdentificadoresPaginaWebSIRESP.MASCARA_CAMPO_DATA.getTextoIdentificador()))
 			{		
-				System.out.println(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()));
+				System.out.println("****" + paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()) + "*****");
 				
 				paginaWeb.limparInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
 				paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador(), dataFimFormatada.replaceAll("-", ""));
 			}
+			
+			System.out.println("Fora do loop ****" + paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador()) + "*****");
 			
 			paginaWeb.tirarFocoDoCampoTexto(driver, IdentificadoresPaginaWebSIRESP.ID_RELATORIO_CDR_QUALITATIVO_FILTRO_DATA_FINAL.getTextoIdentificador());
 			
