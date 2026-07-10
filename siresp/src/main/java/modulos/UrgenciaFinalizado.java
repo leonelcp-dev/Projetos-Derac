@@ -1133,8 +1133,17 @@ public class UrgenciaFinalizado
 	    } catch (DateTimeParseException e) {
 	        // ignora e tenta o próximo formato
 	    }
+	    
+	    // 3️ Caso seja M/d/yy
+	    try {
+	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("M/d/yy");
+	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
+	        return fmtMesAno.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e tenta o próximo formato
+	    }
 	
-	    // 3️ Caso seja mmm/yyyy (direto do Excel ou do POI)
+	    // 4 Caso seja mmm/yyyy (direto do Excel ou do POI)
 	    try {
 	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy");
 	        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy"));

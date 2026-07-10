@@ -7,6 +7,7 @@ public enum IdentificadoresPaginaWebGEFIC {
 	ID_LOTACAO_ACESSO_TABELA(0, "estabelecimentos"),
 	
 	MASCARA_VALOR_DINAMICO(0, "#####"),
+	MASCARA_COLUNA_ACAO_DINAMICO(0, "@@@@@"),
 	
 	XPATH_LOTACAO_ACESSO_LINHA(0, "/html/body/div[2]/div/div/div/div/div/div[1]/div[2]/div[2]/table/tbody/tr[" + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + "]/td/p"),
 	XPATH_MENU_PRINCIPAL(0, "/html/body/div[1]/nav/ul"),
@@ -15,6 +16,8 @@ public enum IdentificadoresPaginaWebGEFIC {
 	
 	XPATH_RELATORIO_QUANTIDADE_PACIENTES_DIV_RODAPE_TABELA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[2]/div[1]/div[2]/div[2]/table/tfoot/tr/th/div[1]"),
 	CLASS_NAME_RELATORIO_QUANTIDADE_PACIENTES_LINHA_RODAPE_TABELA(0, ".row.no-gutters"),
+	CLASS_NAME_FILAS_PROXIMA_PAGINA_HABILITADO(0, ".page-item.page-next"),
+	CLASS_NAME_FILAS_PROXIMA_PAGINA_DESABILITADO(0, ".page-item.page-next.disabled"),
 	
 	XPATH_RELATORIO_QUANTIDADE_PACIENTES_ESTABELECIMENTO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div/div/span/span[1]/span/span[1]/span"),
 	XPATH_RELATORIO_QUANTIDADE_PACIENTES_TEXT_ESTABELECIMENTO(0, "/html/body/span/span/span[1]/input"),
@@ -69,10 +72,13 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_FILAS_CHECK_BOX_ACOES(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/div/label[25]/input"),
 	
 	XPATH_FILAS_TABELA_RESULTADOS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[2]/table"),
-	XPATH_FILAS_BOTAO_ACAO_DINAMICO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[2]/table/tbody/tr[ " + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + " ]/td[10]/div/button"),
+	XPATH_FILAS_BOTAO_ACAO_DINAMICO(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[2]/table/tbody/tr" + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + "/td[" + MASCARA_COLUNA_ACAO_DINAMICO.getTextoIdentificador() + "]/div/button"),
 	XPATH_FILAS_PROXIMA_PAGINA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[3]/div[2]/ul/li[9]/a"),
 	
+	ARIA_LABEL_FILAS_PROXIMA_PAGINA(0, "próxima página"),
+	
 	XPATH_FILAS_TEXT_AREA_OBSERVACAO_HISTORICO(0, "/html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/div/div[2]/div[1]/div/div/div/form/div[2]/div/div/textarea"),
+	ID_FILAS_TEXT_AREA_OBSERVACAO_HISTORICO(0, "obs_original"),
 	
 	CLASS_RELATORIO_SAIDAS_REMOVER_ESTABELECIMENTO_SELECIONADO(0, "select2-selection__clear"),
 	

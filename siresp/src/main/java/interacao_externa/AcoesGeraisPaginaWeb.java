@@ -244,6 +244,33 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean selecionarItemSelectULLIPeloTextoVisivelDeUmaLinhaPeloXPath(WebDriver driverPagina, String xPathLinha, String textoASelecionar)
+	{
+
+		WebDriverWait wait = new WebDriverWait(driverPagina, Duration.ofSeconds(10));
+		
+		try
+		{		
+			WebElement linha = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xPathLinha)));
+			
+			WebElement opcao = wait.until(
+			    ExpectedConditions.elementToBeClickable(
+			        linha.findElement(By.xpath("//li[text()='" + textoASelecionar + "']"))
+			    )
+			);
+
+			opcao.click();
+			
+						
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+				
+		return true;
+	}
+	
+	
 	public boolean selecionarItemSelectULLIPeloTitleDeUmaLinha(WebDriver driverPagina, String id, String textoASelecionar)
 	{
 
@@ -588,7 +615,7 @@ public class AcoesGeraisPaginaWeb {
 			WebElement item = driverPagina.findElement(By.id(id));
 			item.sendKeys(Keys.TAB);
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -616,7 +643,7 @@ public class AcoesGeraisPaginaWeb {
 			}
 
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -644,7 +671,7 @@ public class AcoesGeraisPaginaWeb {
 			}
 
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -661,7 +688,7 @@ public class AcoesGeraisPaginaWeb {
 			
 			item.sendKeys(texto);
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -681,7 +708,7 @@ public class AcoesGeraisPaginaWeb {
 
 			item.sendKeys(texto);
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return false;
 		}
@@ -698,7 +725,7 @@ public class AcoesGeraisPaginaWeb {
 	
 			valor = item.getAttribute("value");
 			
-		}catch(Error e) {
+		}catch(Exception e) {
 			System.out.println(e.toString());
 			return "";
 		}
@@ -741,6 +768,16 @@ public class AcoesGeraisPaginaWeb {
 		}
 		
 		return lista;
+	}
+	
+	public boolean haElementosPorClassName(WebDriver driverPagina, String classname)
+	{
+		List<WebElement> elements = driverPagina.findElements(By.className(classname)); 
+
+		if(elements.isEmpty())
+			return false;
+		
+		return true;
 	}
 	
 	public ArrayList<String> encontrarIDsPorClassName(WebDriver driverPagina, String classname)
@@ -1199,6 +1236,23 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean clicarLinkPeloAriaLabel(WebDriver driverPagina, String ariaLabel)
+	{
+		try
+		{	
+			WebElement item = driverPagina.findElement(By.xpath("//*[@aria-label='" + ariaLabel + "']"));
+			//WebElement radio = driverPagina.findElement(By.cssSelector("input[type='radio'][value$='" + value + "']") );
+	
+			item.click();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public boolean clicarLinkPeloCSSSelector(WebDriver driverPagina, String className)
 	{
 		try
@@ -1423,6 +1477,24 @@ public class AcoesGeraisPaginaWeb {
 		try
 		{	
 			WebElement elemento = driverPagina.findElement(By.name(name));
+			
+			habilitado = elemento.isEnabled() && elemento.isDisplayed();
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return false;
+		}
+		
+		return habilitado;
+	}
+	
+	public boolean elementoEstaVisivelPeloClassName(WebDriver driverPagina, String className)
+	{
+		boolean habilitado;
+		
+		try
+		{	
+			WebElement elemento = driverPagina.findElement(By.className(className)); 
 			
 			habilitado = elemento.isEnabled() && elemento.isDisplayed();
 			

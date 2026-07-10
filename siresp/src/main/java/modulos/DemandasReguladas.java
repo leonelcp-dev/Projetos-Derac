@@ -84,7 +84,7 @@ public class DemandasReguladas {
 		}
 
 		String pastaDestinoArquivosNovasSolicitacoes = pastaBase + "\\" + diretorios.getArquivosNovasSolicitacoesConsolidada();
-		if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()))
+		if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()) || caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTOS.getDescricao()))
 		{
 			
 			if(caminhoArquivoXLSX.contains("CONSULTA"))

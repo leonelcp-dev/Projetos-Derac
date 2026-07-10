@@ -1091,7 +1091,7 @@ public class OfertaDemandaDeAcessoR1 {
 						}
 		
 						String pastaDestinoArquivosNovasSolicitacoes = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivosNovasSolicitacoesConsolidada() + "\\";
-						if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()))
+						if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()) || caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTOS.getDescricao()))
 						{
 							
 							if(caminhoArquivoXLSX.contains("CONSULTA"))
@@ -3881,7 +3881,11 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		String pastaRelatorioCDRA = pastaBaseCDRA + "\\" + diretoriosCDRA.getPastaRelatorioOfertaDemanda();
 		
-		arquivo.CopiarArquivo(pastaRelatorioCDRA + "\\" + arquivo.getNomeDoArquivo());
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		LocalDate data = LocalDate.now();
+		nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDRA + "\\" + nomeArquivo);
 		
 		return "";
 	}
@@ -3893,7 +3897,11 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		String pastaRelatorioCDIDR = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemandaCDIDR();
 		
-		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + arquivo.getNomeDoArquivo());
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		LocalDate data = LocalDate.now();
+		nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
 		
 		return "";
 	}

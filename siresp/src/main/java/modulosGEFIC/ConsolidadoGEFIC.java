@@ -33,6 +33,7 @@ import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoConsolidadoGEFIC;
 import dadosGerais.ParametrosArquivoGEFICEntradaPacientes;
+import dadosGerais.ParametrosArquivoGEFICMotivoOutros;
 import dadosGerais.ParametrosArquivoGEFICSaidaPacientes;
 import dadosGerais.ParametrosArquivoGEFICSaidaPacientesAnalitico;
 import dadosGerais.ParametrosArquivoGEFICTransferenciaPacientes;
@@ -42,6 +43,7 @@ import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFormaResolucao;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaVagaZero;
 import dadosGerais.ParametrosArquivoUrgenciaRelatorioProdutividade;
+import dadosGerais.ParametrosTabelaFilasRegistrosCanceladosGEFIC;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoAgrupado;
 import dadosGerais.ParametrosTabelaUrgenciaSolicitacoesPendentes;
 import interacao_externa.AcoesArquivoExcel;
@@ -236,8 +238,8 @@ public class ConsolidadoGEFIC
     			
     	}
 		
-    	//atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
-    	//atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
+    	atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
+    	atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
     	
     	if(ehOPM)
     	{
@@ -791,7 +793,39 @@ public class ConsolidadoGEFIC
 		else
 			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
 		
+//		arquivoConsolidado.abrirPlanilha(ParametrosArquivoGEFICMotivoOutros.NOME_PLANILHA_OUTROS.getDescricao(), 0);
+//		
+//		int linhaArquivo = ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice();
+//		String nomeArquivo = arquivoConsolidado.getNomeDoAquivo();
+//		
+//		ArrayList<DadoAnaliticoSaidaPacienteGEFIC> listaCasosOutros = new ArrayList<DadoAnaliticoSaidaPacienteGEFIC>();
+//    	
+//    	try (FileInputStream in = new FileInputStream(nomeArquivo)) {
+//    		listaCasosOutros = ExcelBinder.readSheet(in, DadoAnaliticoSaidaPacienteGEFIC.class, ParametrosArquivoGEFICMotivoOutros.NOME_PLANILHA_OUTROS.getDescricao(), ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+//        }
+//		catch(Exception e)
+//		{
+//			e.printStackTrace();
+//			return null;
+//		}
+//    	
+//    	HashMap<String, Integer> dadosInseridos = new HashMap<String, Integer>();
+//    	
+//    	for(DadoAnaliticoSaidaPacienteGEFIC caso : listaCasosOutros)
+//    	{
+//    		String dataSaida = caso.getDataSaida();
+//    		caso.setCompetencia(normalizarDataParaDiaMesAno(dataSaida, "MMM/yyyy"));
+//    		caso.setCompetenciaOrdenacao(normalizarDataParaAnoMesDia(caso.getCompetencia()));
+//    		
+//    		caso.setDataSaida(normalizarDataParaDiaMesAno(dataSaida, "dd/MM/yyyy"));
+//    		caso.setDataSaidaOrdenacao(normalizarDataParaAnoMesDia(caso.getDataSaida()));
+//    		
+//    		dadosInseridos.put(caso.getEstabelecimento() + caso.getPaciente() + caso.getDataNascimento() + caso.getDataSaida() + caso.getProcedimento(), linhaArquivo);
+//    		linhaArquivo++;
+//    	}
+		
 		arquivoConsolidado.abrirPlanilha(planilhaRealizado, 0);
+		
 		
 		int colunaExcel = ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice();
 		int linhaExcelArquivoConsolidado = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
@@ -952,6 +986,7 @@ public class ConsolidadoGEFIC
 		arquivoConsolidado.gravarDadosEmCelula(planilhaCancelado, celulasCancelados, false, false, 0, null);
 		
 		registrarObservacaoOutros(paginaWeb, driver, casosMotivoOutros);
+		montarPlanilhaMotivoOutros(arquivoConsolidado, casosMotivoOutros);
 		
 		return "";
 	}
@@ -975,30 +1010,210 @@ public class ConsolidadoGEFIC
 		
 		paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_STATUS.getTextoIdentificador());
 		
-		paginaWeb.selecionarItemSelectULLIPeloTitleDeUmaLinhaPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_STATUS_UL.getTextoIdentificador(), IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_REGISTRO_CANCELADO.getTextoIdentificador());
+		paginaWeb.selecionarItemSelectULLIPeloTextoVisivelDeUmaLinhaPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_STATUS_UL.getTextoIdentificador(), IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_REGISTRO_CANCELADO.getTextoIdentificador());
 		
 		paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_BOTAO_MAIS_COLUNAS.getTextoIdentificador());
 		
 		paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_CHECK_BOX_PROCEDIMENTO.getTextoIdentificador());
-		
 		paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_CHECK_BOX_DATA_SAIDA.getTextoIdentificador());
 		
 		paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_BOTAO_FILTROS.getTextoIdentificador());
 		
-		DadoAnaliticoSaidaPacienteGEFIC caso = casosOutros.get(0);
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for(DadoAnaliticoSaidaPacienteGEFIC caso : casosOutros)
+		{
+	
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_NOME_PACIENTE.getTextoIdentificador(), caso.getPaciente());
+			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_BOTAO_PESQUISAR.getTextoIdentificador(), "id");
+			
+			boolean casoEncontrado = false;
+			boolean haProximaPagina = true;
+			
+			while(haProximaPagina && !casoEncontrado)
+			{
+			
+				while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+				
+				ArrayList<ArrayList<String>> tabelaResultados = paginaWeb.obterTablePeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_TABELA_RESULTADOS.getTextoIdentificador());
+				
+				if(tabelaResultados != null)
+				{
+					int linha = 1;
+					for(ArrayList<String> linhaTabela : tabelaResultados)
+					{
+						System.out.println(linhaTabela.size());
+						
+						if(linhaTabela.size() >= ParametrosTabelaFilasRegistrosCanceladosGEFIC.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice())
+						{
+							String procedimento = linhaTabela.get(ParametrosTabelaFilasRegistrosCanceladosGEFIC.INDICE_COLUNA_PROCEDIMENTO.getIndice()).replaceAll("\n", " - ");
+							
+							System.out.println(procedimento + "|" + caso.getProcedimento());
+							System.out.println(linhaTabela.get(ParametrosTabelaFilasRegistrosCanceladosGEFIC.INDICE_COLUNA_DATA_SAIDA.getIndice()) + "|" + caso.getDataSaida());
+							
+							if(procedimento.equals(caso.getProcedimento()) && linhaTabela.get(ParametrosTabelaFilasRegistrosCanceladosGEFIC.INDICE_COLUNA_DATA_SAIDA.getIndice()).equals(caso.getDataSaida()))
+							{
+								String xpath;
+								if(linhaTabela.size() == 1)
+									xpath = IdentificadoresPaginaWebGEFIC.XPATH_FILAS_BOTAO_ACAO_DINAMICO.getTextoIdentificador().replaceAll(IdentificadoresPaginaWebGEFIC.MASCARA_VALOR_DINAMICO.getTextoIdentificador(), "");
+								else
+									xpath = IdentificadoresPaginaWebGEFIC.XPATH_FILAS_BOTAO_ACAO_DINAMICO.getTextoIdentificador().replaceAll(IdentificadoresPaginaWebGEFIC.MASCARA_VALOR_DINAMICO.getTextoIdentificador(), "[" + String.valueOf(linha) + "]");
+	
+								xpath = xpath.replaceAll(IdentificadoresPaginaWebGEFIC.MASCARA_COLUNA_ACAO_DINAMICO.getTextoIdentificador(), String.valueOf(ParametrosTabelaFilasRegistrosCanceladosGEFIC.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice()));
+								
+								System.out.println(xpath);
+								paginaWeb.clicarLinkPeloXPath(driver, xpath);
+								
+								while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+								
+								try {
+									Thread.sleep(3000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+								caso.setObservacao(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_TEXT_AREA_OBSERVACAO_HISTORICO.getTextoIdentificador()).replaceAll("\r\n", " | ").replaceAll("\n", " | ").replaceAll("\t", " | ").replaceAll("[\\u00A0]", " "));
+								
+								System.out.println(caso.getObservacao());
+								
+								try {
+									Thread.sleep(3000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+								driver.navigate().back();
+								casoEncontrado =  true;
+								
+								while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+								
+								break;
+							}
+						}
+						linha++;
+					}
+				}
+				
+				if(!paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_FILAS_PROXIMA_PAGINA_HABILITADO.getTextoIdentificador()) ||
+					paginaWeb.haElementosPorClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_FILAS_PROXIMA_PAGINA_DESABILITADO.getTextoIdentificador()))
+					haProximaPagina = false;
+				else
+				{
+					//paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_PROXIMA_PAGINA.getTextoIdentificador());
+					paginaWeb.clicarLinkPeloAriaLabel(driver, IdentificadoresPaginaWebGEFIC.ARIA_LABEL_FILAS_PROXIMA_PAGINA.getTextoIdentificador());
+				}
+			}
+			if(casoEncontrado == false)
+			{
+				caso.setObservacao("Não foi encontrado o caso no GEFIC");
+			}
 		}
 		
-		paginaWeb.preencherInputTextPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_NOME_PACIENTE.getTextoIdentificador(), caso.getPaciente());
+		return "";
+	}
+	
+	private String montarPlanilhaMotivoOutros(AcoesArquivoExcel arquivoConsolidado, ArrayList<DadoAnaliticoSaidaPacienteGEFIC> casosOutros)
+	{
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoGEFICMotivoOutros.NOME_PLANILHA_OUTROS.getDescricao(), 0);
 		
-		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_BOTAO_PESQUISAR.getTextoIdentificador(), "id");
+		int linhaArquivo = ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice();
+		String nomeArquivo = arquivoConsolidado.getNomeDoAquivo();
+		
+		ArrayList<DadoAnaliticoSaidaPacienteGEFIC> listaCasosOutros = new ArrayList<DadoAnaliticoSaidaPacienteGEFIC>();
+    	
+    	try (FileInputStream in = new FileInputStream(nomeArquivo)) {
+    		listaCasosOutros = ExcelBinder.readSheet(in, DadoAnaliticoSaidaPacienteGEFIC.class, ParametrosArquivoGEFICMotivoOutros.NOME_PLANILHA_OUTROS.getDescricao(), ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+    	
+    	HashMap<String, Integer> dadosInseridos = new HashMap<String, Integer>();
+    	
+    	for(DadoAnaliticoSaidaPacienteGEFIC caso : listaCasosOutros)
+    	{
+    		String dataSaida = caso.getDataSaida();
+    		caso.setCompetencia(normalizarDataParaDiaMesAno(dataSaida, "MMM/yyyy"));
+    		caso.setCompetenciaOrdenacao(normalizarDataParaAnoMesDia(caso.getCompetencia()));
+    		
+    		//System.out.println(caso.getCompetencia() + " - " + caso.getCompetenciaOrdenacao());
+    		
+    		caso.setDataSaida(normalizarDataParaDiaMesAno(dataSaida, "dd/MM/yyyy"));
+    		caso.setDataSaidaOrdenacao(normalizarDataParaAnoMesDia(caso.getDataSaida()));
+    		
+    		String dataNascimento = caso.getDataNascimento();
+    		caso.setDataNascimento(normalizarDataParaDiaMesAno(dataNascimento, "dd/MM/yyyy"));
+    		
+    		dadosInseridos.put(caso.getEstabelecimento() + caso.getPaciente() + caso.getDataNascimento() + caso.getDataSaida() + caso.getProcedimento(), linhaArquivo);
+    		linhaArquivo++;
+    	}
+    	
 
-		
+    	for(DadoAnaliticoSaidaPacienteGEFIC caso : casosOutros)
+    	{
+    		if(!dadosInseridos.containsKey(caso.getEstabelecimento() + caso.getPaciente() + caso.getDataNascimento() + caso.getDataSaida() + caso.getProcedimento()))
+    		{
+    			String dataSaida = caso.getDataSaida();
+        		caso.setCompetencia(normalizarDataParaDiaMesAno(dataSaida, "MMM/yyyy"));
+        		caso.setCompetenciaOrdenacao(normalizarDataParaAnoMesDia(caso.getCompetencia()));
+        		
+        		caso.setDataSaida(normalizarDataParaDiaMesAno(dataSaida, "dd/MM/yyyy"));
+        		caso.setDataSaidaOrdenacao(normalizarDataParaAnoMesDia(caso.getDataSaida()));
+        		
+//        		System.out.println("Competência: " + caso.getCompetenciaOrdenacao());
+//        		System.out.println("Estabelecimento: " + caso.getEstabelecimento());
+//        		System.out.println("Data de Saída: " + caso.getDataSaida());
+//        		System.out.println("Procedimento: " + caso.getProcedimento());
+        		
+    			listaCasosOutros.add(caso);
+    		}
+    	}
+
+    	Collections.sort(listaCasosOutros, Comparator
+    		    .comparing(DadoAnaliticoSaidaPacienteGEFIC::getCompetenciaOrdenacao).reversed()
+    		    .thenComparing(DadoAnaliticoSaidaPacienteGEFIC::getEstabelecimento)
+    		    .thenComparing(DadoAnaliticoSaidaPacienteGEFIC::getDataSaidaOrdenacao).reversed()
+    		    .thenComparing(DadoAnaliticoSaidaPacienteGEFIC::getProcedimento)
+    		);
+    	
+    	linhaArquivo = ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice();
+    	ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+    	for(DadoAnaliticoSaidaPacienteGEFIC caso : listaCasosOutros)
+    	{
+    		LocalDate dataNascimento = LocalDate.parse(caso.getDataNascimento(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    		LocalDate dataSaida = LocalDate.parse(caso.getDataSaida(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    		LocalDate inicioDataSaida = dataSaida.with(TemporalAdjusters.firstDayOfMonth()); 		
+    		
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_UNIDADE.getIndice(), caso.getEstabelecimento(), ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_UNIDADE.getTipo()));
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_COMPETENCIA.getIndice(), inicioDataSaida, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_COMPETENCIA.getTipo()));
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_PACIENTE.getIndice(), caso.getPaciente(), ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_PACIENTE.getTipo()));
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_DATA_NASCIMENTO.getIndice(), dataNascimento, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_DATA_NASCIMENTO.getTipo()));
+    		try
+    		{
+    			celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_IDADE.getIndice(), Integer.parseInt(caso.getIdade()), ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_IDADE.getTipo()));
+    		}catch(NumberFormatException e)
+    		{
+    			celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_IDADE.getIndice(), "-", "String"));
+    		}
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_DATA_SAIDA.getIndice(), dataSaida, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_DATA_SAIDA.getTipo()));
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_MOTIVO_SAIDA.getIndice(), caso.getMotivoSaida(), ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_MOTIVO_SAIDA.getTipo()));
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_PROCEDIMENTO.getIndice(), caso.getProcedimento(), ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_PROCEDIMENTO.getTipo()));
+    		celulas.add(new CelulaExcel(linhaArquivo, ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_OBSERVACAO.getIndice(), caso.getObservacao(), ParametrosArquivoGEFICMotivoOutros.INDICE_COLUNA_OBSERVACAO.getTipo()));
+    		
+    		linhaArquivo++;
+    	}
+    	
+    	arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoGEFICMotivoOutros.NOME_PLANILHA_OUTROS.getDescricao(), celulas, true, false, ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+    	
 		return "";
 	}
 	
@@ -1134,5 +1349,84 @@ public class ConsolidadoGEFIC
 		return arquivo;
 	}
 	
+	
+	private static String normalizarDataParaDiaMesAno(String valor, String formato) {
+	    if (valor == null || valor.isBlank())
+	        return null;
+	
+	    DateTimeFormatter fmtMesAno = DateTimeFormatter.ofPattern(formato);
+	
+	    // 1️ Caso seja número serial do Excel
+	    if (valor.matches("\\d+")) {
+	        long serial = Long.parseLong(valor);
+	        LocalDate data = LocalDate.of(1899, 12, 30).plusDays(serial); // Ajuste Excel
+	        return fmtMesAno.format(data);
+	    }
+	
+	    // 2️ Caso seja dd/MM/yyyy
+	    try {
+	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
+	        return fmtMesAno.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e tenta o próximo formato
+	    }
+	    
+	    // 3️ Caso seja M/d/yy
+	    try {
+	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("M/d/yy");
+	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
+	        return fmtMesAno.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e tenta o próximo formato
+	    }
+
+	
+	    // 4️ Caso seja mmm/yyyy (direto do Excel ou do POI)
+	    try {
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy");
+	        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy"));
+	        return fmtMesAno.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	
+	    throw new IllegalArgumentException("Formato de data inválido: " + valor);
+	}
+	
+	private static String normalizarDataParaAnoMesDia(String valor) {
+	    if (valor == null || valor.isBlank())
+	        return null;
+	
+	    Locale localeBR = Locale.of("pt", "BR"); // Java 21
+	    DateTimeFormatter fmtAnoMes = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	
+	    // 1️ Caso seja número serial do Excel
+	    if (valor.matches("\\d+")) {
+	        long serial = Long.parseLong(valor);
+	        LocalDate data = LocalDate.of(1899, 12, 30).plusDays(serial); // Ajuste Excel
+	        return fmtAnoMes.format(data);
+	    }
+	
+	    // 2️ Caso seja dd/MM/yyyy
+	    try {
+	        DateTimeFormatter fmtCompleto = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        LocalDate data = LocalDate.parse(valor, fmtCompleto);
+	        return fmtAnoMes.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e tenta o próximo formato
+	    }
+	
+	    // 3️ Caso seja mmm/yyyy (direto do Excel ou do POI)
+	    try {
+	        DateTimeFormatter fmtEntradaAbrev = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+	        LocalDate data = LocalDate.parse("01/" + valor, DateTimeFormatter.ofPattern("dd/MMM/yyyy", localeBR));
+	        return fmtAnoMes.format(data);
+	    } catch (DateTimeParseException e) {
+	        // ignora e vai para erro final
+	    }
+	
+	    throw new IllegalArgumentException("Formato de data inválido: " + valor);
+	}
 	
 }
