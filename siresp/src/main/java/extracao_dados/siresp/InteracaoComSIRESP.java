@@ -166,7 +166,7 @@ public class InteracaoComSIRESP
         {
         	Absenteismo absenteismo = new Absenteismo();
         	//absenteismo.verificarAbsenteismo(driver, null, null);
-        	absenteismo.verificarAbsenteismo(driver, "06/2026", "06/2026");
+        	absenteismo.verificarAbsenteismo(driver, null, null);
         	//absenteismo.parametrizarArquivosVazios(driver);C:\Users\PMC514991-2\Documents\Oferta e Demanda
         }
         else if(escolha == 5)
@@ -216,8 +216,8 @@ public class InteracaoComSIRESP
     		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
         	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
         	
-        	LocalDate dataInicial = LocalDate.of(2026, 6, 24);
-        	LocalDate dataFinal = LocalDate.of(2026, 6, 25);
+        	LocalDate dataInicial = LocalDate.of(2026, 7, 01);
+        	LocalDate dataFinal = LocalDate.of(2026, 7, 30);
         	
         	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))
         	{

@@ -1035,6 +1035,8 @@ public class ConsolidadoGEFIC
 			boolean casoEncontrado = false;
 			boolean haProximaPagina = true;
 			
+			System.out.println("Paciente: " + caso.getPaciente());
+			
 			while(haProximaPagina && !casoEncontrado)
 			{
 			
@@ -1067,32 +1069,51 @@ public class ConsolidadoGEFIC
 								xpath = xpath.replaceAll(IdentificadoresPaginaWebGEFIC.MASCARA_COLUNA_ACAO_DINAMICO.getTextoIdentificador(), String.valueOf(ParametrosTabelaFilasRegistrosCanceladosGEFIC.QUANTIDADE_ESPERADA_DE_COLUNAS.getIndice()));
 								
 								System.out.println(xpath);
-								paginaWeb.clicarLinkPeloXPath(driver, xpath);
 								
-								while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+								int tentativas = 0;
 								
-								try {
-									Thread.sleep(3000);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+								boolean elementoEncontrado = paginaWeb.clicarLinkPeloXPath(driver, xpath);
+								while(tentativas < 5 && !elementoEncontrado)
+								{
+									try {
+										Thread.sleep(1000);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									elementoEncontrado = paginaWeb.clicarLinkPeloXPath(driver, xpath);
+									tentativas++;
 								}
 								
-								caso.setObservacao(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_TEXT_AREA_OBSERVACAO_HISTORICO.getTextoIdentificador()).replaceAll("\r\n", " | ").replaceAll("\n", " | ").replaceAll("\t", " | ").replaceAll("[\\u00A0]", " "));
-								
-								System.out.println(caso.getObservacao());
-								
-								try {
-									Thread.sleep(3000);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+								if(elementoEncontrado)
+								{
+									while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+									
+									try {
+										Thread.sleep(3000);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+									caso.setObservacao(paginaWeb.obterTextoInputText(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_TEXT_AREA_OBSERVACAO_HISTORICO.getTextoIdentificador()).replaceAll("\r\n", " | ").replaceAll("\n", " | ").replaceAll("\t", " | ").replaceAll("[\\u00A0]", " "));
+									
+									System.out.println(caso.getObservacao());
+									
+									try {
+										Thread.sleep(3000);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+									driver.navigate().back();
+									casoEncontrado =  true;
+									
+									while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
 								}
-								
-								driver.navigate().back();
-								casoEncontrado =  true;
-								
-								while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+								else
+									caso.setObservacao("ALERTA: Erro na tentativa de clicar nos detalhes do caso.");
 								
 								break;
 							}

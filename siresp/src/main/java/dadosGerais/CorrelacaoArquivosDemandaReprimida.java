@@ -12,6 +12,14 @@ public class CorrelacaoArquivosDemandaReprimida {
 	 * de forma a melhorar o processo de escrita no arquivo final do Novas Solicitações de cada uniadade. 
 	 */
 	
+	/**
+	 * Gera a correlação dos arquivos de demanda reprimida de acordo com a planilha a ser preenchida no arquivo final
+	 * 
+	 * @param tipoDeDemanda tipo de demanda/planilha a ser preenchida. Para CDR pode ser "CDR" ou "Filipeta". Para solicitações regulada, será "Regulada"
+	 * @param tipoDeAtendimento tipo de atendimento "CONSULTA" ou "EXAME"
+	 * @return lista de índce de colunas correlacionadas
+	 */
+	
 	public ArrayList<CorrelacaoColunasArquivos> obterCorrelacaoEntreArquivos(String tipoDeDemanda, String tipoDeAtendimento)
 	{
 		ArrayList<CorrelacaoColunasArquivos> correlacao = new ArrayList<CorrelacaoColunasArquivos>();

@@ -12,6 +12,12 @@ public class CorrelacaoArquivosAbsenteismo {
 	 * de forma a melhorar o processo de escrita no arquivo final do Absenteísmo de cada uniadade. 
 	 */
 	
+	/**
+	 * Gera a correlação entre arquivos de absenteísmo - consolidado geral x arquivo de consulta ou exame
+	 * 
+	 * @param consultaOuExame informar de trata de uma "Consulta" ou "Exame"
+	 * @return lista de índce de colunas correlacionadas
+	 */
 	public ArrayList<CorrelacaoColunasArquivos> obterCorrelacaoEntreArquivos(String consultaOuExame)
 	{
 		ArrayList<CorrelacaoColunasArquivos> correlacao = new ArrayList<CorrelacaoColunasArquivos>();

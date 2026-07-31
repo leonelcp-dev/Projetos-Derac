@@ -906,6 +906,22 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	public boolean elementoEstaSelecionadoPeloXPATH(WebDriver driverPagina, String xpath)
+	{
+		try
+		{	
+			WebElement elemento = null;
+			
+			elemento = driverPagina.findElement(By.xpath(xpath));
+			
+			return elemento.isSelected();
+			
+		}catch(Error e) {
+			System.out.println(e.toString());
+			return false;
+		}
+	}
+	
 	public ArrayList<ArrayList<String>> obterTable(WebDriver driverPagina, String id)
 	{
 		ArrayList<ArrayList<String>> tabela = new ArrayList();

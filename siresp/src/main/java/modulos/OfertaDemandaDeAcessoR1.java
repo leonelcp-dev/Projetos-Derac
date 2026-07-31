@@ -1944,7 +1944,7 @@ public class OfertaDemandaDeAcessoR1 {
 					
 					if(ofertaTotal > 0)
 					{
-						demanda.setTempoDeEspera(String.valueOf((int) 1.0 * demandasPorEspecialidade.get(especialidade) / ofertaPorEspecialidade.get(especialidade)));
+						demanda.setTempoDeEspera(String.valueOf((int)Math.ceil(1.0 * demandasPorEspecialidade.get(especialidade) / ofertaPorEspecialidade.get(especialidade))));
 
 					}
 					else

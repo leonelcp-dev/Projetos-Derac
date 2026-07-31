@@ -243,7 +243,7 @@ public class LeitosUrgencia
 			linha = br.readLine();
 			
 			while ((linha = br.readLine()) != null) {
-			    String[] colunas = linha.split(";");
+			    String[] colunas = linha.split(";", -1);
 			    
 			    if(colunas[2].equals("SIM"))
 			    {
@@ -271,7 +271,7 @@ public class LeitosUrgencia
 			linha = br.readLine();
 			
 			while ((linha = br.readLine()) != null) {
-			    String[] colunas = linha.split(";");
+			    String[] colunas = linha.split(";", -1);
 			    
 			    deParaEspecialidadeLeitos.put(colunas[0] + colunas[1], colunas[2]);
 			}
@@ -343,13 +343,13 @@ public class LeitosUrgencia
 			if(chave.contains(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_UNIDADE_ESPECIALIDADE.getDescricao()))
 			{
 				System.out.println(chave);
-				String[] partes = chave.split(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_UNIDADE_ESPECIALIDADE.getDescricao());
+				String[] partes = chave.split(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_UNIDADE_ESPECIALIDADE.getDescricao(), -1);
 				String especialidade = partes[1];
 				DadosAcumuladosLeitos dadosLeito = dadosConsolidados.get(entidade.getNomeSIRESP() + ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_UNIDADE_ESPECIALIDADE.getDescricao() + especialidade);
 				
 				System.out.println(especialidade);
 				
-				partes = especialidade.split(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_ESPECIALIDADE_ENFERMARIA.getDescricao());
+				partes = especialidade.split(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_ESPECIALIDADE_ENFERMARIA.getDescricao(), -1);
 				especialidade = partes[0];
 				String enfermaria = partes[1];
 				
@@ -427,7 +427,7 @@ public class LeitosUrgencia
 		{
 			if(chave.contains(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_ESPECIALIDADE_ENFERMARIA.getDescricao()))
 			{
-				String[] partes = chave.split(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_ESPECIALIDADE_ENFERMARIA.getDescricao());
+				String[] partes = chave.split(ParametrosArquivoLeitosPlanilhaMonitoramento.DIVISOR_ESPECIALIDADE_ENFERMARIA.getDescricao(), -1);
 				String especialidade = partes[0];
 				String enfermaria = partes[1];
 				
@@ -514,7 +514,7 @@ public class LeitosUrgencia
 				String statusLeito = arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_STATUS.getIndice());
 				
 				String tipoDeLeito = arquivoCenso.getValorDaCelulaComoString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_TIPO_DE_LEITO_3.getIndice(), "");
-				String pactuado = ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao();
+				String leitoExtraPactuado = ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao();
 				
 				LeitoCadastrado leito;
 				
@@ -536,7 +536,7 @@ public class LeitosUrgencia
 						leito.setEnfermaria(leitoExtra.getEspecialidade());
 						
 						if(!leitoExtra.getPactuado().trim().equals(""))
-							pactuado = leitoExtra.getPactuado().trim();
+							leitoExtraPactuado = leitoExtra.getPactuado().trim();
 					}
 					else
 					{
@@ -611,7 +611,7 @@ public class LeitosUrgencia
 					
 					if(situacaoLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_OCUPADO.getDescricao()))
 					{
-						if(pactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_PACTUADO.getDescricao()))
+						if(leitoExtraPactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_PACTUADO.getDescricao()))
 						{
 							consolidadoPorHospitalEspecialidade.incrementarTotalOcupado();
 							consolidadoPorEspecialidade.incrementarTotalOcupado();
@@ -619,7 +619,7 @@ public class LeitosUrgencia
 						
 						if(tipoDeLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_EXTRA.getDescricao()))
 						{
-							if(pactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao()))
+							if(leitoExtraPactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao()))
 							{
 								consolidadoPorHospitalEspecialidade.incrementarExtraNaoPactuadoOcupado();
 								consolidadoPorEspecialidade.incrementarExtraNaoPactuadoOcupado();
@@ -644,6 +644,9 @@ public class LeitosUrgencia
 						{
 							consolidadoPorHospitalEspecialidade.incrementarRegularOcupado();
 							consolidadoPorEspecialidade.incrementarRegularOcupado();	
+							
+							consolidadoPorHospitalEspecialidade.incrementarTotalOcupado();
+							consolidadoPorEspecialidade.incrementarTotalOcupado();
 						}
 					}
 					else if(situacaoLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_VAZIO.getDescricao()))
@@ -801,20 +804,23 @@ public class LeitosUrgencia
 	{
 		HashMap<String, LeitoExtraCadastrado> leitosCadastrados = new HashMap<String, LeitoExtraCadastrado>();
 		
-		arquivoCenso.abrirPlanilha(ParametrosArquivoCensoPlanilhaCadastroExtra.NOME_PLANILHA.getDescricao(), 0);
-		
-		int quantidadeDeLinhas = arquivoCenso.getUltimaLinhaPreenchida();
-		
-		for(int linhaPlanilha = ParametrosArquivoCensoPlanilhaCadastroExtra.LINHA_INICIAL_ARQUIVO.getIndice(); linhaPlanilha <= quantidadeDeLinhas; linhaPlanilha++)
+		if(arquivoCenso.getIndicePlanilha(ParametrosArquivoCensoPlanilhaCadastroExtra.NOME_PLANILHA.getDescricao(), false) >= 0)
 		{
-			LeitoExtraCadastrado leito = new LeitoExtraCadastrado();
-			leito.setUnidade(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_UNIDADE.getIndice()));
-			leito.setDescricaoEnfermaria(arquivoCenso.getValorDaCelulaComoString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_DESCRICAO_ENFERMARIA.getIndice(), ""));
-			leito.setDescricaoLeito(arquivoCenso.getValorDaCelulaComoString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_DESCRICAO_LEITO.getIndice(), ""));
-			leito.setEspecialidade(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_ESPECIALIDADE.getIndice()));
-			leito.setPactuado(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_PACTUADO.getIndice()).toUpperCase().trim());
+			arquivoCenso.abrirPlanilha(ParametrosArquivoCensoPlanilhaCadastroExtra.NOME_PLANILHA.getDescricao(), 0);
 			
-			leitosCadastrados.put(leito.getDescricaoEnfermaria().toUpperCase() + leito.getDescricaoLeito().toUpperCase(), leito);
+			int quantidadeDeLinhas = arquivoCenso.getUltimaLinhaPreenchida();
+			
+			for(int linhaPlanilha = ParametrosArquivoCensoPlanilhaCadastroExtra.LINHA_INICIAL_ARQUIVO.getIndice(); linhaPlanilha <= quantidadeDeLinhas; linhaPlanilha++)
+			{
+				LeitoExtraCadastrado leito = new LeitoExtraCadastrado();
+				leito.setUnidade(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_UNIDADE.getIndice()));
+				leito.setDescricaoEnfermaria(arquivoCenso.getValorDaCelulaComoString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_DESCRICAO_ENFERMARIA.getIndice(), ""));
+				leito.setDescricaoLeito(arquivoCenso.getValorDaCelulaComoString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_DESCRICAO_LEITO.getIndice(), ""));
+				leito.setEspecialidade(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_ESPECIALIDADE.getIndice()));
+				leito.setPactuado(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_PACTUADO.getIndice()).toUpperCase().trim());
+				
+				leitosCadastrados.put(leito.getDescricaoEnfermaria().toUpperCase() + leito.getDescricaoLeito().toUpperCase(), leito);
+			}
 		}
 		
 		return leitosCadastrados;

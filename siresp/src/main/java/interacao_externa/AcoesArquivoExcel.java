@@ -496,6 +496,22 @@ public class AcoesArquivoExcel {
 		
 		ultimaLinhaPreenchida = planilhaAtiva.getLastRowNum();
 	}
+	
+	public int getIndicePlanilha(String nome, boolean imprimirPosicao)
+	{
+		int indice = arquivoXLSX.getSheetIndex(nome);
+		
+		if(imprimirPosicao)
+		{
+			if (indice >= 0) {
+				System.out.println("Existe na posição " + indice);
+			} else {
+				System.out.println("Não existe.");
+			}
+		}
+		
+		return indice;
+	}
 
 	public String getNomeDoAquivo() {
 		return nomeDoAquivo;
