@@ -569,7 +569,7 @@ public class CensoLeitos {
 						
 						for(int coluna = 0; coluna <= ParametrosArquivoCenso.INDICE_COLUNA_ANALISE_DO_DERAC.getIndice(); coluna++)
 						{
-							//System.out.println("Censo: " + linhaCenso + ", Diário: " + linhaDiario + ", Coluna: " + coluna);
+							//System.out.println(primeiraLinhaVaziaArquivoDiario + " Censo: " + linhaCenso + ", Diário: " + linhaDiario + ", Coluna: " + coluna);
 							//arquivoConsolidado.copiarFormatoEntreLinhas(linhaCenso - 1, linhaCenso);
 							
 							if(arquivoDiario.ehCelulaVazia(linhaDiario, coluna))

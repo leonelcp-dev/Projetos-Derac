@@ -25,7 +25,10 @@ public enum ParametrosArquivoAgendamentosPendentesRegulada {
 	NOME_PLANILHA_ARQUIVO_FORMATADO(13, 8,"BD - CDR", "", ""),
 	
 	EXTENSAO_ARQUIVO_BAIXADO(14, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_FORMATADO(15, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_FORMATADO(15, 0, "xlsx", "", ""),
+	
+	TEXTO_TIPO_ARQUIVO_CONSULTA(16, 0, "AGENDAMENTO CONSULTA", "", ""),
+	TEXTO_TIPO_ARQUIVO_EXAME(17, 0, "AGENDAMENTO EXAME", "", "");
 
 	private int idUnico;
 	private int indice;

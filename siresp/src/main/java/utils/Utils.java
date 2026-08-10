@@ -121,5 +121,16 @@ public class Utils {
 		
 		return iniciais.trim();
 	}
+	
+	public static LocalDate converterStringParaData(String data, String formato)
+	{
+		try 
+		{
+			return LocalDate.parse(data, DateTimeFormatter.ofPattern(formato));
+		}catch(Exception e)
+		{
+			return null;
+		}
+	}
 
 }

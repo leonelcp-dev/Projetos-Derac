@@ -188,8 +188,13 @@ public class InteracaoComSIRESP
         {
         	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
         	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", false, false, false, false, false, false, true, false, false, false, ambiente);
-        	ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, false, true, true, true, true, true, true, ambiente);
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, "06/2026", "06/2026", true, true, true, false, true, false, false, false, false, false, ambiente);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", true, true, true, true, true, false, false, false, false, false, ambiente);
+        	
+        	//diário
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, false, true, true, true, true, true, true, ambiente);
+        	
+        	//consolidação de novas demandas regulada
+        	ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, true, true, true, true, true, true, true, ambiente);
         }
         
         else if(escolha == 9)
@@ -216,7 +221,7 @@ public class InteracaoComSIRESP
     		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
         	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
         	
-        	LocalDate dataInicial = LocalDate.of(2026, 7, 01);
+        	LocalDate dataInicial = LocalDate.of(2026, 7, 0);
         	LocalDate dataFinal = LocalDate.of(2026, 7, 30);
         	
         	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))

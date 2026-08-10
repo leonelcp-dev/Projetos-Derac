@@ -27,7 +27,10 @@ public enum ParametrosArquivoSolicitacoesPendentesRegulada {
 	NOME_PLANILHA_ARQUIVO_FORMATADO(15, 8,"BD - CDR", "", ""),
 	
 	EXTENSAO_ARQUIVO_BAIXADO(16, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_FORMATADO(17, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_FORMATADO(17, 0, "xlsx", "", ""),
+	
+	TEXTO_TIPO_ARQUIVO_CONSULTA(18, 0, "SOLICITACAO CONSULTA", "", ""),
+	TEXTO_TIPO_ARQUIVO_EXAME(19, 0, "SOLICITACAO EXAME", "", "");;
 
 	private int idUnico;
 	private int indice;

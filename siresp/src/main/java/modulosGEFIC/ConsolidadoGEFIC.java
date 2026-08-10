@@ -80,6 +80,7 @@ public class ConsolidadoGEFIC
 	boolean jaConsolidouTransferencias;
 	HashMap<String, Integer> transferidosPorOrigem;
 	HashMap<String, Integer> transferidosPorDestino;
+	String ambiente;
 	
 	ArrayList<EntidadeGEFIC> entidades;
 	private IdentificadoresPastasCompartilhadasCDIDRGEFIC diretoriosCDIDR; 
@@ -108,6 +109,7 @@ public class ConsolidadoGEFIC
 	public String gerarArquivoConsolidadoGEFIC(WebDriver driver, String ambiente, String pastaBaseInformada, String pastaDownloads, boolean ehOPM, String competencia)
 	{			
 		this.ehOPM = ehOPM;
+		this.ambiente = ambiente;
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRGEFIC.valueOf(ambiente.toUpperCase());
 		
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
@@ -238,16 +240,17 @@ public class ConsolidadoGEFIC
     			
     	}
 		
-    	atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
-    	atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
+    	//atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
+    	//atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
     	
     	if(ehOPM)
     	{
-    		atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosOPM, deParaStatusOPM);
+    		//atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosOPM, deParaStatusOPM);
     	}
     	else
     	{
-    		atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosCirurgiaEletiva, deParaStatusCirurgiasEletivas);
+    		//atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosCirurgiaEletiva, deParaStatusCirurgiasEletivas);
+    		atualizarNaoConformidades(competencia);
     	}
 		
 		
@@ -1235,6 +1238,123 @@ public class ConsolidadoGEFIC
     	
     	arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoGEFICMotivoOutros.NOME_PLANILHA_OUTROS.getDescricao(), celulas, true, false, ParametrosArquivoGEFICMotivoOutros.LINHA_INICIAL_ARQUIVO.getIndice(), null);
     	
+		return "";
+	}
+	
+	private String atualizarNaoConformidades(String competencia)
+	{
+		dataFormatadaInicioCompetencia = "01/" + competencia;
+		
+		dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		
+		dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
+		dataFormatadaFinalCompetencia = dataFinalCompetencia.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		String mesAnalise = (new MesesFormatados()).getMeses().get(dataInicioCompetencia.getMonthValue() - 1).getMesDescricao();
+		
+		NaoConformidadesGEFIC naoConformidades = new NaoConformidadesGEFIC(pastaBase, ambiente);
+		
+		HashMap<String, HashMap<String, Integer>> naoConformidadesPorUnidade = new HashMap<String, HashMap<String,Integer>>();
+		naoConformidades.contabilizarNaoConformidades(ehOPM, competencia, naoConformidadesPorUnidade);
+		
+		AcoesArquivoExcel arquivoConsolidado;
+		if(ehOPM)
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICOPM().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
+		else
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
+		
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_NAO_CONFORMIDADES.getDescricao(), 0);
+		
+		
+		int colunaExcel = ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice();
+		int linhaExcelArquivoConsolidado = ParametrosArquivoConsolidadoGEFIC.INDICE_LINHA_INICIAL_RELATORIOS.getIndice();
+		
+		String conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado - 1, colunaExcel, "");
+		while(!conteudoCelula.equals(mesAnalise) && colunaExcel < 20)
+		{
+			colunaExcel++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado - 1, colunaExcel, ""); 
+			System.out.println(conteudoCelula);
+		}
+
+		ArrayList<CelulaExcel> celulasNaoConformidades = new ArrayList<CelulaExcel>();
+		
+		conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+		while(!conteudoCelula.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+		{
+			if(naoConformidadesPorUnidade.containsKey(conteudoCelula))
+			{
+				HashMap<String, Integer> naoConformidadesDaUnidade = naoConformidadesPorUnidade.get(conteudoCelula);
+				int quantidadeNaoConformidadesDaUnidade = 0;
+				
+				int linhaDetalhado = linhaExcelArquivoConsolidado + 1;
+				String conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+				
+				while(!conteudoDetalhado.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_FINAL_RELATORIO.getDescricao()) && !conteudoDetalhado.equals(conteudoCelula))
+				{
+					linhaDetalhado++;
+					conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+				}
+				
+				if(conteudoDetalhado.equals(conteudoCelula))
+				{
+					linhaDetalhado += 2;
+					
+					conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+					
+					while(!conteudoDetalhado.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+					{
+						if(naoConformidadesDaUnidade.containsKey(conteudoDetalhado))
+						{
+							int qtdeNaoConformidades = naoConformidadesDaUnidade.get(conteudoDetalhado);
+							quantidadeNaoConformidadesDaUnidade += qtdeNaoConformidades;
+							
+							celulasNaoConformidades.add(new CelulaExcel(linhaDetalhado, colunaExcel, qtdeNaoConformidades, "Integer"));
+						}
+						else
+							celulasNaoConformidades.add(new CelulaExcel(linhaDetalhado, colunaExcel, 0, "Integer"));
+						
+						linhaDetalhado++;
+						conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+					}
+				}
+				
+				celulasNaoConformidades.add(new CelulaExcel(linhaExcelArquivoConsolidado, colunaExcel, quantidadeNaoConformidadesDaUnidade, "Integer"));
+			}
+			else
+			{
+				celulasNaoConformidades.add(new CelulaExcel(linhaExcelArquivoConsolidado, colunaExcel, 0, "Integer"));
+				
+				int linhaDetalhado = linhaExcelArquivoConsolidado + 1;
+				String conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+				while(!conteudoDetalhado.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_FINAL_RELATORIO.getDescricao()) && !conteudoDetalhado.equals(conteudoCelula))
+				{
+					linhaDetalhado++;
+					conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+				}
+				
+				if(conteudoDetalhado.equals(conteudoCelula))
+				{
+					linhaDetalhado += 2;
+					
+					conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+					
+					while(!conteudoDetalhado.equals(ParametrosArquivoConsolidadoGEFIC.TEXTO_TOTAL.getDescricao()))
+					{
+						celulasNaoConformidades.add(new CelulaExcel(linhaDetalhado, colunaExcel, 0, "Integer"));
+						
+						linhaDetalhado++;
+						conteudoDetalhado = arquivoConsolidado.getValorDaCelulaComoString(linhaDetalhado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();
+					}
+				}
+			}
+			
+			linhaExcelArquivoConsolidado++;
+			conteudoCelula = arquivoConsolidado.getValorDaCelulaComoString(linhaExcelArquivoConsolidado, ParametrosArquivoConsolidadoGEFIC.INDICE_COLUNA_INICIAL_RELATORIOS.getIndice(), "").trim();			
+		}
+		
+		arquivoConsolidado.forcarCalculos();
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_NAO_CONFORMIDADES.getDescricao(), celulasNaoConformidades, false, false, 0, null);
+		
 		return "";
 	}
 	

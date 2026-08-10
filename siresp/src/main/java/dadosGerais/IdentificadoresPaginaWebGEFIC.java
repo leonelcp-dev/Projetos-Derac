@@ -12,6 +12,7 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_LOTACAO_ACESSO_LINHA(0, "/html/body/div[2]/div/div/div/div/div/div[1]/div[2]/div[2]/table/tbody/tr[" + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + "]/td/p"),
 	XPATH_MENU_PRINCIPAL(0, "/html/body/div[1]/nav/ul"),
 	XPATH_AGUARDANDO(0, "/html/body/div[7]/div"),
+	XPATH_AGUARDANDO_FILAS(0, "/html/body/div[6]"),
 	XPATH_AGUARDANDO_SAIDA(0, "/html/body/div[6]/div"),
 	
 	XPATH_RELATORIO_QUANTIDADE_PACIENTES_DIV_RODAPE_TABELA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[2]/div[1]/div[2]/div[2]/table/tfoot/tr/th/div[1]"),
@@ -40,6 +41,7 @@ public enum IdentificadoresPaginaWebGEFIC {
 	
 	XPATH_FILAS_BOTAO_FILTROS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[1]/div/div/div[1]/button"),
 	XPATH_FILAS_FILTRO_STATUS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[1]/div/div/div[2]/span/span[1]/span/span[1]"),
+	
 	XPATH_FILAS_FILTRO_STATUS_UL(0, "/html/body/span/span/span[2]/ul"),
 	XPATH_FILAS_FILTRO_NOME_PACIENTE(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[1]/div[1]/div[1]/div/input"),
 	XPATH_FILAS_BOTAO_MAIS_COLUNAS(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[3]/div[1]/div[2]/div/button"),
@@ -100,6 +102,7 @@ public enum IdentificadoresPaginaWebGEFIC {
 	ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL(0, "excel"),
+	ID_FILAS_BOTAO_EXCEL(0, "excel"),
 	
 	ID_RELATORIO_SAIDA_PACIENTES_OPCAO_ANALITICO(0, "analitico"),
 	

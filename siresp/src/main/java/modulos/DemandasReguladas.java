@@ -13,6 +13,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
@@ -83,35 +86,49 @@ public class DemandasReguladas {
 			}
 		}
 
+		String tipoArquivoProcessado = "";
+		
 		String pastaDestinoArquivosNovasSolicitacoes = pastaBase + "\\" + diretorios.getArquivosNovasSolicitacoesConsolidada();
-		if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()) || caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTOS.getDescricao()))
+		if(caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()) || caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTOS.getDescricao()))
 		{
 			
-			if(caminhoArquivoXLSX.contains("CONSULTA"))
+			if(caminhoArquivoXLSX.toUpperCase().contains("CONSULTA"))
 			{
 				extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Consulta", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
+				tipoArquivoProcessado = ParametrosArquivoAgendamentosPendentesRegulada.TEXTO_TIPO_ARQUIVO_CONSULTA.getDescricao();
 			}
-			if(caminhoArquivoXLSX.contains("EXAME"))
+			if(caminhoArquivoXLSX.toUpperCase().contains("EXAME"))
 			{
 				extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Exame", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
+				tipoArquivoProcessado = ParametrosArquivoAgendamentosPendentesRegulada.TEXTO_TIPO_ARQUIVO_EXAME.getDescricao();
 			}
 		}
-		else if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao()))
+		else if(caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao()) || caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES_ACENTUADO.getDescricao()) ||
+				caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACAO.getDescricao()) || caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACAO_ACENTUADO.getDescricao()))
 		{
-			if(caminhoArquivoXLSX.contains("CONSULTA"))
+			if(caminhoArquivoXLSX.toUpperCase().contains("CONSULTA"))
 			{
 				extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Consulta", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
+				tipoArquivoProcessado = ParametrosArquivoSolicitacoesPendentesRegulada.TEXTO_TIPO_ARQUIVO_CONSULTA.getDescricao();
 			}
-			if(caminhoArquivoXLSX.contains("EXAME"))
+			if(caminhoArquivoXLSX.toUpperCase().contains("EXAME"))
 			{
 				extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Exame", pastaBase, caminhoArquivoDemandaReprimida, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, demandaReprimidaPorExpecialidade, maximoTempoEmDiasPorExpecialidade);
+				tipoArquivoProcessado = ParametrosArquivoSolicitacoesPendentesRegulada.TEXTO_TIPO_ARQUIVO_EXAME.getDescricao();
 			}
+		}
+		else
+		{
+			JOptionPane optionPane = new JOptionPane("Arquivo fora do padrão de nomenclatura: " + caminhoArquivoXLSX, JOptionPane.INFORMATION_MESSAGE);
+			JDialog dialog = optionPane.createDialog("Aviso");
+			dialog.setModal(false); // não bloqueia
+			dialog.setVisible(true);
 		}
 		
 		if(arquivoConvertido)
 			arquivoConvertidoXLSX.delete();
 		
-		return "";
+		return tipoArquivoProcessado;
 	}
 	
 	private String extrairConsolidarDadosDeAgendamentosRegulada(String arquivo, String nomePlanilha, String TipoArquivoRegulada, String pastaDestinoArquivosNovasSolicitacoes, String tipoDeOferta, String pastaBase, String caminhoArquivoDemandaReprimida, LocalDate dataDaColeta, HashMap<String, String> relacaoUnidadeTipo, HashMap<String, NomenclaturaPadronizada> nomenclaturasPadronizadas, HashMap<String, Integer> demandaReprimidaPorExpecialidade, HashMap<String, Integer> maximoTempoEmDiasPorExpecialidade)

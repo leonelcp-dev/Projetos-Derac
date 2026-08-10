@@ -10,8 +10,9 @@ import interacao_externa.AcoesGeraisPaginaWeb;
 public class RelatoriosGEFIC
 {
 
-	public String baixarFilaNominalCompleta(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, boolean separarPorStatus, boolean ehOPM)
+	public String baixarFilaNominalCompleta(WebDriver driver, boolean separarPorStatus, boolean ehOPM)
 	{
+		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
 		ArrayList<String> opcoes = new ArrayList<String>();
 		
 		if(ehOPM)
@@ -47,7 +48,19 @@ public class RelatoriosGEFIC
 			
 			paginaWeb.selecionarItemSelectULLIPeloTextoVisivelDeUmaLinhaPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_STATUS_UL.getTextoIdentificador(), status);
 			
-			paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_BOTAO_FILTROS.getTextoIdentificador());
+			while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_FILAS.getTextoIdentificador()));
+			
+			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_BOTAO_EXCEL.getTextoIdentificador(), "id");
+			
+			while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_FILAS.getTextoIdentificador()));
+			
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 	
 		

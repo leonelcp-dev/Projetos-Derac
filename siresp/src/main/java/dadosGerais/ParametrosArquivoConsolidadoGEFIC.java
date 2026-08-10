@@ -17,24 +17,25 @@ public enum ParametrosArquivoConsolidadoGEFIC {
 	NOME_PLANILHA_CIRURGIAS_CANCELADAS(19, 0, "CIRURGIAS CANCELADAS", "", ""),
 	NOME_PLANILHA_OPM_ENTREGUES(20, 0, "OPM ENTREGUES", "", ""),
 	NOME_PLANILHA_OPM_CANCELADAS(21, 0, "OPM CANCELADAS", "", ""),
+	NOME_PLANILHA_NAO_CONFORMIDADES(22, 0, "NÃO CONFORMIDADES", "", ""),
 	
-	TEXTO_TOTAL(22, 0, "TOTAL", "", ""),
+	TEXTO_TOTAL(23, 0, "TOTAL", "", ""),
 	
-	TEXTO_SERVICO(23, 0, "SERVIÇO", "", ""),
-	TEXTO_SOMAR(24, 0, "SOMAR", "", ""),
-	TEXTO_SUBTRAIR(25, 0, "SUBTRAIR", "", ""),
-	TEXTO_CIRURGIA_REALIZADA(26, 0, "Realizou a cirurgia", "", ""),
-	TEXTO_OPM_ENTREGUE(27, 0, "Entrega realizada", "", ""),
+	TEXTO_SERVICO(24, 0, "SERVIÇO", "", ""),
+	TEXTO_SOMAR(25, 0, "SOMAR", "", ""),
+	TEXTO_SUBTRAIR(26, 0, "SUBTRAIR", "", ""),
+	TEXTO_CIRURGIA_REALIZADA(27, 0, "Realizou a cirurgia", "", ""),
+	TEXTO_OPM_ENTREGUE(28, 0, "Entrega realizada", "", ""),
 	
-	TEXTO_FINAL_RELATORIO(28, 0, "Final do relatório", "", ""),
+	TEXTO_FINAL_RELATORIO(29, 0, "Final do relatório", "", ""),
 	
-	TEXTO_CIRURGIA_ELETIVA(29, 0, "CIRURGIA ELETIVA", "", ""),
-	TEXTO_OPM(30, 0, "OPM", "", ""),
+	TEXTO_CIRURGIA_ELETIVA(30, 0, "CIRURGIA ELETIVA", "", ""),
+	TEXTO_OPM(31, 0, "OPM", "", ""),
 	
-	TEXTO_SIM(31, 0, "SIM", "", ""),
-	TEXTO_NAO(32, 0, "NÃO", "", ""),
+	TEXTO_SIM(32, 0, "SIM", "", ""),
+	TEXTO_NAO(33, 0, "NÃO", "", ""),
 	
-	EXTENSAO_ARQUIVO(33, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO(34, 0, "xlsx", "", "");
 	
 
 	private int idUnico;

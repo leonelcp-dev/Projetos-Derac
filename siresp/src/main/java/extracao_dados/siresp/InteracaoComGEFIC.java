@@ -29,6 +29,7 @@ import modulos.RemoverDuplicadoDeFila;
 import modulos.UrgenciaAguardando;
 import modulos.UrgenciaFinalizado;
 import modulosGEFIC.ConsolidadoGEFIC;
+import modulosGEFIC.RelatoriosGEFIC;
 
 /**
  * Para acessar o selenium em uma sessão já existente, o Google Chrome deve ser aberto em modo de depuração
@@ -144,6 +145,13 @@ public class InteracaoComGEFIC
 	        
 	        consolidadoGEFIC.gerarArquivoConsolidadoGEFIC(driver, ambiente, pastaBase, pastaDownloads, false, competenciaInicial);
 	        consolidadoGEFIC.gerarArquivoConsolidadoGEFIC(driver, ambiente, pastaBase, pastaDownloads, true, competenciaInicial);
+        }
+        else if(escolha == 1)
+        {
+        	RelatoriosGEFIC relatorioGEFIC = new RelatoriosGEFIC();
+        	
+        	relatorioGEFIC.baixarFilaNominalCompleta(driver, true, false);
+        	
         }
        
         

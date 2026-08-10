@@ -659,8 +659,8 @@ public class OfertaDemandaDeAcessoR1 {
 		ordenarPlanilhaDeOfertas();
 		ordenarPlanilhaDeDemandas();
 		atualizarCopiaOriginalRelatorioProducao();
-		copiarRelatorioProducaoParaCDIDR();
-		copiarRelatorioProducaoParaCDRA();
+		//copiarRelatorioProducaoParaCDIDR();
+		//copiarRelatorioProducaoParaCDRA();
 		
 		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
@@ -1091,28 +1091,36 @@ public class OfertaDemandaDeAcessoR1 {
 						}
 		
 						String pastaDestinoArquivosNovasSolicitacoes = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivosNovasSolicitacoesConsolidada() + "\\";
-						if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()) || caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTOS.getDescricao()))
+						if(caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()) || caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_AGENDAMENTOS.getDescricao()))
 						{
 							
-							if(caminhoArquivoXLSX.contains("CONSULTA"))
+							if(caminhoArquivoXLSX.toUpperCase().contains("CONSULTA"))
 							{
 								extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Consulta");
 							}
-							if(caminhoArquivoXLSX.contains("EXAME"))
+							if(caminhoArquivoXLSX.toUpperCase().contains("EXAME"))
 							{
 								extrairConsolidarDadosDeAgendamentosRegulada(caminhoArquivoXLSX, ParametrosArquivoAgendamentosPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Agendamentos", pastaDestinoArquivosNovasSolicitacoes, "Exame");
 							}
 						}
-						else if(caminhoArquivoXLSX.contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao()))
+						else if(caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES.getDescricao()) || caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACOES_ACENTUADO.getDescricao()) ||
+								caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACAO.getDescricao()) || caminhoArquivoXLSX.toUpperCase().contains(ParametrosArquivoFilasNominais.PREFIXO_NOME_ARQUIVO_REGULADA_SOLICITACAO_ACENTUADO.getDescricao()))
 						{
-							if(caminhoArquivoXLSX.contains("CONSULTA"))
+							if(caminhoArquivoXLSX.toUpperCase().contains("CONSULTA"))
 							{
 								extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_CONSULTA.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Consulta");
 							}
-							if(caminhoArquivoXLSX.contains("EXAME"))
+							if(caminhoArquivoXLSX.toUpperCase().contains("EXAME"))
 							{
 								extrairConsolidarDadosDeSolicitacoesRegulada(caminhoArquivoXLSX, ParametrosArquivoSolicitacoesPendentesRegulada.NOME_PLANILHA_ARQUIVO_DOWNLOAD_EXAME.getDescricao(), "Solicitações", pastaDestinoArquivosNovasSolicitacoes, "Exame");
 							}
+						}
+						else
+						{
+							JOptionPane optionPane = new JOptionPane("Arquivo fora do padrão de nomenclatura: " + caminhoArquivoXLSX, JOptionPane.INFORMATION_MESSAGE);
+							JDialog dialog = optionPane.createDialog("Aviso");
+							dialog.setModal(false); // não bloqueia
+							dialog.setVisible(true);
 						}
 						
 						if(arquivoConvertido)
@@ -1312,7 +1320,7 @@ public class OfertaDemandaDeAcessoR1 {
 			int ano = Integer.parseInt(dados[1]);
 
 			//criando nome do arquivo consolidado
-			String pastaArquivosBaixados = pastaBaseDemandaReprimidaCDIDR + "\\" + diretoriosCDIDR.getArquivosReguladasNovasSolicitacoes();
+			String pastaArquivosBaixados = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivosReguladasNovasSolicitacoes();
 			Pasta pastaDestino = new Pasta(pastaArquivosBaixados, true);
 			pastaArquivosBaixados = pastaArquivosBaixados + "\\" + ano;
 			pastaDestino = new Pasta(pastaArquivosBaixados, true);

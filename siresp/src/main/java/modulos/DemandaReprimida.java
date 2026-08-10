@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.csv.CSVFormat;
@@ -77,6 +78,11 @@ public class DemandaReprimida {
 	private HashMap<String, Integer> maximoTempoEmDiasPorEspecialidadeCDR;
 	private HashMap<String, Integer> demandaReprimidaPorEspecialidadeRegulada;
 	private HashMap<String, Integer> maximoTempoEmDiasPorEspecialidadeRegulada;
+	
+	private boolean agendamentoConsultaEncontrado = false;
+	private boolean agendamentoExameEncontrado = false;
+	private boolean solicitacaoConsultaEncontrado = false;
+	private boolean solicitacaoExameEncontrado = false;
 	
 	public String montarDemandaReprimidaDiaria(String ambiente)
 	{
@@ -254,6 +260,41 @@ public class DemandaReprimida {
 		arquivo = new Arquivo(pastaArquivosDemandaReprimidaTemporaria, nomeArquivoDemandaReprimida);
 		
 		procurarEConsolidarArquivo(pasta, false, "", "", arquivo.getCaminhoCompleto(), dataDaColeta, demandaReprimidaPorEspecialidadeCDR, maximoTempoEmDiasPorEspecialidadeCDR, demandaReprimidaPorEspecialidadeRegulada, maximoTempoEmDiasPorEspecialidadeRegulada);
+		
+		String mensagemErro = "Não foram encontrados os seguintes tipos de Arquivos";
+		boolean houveErro = false;
+		if(!agendamentoConsultaEncontrado)
+		{
+			houveErro = true;
+			mensagemErro += "\r\n - Agendamentos Pendentes - Consulta";
+		}
+		
+		if(!agendamentoExameEncontrado)
+		{
+			houveErro = true;
+			mensagemErro += "\r\n - Agendamentos Pendentes - Exame";
+		}
+		
+		if(!solicitacaoConsultaEncontrado)
+		{
+			houveErro = true;
+			mensagemErro += "\r\n - Solicitações Pendentes - Consulta";
+		}
+		
+		if(!solicitacaoExameEncontrado)
+		{
+			houveErro = true;
+			mensagemErro += "\r\n - Solicitações Pendentes - Exame";
+		}
+		
+		if(houveErro)
+		{
+			JOptionPane optionPane = new JOptionPane(mensagemErro, JOptionPane.INFORMATION_MESSAGE);
+			JDialog dialog = optionPane.createDialog("Aviso");
+			dialog.setModal(false); // não bloqueia
+			dialog.setVisible(true);
+		}
+		
 		atualizarTabelasDinamicas(arquivo.getCaminhoCompleto());
 		copiarTabelasDinamicas(arquivo.getCaminhoCompleto());
 		ocultarPlanilhasCopia(arquivo.getCaminhoCompleto());
@@ -436,7 +477,21 @@ public class DemandaReprimida {
 					DemandasReguladas novasSolicitacoes = new DemandasReguladas();
 					
 					if((new File(itemDaPasta.getPath()).exists()))
-						novasSolicitacoes.agruparDadosPorEspecialidadeRegulada(pasta, pastaBaseAmbulatorialCDIDR, caminhoArquivo, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, itemDaPasta, diretoriosCDIDR, demandaReprimidaPorExpecialidadeRegulada, maximoTempoEmDiasPorExpecialidadeRegulada);				
+					{
+						String tipoArquivoRetornado = novasSolicitacoes.agruparDadosPorEspecialidadeRegulada(pasta, pastaBaseAmbulatorialCDIDR, caminhoArquivo, dataDaColeta, relacaoUnidadeTipo, nomenclaturasPadronizadas, itemDaPasta, diretoriosCDIDR, demandaReprimidaPorExpecialidadeRegulada, maximoTempoEmDiasPorExpecialidadeRegulada);
+						
+						if(tipoArquivoRetornado.equals(ParametrosArquivoAgendamentosPendentesRegulada.TEXTO_TIPO_ARQUIVO_CONSULTA.getDescricao()))
+							agendamentoConsultaEncontrado = true;
+						
+						if(tipoArquivoRetornado.equals(ParametrosArquivoAgendamentosPendentesRegulada.TEXTO_TIPO_ARQUIVO_EXAME.getDescricao()))
+							agendamentoExameEncontrado = true;
+						
+						if(tipoArquivoRetornado.equals(ParametrosArquivoSolicitacoesPendentesRegulada.TEXTO_TIPO_ARQUIVO_CONSULTA.getDescricao()))
+							solicitacaoConsultaEncontrado = true;
+						
+						if(tipoArquivoRetornado.equals(ParametrosArquivoSolicitacoesPendentesRegulada.TEXTO_TIPO_ARQUIVO_EXAME.getDescricao()))
+							solicitacaoExameEncontrado = true;
+					}
 				}
 				else
 				{
