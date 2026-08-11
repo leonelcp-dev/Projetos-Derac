@@ -1,0 +1,36 @@
+package dadosGerais;
+
+import java.util.ArrayList;
+
+import modelosDados.CorrelacaoColunasArquivos;
+
+public class CorrelacaoArquivosFilasGEFIC {
+
+
+	public ArrayList<CorrelacaoColunasArquivos> obterCorrelacaoEntreArquivos()
+	{
+		ArrayList<CorrelacaoColunasArquivos> correlacao = new ArrayList<CorrelacaoColunasArquivos>();
+		
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PACIENTE.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_PACIENTE.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PACIENTE.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PACIENTE.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_IDADE.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_IDADE.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_IDADE.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_IDADE.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PRIODIZACAO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_PRIODIZACAO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PRIODIZACAO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PRIODIZACAO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESPECIALIDADE.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_ESPECIALIDADE.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESPECIALIDADE.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESPECIALIDADE.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SUBESPECIALIDADE.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_SUBESPECIALIDADE.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SUBESPECIALIDADE.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SUBESPECIALIDADE.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PROCEDIMENTO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_PROCEDIMENTO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PROCEDIMENTO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_PROCEDIMENTO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CID.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_CID.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CID.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CID.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INDICACAO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_DATA_INDICACAO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INDICACAO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INDICACAO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INSERCAO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_DATA_INSERCAO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INSERCAO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INSERCAO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_EXECUCAO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_DATA_EXECUCAO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_EXECUCAO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_EXECUCAO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_SAIDA.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_DATA_SAIDA.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_SAIDA.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_SAIDA.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_ESTABELECIMENTO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_SITUACAO.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_CIDADE.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getFormato()));
+		correlacao.add(new CorrelacaoColunasArquivos(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_OBSERVACOES.getIndice(), ParametrosArquivoGEFICFilas.INDICE_COLUNA_OBSERVACOES.getIndice(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_OBSERVACOES.getTipo(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_OBSERVACOES.getFormato()));
+		
+		return correlacao;
+	}
+	
+}

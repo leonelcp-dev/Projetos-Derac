@@ -62,6 +62,7 @@ public class DemandasReguladas {
 		boolean arquivoConvertido = false;
 		File arquivoConvertidoXLSX = null;
 		
+		String nomeArquivoMensagem = itemDaPasta.getName();
 		String nomeArquivo = itemDaPasta.getPath();
 		if(nomeArquivo.endsWith(ParametrosArquivoFilasNominaisRegulada.EXTENSAO_ARQUIVO_XLSX.getDescricao()))
 		{
@@ -119,7 +120,7 @@ public class DemandasReguladas {
 		}
 		else
 		{
-			JOptionPane optionPane = new JOptionPane("Arquivo fora do padrão de nomenclatura: " + caminhoArquivoXLSX, JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane optionPane = new JOptionPane("Arquivo fora do padrão de nomenclatura: " + nomeArquivoMensagem, JOptionPane.INFORMATION_MESSAGE);
 			JDialog dialog = optionPane.createDialog("Aviso");
 			dialog.setModal(false); // não bloqueia
 			dialog.setVisible(true);

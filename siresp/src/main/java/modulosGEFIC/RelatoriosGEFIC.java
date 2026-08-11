@@ -48,21 +48,22 @@ public class RelatoriosGEFIC
 			
 			paginaWeb.selecionarItemSelectULLIPeloTextoVisivelDeUmaLinhaPeloXPath(driver, IdentificadoresPaginaWebGEFIC.XPATH_FILAS_FILTRO_STATUS_UL.getTextoIdentificador(), status);
 			
-			while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_FILAS.getTextoIdentificador()));
+			//while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+			while(paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_AGUARDANDO.getTextoIdentificador()));
 			
 			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_BOTAO_EXCEL.getTextoIdentificador(), "id");
 			
-			while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO_FILAS.getTextoIdentificador()));
+			//while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+			while(paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_AGUARDANDO.getTextoIdentificador()));
 			
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		}
-	
 		
 		return "";
 	}

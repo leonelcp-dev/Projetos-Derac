@@ -9,6 +9,8 @@ public enum IdentificadoresPaginaWebGEFIC {
 	MASCARA_VALOR_DINAMICO(0, "#####"),
 	MASCARA_COLUNA_ACAO_DINAMICO(0, "@@@@@"),
 	
+	CLASS_NAME_AGUARDANDO(0, "la-ball-spin-fade"),
+	
 	XPATH_LOTACAO_ACESSO_LINHA(0, "/html/body/div[2]/div/div/div/div/div/div[1]/div[2]/div[2]/table/tbody/tr[" + MASCARA_VALOR_DINAMICO.getTextoIdentificador() + "]/td/p"),
 	XPATH_MENU_PRINCIPAL(0, "/html/body/div[1]/nav/ul"),
 	XPATH_AGUARDANDO(0, "/html/body/div[7]/div"),

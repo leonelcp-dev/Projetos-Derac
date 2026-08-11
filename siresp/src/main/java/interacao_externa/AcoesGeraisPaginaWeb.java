@@ -1447,6 +1447,8 @@ public class AcoesGeraisPaginaWeb {
 		return visivel;
 	}
 	
+
+	
 	public boolean compararValorAtributoCSSPorXPATH(WebDriver driverPagina, String xpath, String atributo, String valor)
 	{
 		boolean valorEsperado = false;

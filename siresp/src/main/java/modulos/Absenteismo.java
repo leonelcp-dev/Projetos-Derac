@@ -440,7 +440,7 @@ public class Absenteismo {
 						
 						if(arquivoSIRESP.ehCelulaVazia(linha, coluna.getColunaSIRESP()))
 						{
-							celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaSIRESP(), "", "String"));
+							celulas.add(new CelulaExcel(linhaArquivoConsolidado, coluna.getColunaConsolidado(), "", "String"));
 						}
 						else
 						{
