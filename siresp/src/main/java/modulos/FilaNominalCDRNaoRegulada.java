@@ -47,6 +47,24 @@ public class FilaNominalCDRNaoRegulada {
 	private DateTimeFormatter formatoDataPasta;
 	LocalDate dataProcessamento;
 	String dataFormatadaPasta;
+	boolean execucaoSequencial;
+	
+	public FilaNominalCDRNaoRegulada()
+	{
+		pastaDestinoArquivos = null;
+		pastaDownloads = null;
+		
+		execucaoSequencial = false;
+	}
+	
+	public FilaNominalCDRNaoRegulada(String pastaDestinoArquivos, String pastaDownloads)
+	{
+		this.pastaDestinoArquivos = pastaDestinoArquivos;
+		this.pastaDownloads = pastaDownloads;
+		
+		execucaoSequencial = true;
+	}
+	
 
 	public String baixarFilaCDR(WebDriver driver)
 	{			
@@ -69,8 +87,11 @@ public class FilaNominalCDRNaoRegulada {
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
-		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
-		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+		if(pastaDestinoArquivos == null)
+			pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+		
+		if(pastaDownloads == null)
+			pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
 		
 	
 		//definindo entidades para o censo de leitos
@@ -196,7 +217,8 @@ public class FilaNominalCDRNaoRegulada {
 
 		}
 		
-		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		if(!execucaoSequencial)
+			JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";	
 	}

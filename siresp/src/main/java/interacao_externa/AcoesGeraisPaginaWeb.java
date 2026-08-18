@@ -1,5 +1,13 @@
 package interacao_externa;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 
 import java.util.ArrayList;
@@ -14,6 +22,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -557,6 +566,72 @@ public class AcoesGeraisPaginaWeb {
 		}
 				
 		return true;
+	}
+	
+	
+	public String baixarImagem(WebDriver driverPagina, String urlInicial, String id, String destino)
+	{
+
+		try
+		{
+			WebElement imagem = driverPagina.findElement(By.id(id));
+			
+			String src="";
+			if(!urlInicial.equals(""))
+				src = src + urlInicial + "/";
+			
+			src = src + imagem.getAttribute("src");
+			
+			System.out.println(src);
+			
+			URL url = new URI(src).toURL();
+			
+			HttpURLConnection conn = (HttpURLConnection) new URI(src).toURL().openConnection();
+
+					System.out.println("Status = " + conn.getResponseCode());
+					System.out.println("Tipo = " + conn.getContentType());
+
+					System.out.println("Tamanho = " + conn.getContentLengthLong());
+
+			try (InputStream in = url.openStream()) 
+			{
+				Files.copy(in, Path.of(destino), StandardCopyOption.REPLACE_EXISTING);
+			}
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return "Erro";
+		}
+				
+		return "";
+	}
+	
+	public String baixarScreenshot(WebDriver driverPagina, String urlInicial, String id, String destino)
+	{
+
+		try
+		{
+			WebElement imagem = driverPagina.findElement(By.id(id));
+			
+			String src="";
+			if(!urlInicial.equals(""))
+				src = src + urlInicial + "/";
+			
+			src = src + imagem.getAttribute("src");
+			
+			System.out.println(src);
+			
+					
+			File screenshot = imagem.getScreenshotAs(OutputType.FILE);
+			
+			Files.copy(screenshot.toPath(), Path.of(destino), StandardCopyOption.REPLACE_EXISTING);
+			
+		}catch(Exception e) {
+			System.out.println(e.toString());
+			return "Erro";
+		}
+				
+		return "";
 	}
 	
 	public boolean preencherInputTextPeloXPATH(WebDriver driverPagina, String xpath, String texto)

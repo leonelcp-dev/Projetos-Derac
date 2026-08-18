@@ -191,10 +191,10 @@ public class InteracaoComSIRESP
         	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", true, true, true, true, true, false, false, false, false, false, ambiente);
         	
         	//diário
-        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, false, true, true, true, true, true, true, ambiente);
+        	ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, false, true, true, true, true, true, true, ambiente);
         	
         	//consolidação de novas demandas regulada
-        	ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, true, true, true, true, true, true, true, ambiente);
+        	//ofertaDemanda.calcularOfertaEDemanda(driver, null, null, false, true, true, true, true, true, true, true, true, true, ambiente);
         }
         
         else if(escolha == 9)

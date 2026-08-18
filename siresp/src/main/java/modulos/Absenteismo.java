@@ -355,6 +355,8 @@ public class Absenteismo {
 			
 			paginaWeb.selecionarItemSelectPeloValue(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_ORDENACAO_RELATORIO.getTextoIdentificador(), IdentificadoresPaginaWebSIRESP.VALOR_ABSENTEISMO_ORDENACAO_RELATORIO_DATA_HORA_AGENDAMENTO.getTextoIdentificador());
 			
+			paginaWeb.selecionarItemSelect(driver, IdentificadoresPaginaWebSIRESP.ID_ABSENTEISMO_FILTRO_UNIDADE_SOLICITANTE.getTextoIdentificador(), entidade.getNomeUnidadeSIRESP());
+			
 			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_ABSENTEISMO_BOTAO_BUSCAR.getTextoIdentificador(), "name");
 			
 			do

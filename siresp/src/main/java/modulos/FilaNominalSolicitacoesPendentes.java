@@ -45,7 +45,24 @@ public class FilaNominalSolicitacoesPendentes {
 	private DateTimeFormatter formatoDataPasta;
 	LocalDate dataProcessamento;
 	String dataFormatadaPasta;
+	boolean execucaoSequencial;
 
+	public FilaNominalSolicitacoesPendentes()
+	{
+		pastaDestinoArquivos = null;
+		pastaDownloads = null;
+		
+		execucaoSequencial = false;
+	}
+	
+	public FilaNominalSolicitacoesPendentes(String pastaDestinoArquivos, String pastaDownloads)
+	{
+		this.pastaDestinoArquivos = pastaDestinoArquivos;
+		this.pastaDownloads = pastaDownloads;
+		
+		execucaoSequencial = true;
+	}
+	
 	public String baixarFilaSolicitacoesPendentes(WebDriver driver)
 	{			
 		formatoDataPasta = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -67,8 +84,11 @@ public class FilaNominalSolicitacoesPendentes {
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
-		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
-		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
+		if(pastaDestinoArquivos == null)
+			pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
+		
+		if(pastaDownloads == null)
+			pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
 		
 	
 		//definindo entidades para o censo de leitos
@@ -397,7 +417,8 @@ public class FilaNominalSolicitacoesPendentes {
 //			ultimoRecente = arquivo.getNomeDoArquivo();
 		}
 		
-		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		if(!execucaoSequencial)
+			JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 
 		return "";

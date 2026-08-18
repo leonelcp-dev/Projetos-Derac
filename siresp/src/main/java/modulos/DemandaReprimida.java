@@ -83,6 +83,25 @@ public class DemandaReprimida {
 	private boolean agendamentoExameEncontrado = false;
 	private boolean solicitacaoConsultaEncontrado = false;
 	private boolean solicitacaoExameEncontrado = false;
+	private boolean execucaoSequencial;
+	
+	ArrayList<String> CDRsProcessados;
+	
+	public DemandaReprimida()
+	{
+		pastaBase = null;
+		dataDeAnalise = null;
+		
+		execucaoSequencial = false;
+	}
+	
+	public DemandaReprimida(String pastaBase, String dataExecucao)
+	{
+		this.pastaBase = pastaBase;
+		this.dataDeAnalise = dataExecucao;
+		
+		execucaoSequencial = true;
+	}
 	
 	public String montarDemandaReprimidaDiaria(String ambiente)
 	{
@@ -99,9 +118,15 @@ public class DemandaReprimida {
 		pastasPrincipais.add("SULESTE");
 		pastasPrincipais.add("DIVERSOS");
 		
-		pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
-				
-		dataDeAnalise = JOptionPane.showInputDialog(null, "Insira a data do dia de análise (formato: dd/mm/yyyy)", "Data da Análise", JOptionPane.QUESTION_MESSAGE).trim();
+		CDRsProcessados = new ArrayList<String>();
+		
+		if(pastaBase == null)
+			pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+		
+		if(dataDeAnalise == null)
+			dataDeAnalise = JOptionPane.showInputDialog(null, "Insira a data do dia de análise (formato: dd/mm/yyyy)", "Data da Análise", JOptionPane.QUESTION_MESSAGE).trim();
+		
+		
 		dataInformada = LocalDate.parse(dataDeAnalise, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		meses = new MesesFormatados();
 		
@@ -220,7 +245,8 @@ public class DemandaReprimida {
 		
 		consolidarDemandaReprimida(dataInformada, dataDeAnalise.replaceAll("/", "."));
 		
-		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		if(!execucaoSequencial)
+			JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";
 	}
@@ -500,150 +526,180 @@ public class DemandaReprimida {
 					
 					if(arquivoCDR.endsWith(ParametrosArquivoFilaCDRConsulta.EXTENSAO_ARQUIVO.getDescricao()))
 					{
-						String unidade = itemDaPasta.getName().substring(0, itemDaPasta.getName().indexOf(" - " + consultaOuExame)).trim();
-						String tipoUnidade = relacaoUnidadeTipo.get(unidade);
-						
-						AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(caminhoArquivo, 0);
-
-						arquivoDemandaReprimida.abrirPlanilha(ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CDR.getDescricao(), 0);
-						int linhaPlanilhaCDR = arquivoDemandaReprimida.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoDemandaReprimidaCDR.LINHA_INICIAL_PLANILHA_CDR.getIndice() - 1, 0) + 1;
-						
-						arquivoDemandaReprimida.abrirPlanilha(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.NOME_PLANILHA_FILIPETAS_NAO_IMPRESSAS.getDescricao(), 0);
-						int linhaPlanilhaFilipetaNaoImpressa = arquivoDemandaReprimida.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.LINHA_INICIAL_PLANILHA_CDR.getIndice() - 1, 0) + 1;
-						
-						ArrayList<CelulaExcel> celulasCDR = new ArrayList<CelulaExcel>();
-						ArrayList<CelulaExcel> celulasFilipetasNaoImpressas = new ArrayList<CelulaExcel>();
-						
-						CorrelacaoArquivosDemandaReprimida correlacaoCDR = new CorrelacaoArquivosDemandaReprimida();
-						ArrayList<CorrelacaoColunasArquivos> colunasCDR = correlacaoCDR.obterCorrelacaoEntreArquivos("CDR", consultaOuExame);
-						
-						CorrelacaoArquivosDemandaReprimida correlacaoFilipeta = new CorrelacaoArquivosDemandaReprimida();
-						ArrayList<CorrelacaoColunasArquivos> colunasFilipeta = correlacaoFilipeta.obterCorrelacaoEntreArquivos("Filipeta", consultaOuExame);
-						
-						BufferedReader br;
-						try {
-
-							Reader reader = new InputStreamReader(new FileInputStream(arquivoCDR), StandardCharsets.ISO_8859_1);
-
-							CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(';').setQuote('"').setHeader().setSkipHeaderRecord(true).setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL).build();
+						if(itemDaPasta.getName().toUpperCase().contains(consultaOuExame)) 
+						{
+							String unidade = itemDaPasta.getName().substring(0, itemDaPasta.getName().indexOf(" - " + consultaOuExame)).trim();
+							String tipoUnidade = relacaoUnidadeTipo.get(unidade);
 							
-							String linha;
-							
-							int colunaNomePaciente;
-							int colunaDataEntrada;
-							int colunaEspecialidadeExame;
-							int colunaStatus;
-							String formatoData;
-							String formatoHora;
-							String formatoDataHora;
-							
-							if(consultaOuExame.equals("CONSULTA"))
+							if(CDRsProcessados.contains(unidade + consultaOuExame))
 							{
-								colunaNomePaciente = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_NOME.getIndice();
-								colunaDataEntrada = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_DATA_ENTRADA.getIndice();
-								colunaEspecialidadeExame = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_ESPECIALIDADE.getIndice();
-								colunaStatus = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_STATUS.getIndice();
-								formatoData = ParametrosArquivoFilaCDRConsulta.FORMATO_DATA_CSV.getDescricao();
-								formatoHora = ParametrosArquivoFilaCDRConsulta.FORMATO_HORA_CSV.getDescricao();
-								formatoDataHora = ParametrosArquivoFilaCDRConsulta.FORMATO_DATA_HORA_CSV.getDescricao();
+								JOptionPane optionPane = new JOptionPane("Já houve processamento de um arquivo de " + consultaOuExame + " para a unidade " + unidade + "\r\nFavor comunicar a equipe do CDIDR.", JOptionPane.INFORMATION_MESSAGE);
+								JDialog dialog = optionPane.createDialog("Aviso");
+								dialog.setModal(false); // não bloqueia
+								dialog.setVisible(true);
 							}
 							else
 							{
-								colunaNomePaciente = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_NOME.getIndice();
-								colunaDataEntrada = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_DATA_ENTRADA.getIndice();
-								colunaEspecialidadeExame = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_EXAME.getIndice();	
-								colunaStatus = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_STATUS.getIndice();
-								formatoData = ParametrosArquivoFilaCDRExame.FORMATO_DATA_CSV.getDescricao();
-								formatoHora = ParametrosArquivoFilaCDRExame.FORMATO_HORA_CSV.getDescricao();
-								formatoDataHora = ParametrosArquivoFilaCDRExame.FORMATO_DATA_HORA_CSV.getDescricao();
+								CDRsProcessados.add(unidade + consultaOuExame);
+								
+								if(tipoUnidade == null || tipoUnidade.equals(""))
+								{
+									JOptionPane optionPane = new JOptionPane("Não foi encontrado o tipo de unidade correspondente aos dados do arquivo " + unidade + "\r\nFavor comunicar a equipe do CDIDR.", JOptionPane.INFORMATION_MESSAGE);
+									JDialog dialog = optionPane.createDialog("Aviso");
+									dialog.setModal(false); // não bloqueia
+									dialog.setVisible(true);
+								}
+								
+								AcoesArquivoExcel arquivoDemandaReprimida = new AcoesArquivoExcel(caminhoArquivo, 0);
+		
+								arquivoDemandaReprimida.abrirPlanilha(ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CDR.getDescricao(), 0);
+								int linhaPlanilhaCDR = arquivoDemandaReprimida.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoDemandaReprimidaCDR.LINHA_INICIAL_PLANILHA_CDR.getIndice() - 1, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOME_PACIENTE.getIndice()) + 1;
+								
+								arquivoDemandaReprimida.abrirPlanilha(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.NOME_PLANILHA_FILIPETAS_NAO_IMPRESSAS.getDescricao(), 0);
+								int linhaPlanilhaFilipetaNaoImpressa = arquivoDemandaReprimida.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.LINHA_INICIAL_PLANILHA_CDR.getIndice() - 1,  ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOME_PACIENTE.getIndice()) + 1;
+								
+								ArrayList<CelulaExcel> celulasCDR = new ArrayList<CelulaExcel>();
+								ArrayList<CelulaExcel> celulasFilipetasNaoImpressas = new ArrayList<CelulaExcel>();
+								
+								CorrelacaoArquivosDemandaReprimida correlacaoCDR = new CorrelacaoArquivosDemandaReprimida();
+								ArrayList<CorrelacaoColunasArquivos> colunasCDR = correlacaoCDR.obterCorrelacaoEntreArquivos("CDR", consultaOuExame);
+								
+								CorrelacaoArquivosDemandaReprimida correlacaoFilipeta = new CorrelacaoArquivosDemandaReprimida();
+								ArrayList<CorrelacaoColunasArquivos> colunasFilipeta = correlacaoFilipeta.obterCorrelacaoEntreArquivos("Filipeta", consultaOuExame);
+								
+								BufferedReader br;
+								try {
+		
+									Reader reader = new InputStreamReader(new FileInputStream(arquivoCDR), StandardCharsets.ISO_8859_1);
+		
+									CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(';').setQuote('"').setHeader().setSkipHeaderRecord(true).setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL).build();
+									
+									String linha;
+									
+									int colunaNomePaciente;
+									int colunaDataEntrada;
+									int colunaEspecialidadeExame;
+									int colunaStatus;
+									String formatoData;
+									String formatoHora;
+									String formatoDataHora;
+									
+									if(consultaOuExame.equals("CONSULTA"))
+									{
+										colunaNomePaciente = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_NOME.getIndice();
+										colunaDataEntrada = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_DATA_ENTRADA.getIndice();
+										colunaEspecialidadeExame = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_ESPECIALIDADE.getIndice();
+										colunaStatus = ParametrosArquivoFilaCDRConsulta.INDICE_COLUNA_STATUS.getIndice();
+										formatoData = ParametrosArquivoFilaCDRConsulta.FORMATO_DATA_CSV.getDescricao();
+										formatoHora = ParametrosArquivoFilaCDRConsulta.FORMATO_HORA_CSV.getDescricao();
+										formatoDataHora = ParametrosArquivoFilaCDRConsulta.FORMATO_DATA_HORA_CSV.getDescricao();
+									}
+									else
+									{
+										colunaNomePaciente = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_NOME.getIndice();
+										colunaDataEntrada = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_DATA_ENTRADA.getIndice();
+										colunaEspecialidadeExame = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_EXAME.getIndice();	
+										colunaStatus = ParametrosArquivoFilaCDRExame.INDICE_COLUNA_STATUS.getIndice();
+										formatoData = ParametrosArquivoFilaCDRExame.FORMATO_DATA_CSV.getDescricao();
+										formatoHora = ParametrosArquivoFilaCDRExame.FORMATO_HORA_CSV.getDescricao();
+										formatoDataHora = ParametrosArquivoFilaCDRExame.FORMATO_DATA_HORA_CSV.getDescricao();
+									}
+									
+									Iterable<CSVRecord> registros = format.parse(reader);
+									for(CSVRecord registro : registros)						
+									{
+										String nomeAbreviado = Utils.somenteIniciais(registro.get(colunaNomePaciente).replaceAll("\"", ""));
+		
+									    System.out.println(linhaPlanilhaCDR + " " + registro.get(0));
+									    System.out.println(registro.get(colunaDataEntrada));
+									    LocalDate dataEntrada = LocalDate.parse(registro.get(colunaDataEntrada).replaceAll("\"", ""), DateTimeFormatter.ofPattern(formatoDataHora));
+									    
+									    int tempoDeEsperaEmDias = (int)ChronoUnit.DAYS.between(dataEntrada, dataDaColeta);
+									    
+									    String especialidadeExame = registro.get(colunaEspecialidadeExame).replaceAll("\"", "");
+									    String nomePadronizado = "";
+									    String tipoAgendamento = "";
+									    
+									    if(nomenclaturasPadronizadas.containsKey(especialidadeExame.toUpperCase().trim()))
+									    {
+									    	nomePadronizado = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getNomenclatura();
+									    	tipoAgendamento = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getFluxo();
+									    }
+									    
+									    if(registro.get(colunaStatus).equals(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.TEXTO_STATUS_AGENDADO.getDescricao())) 
+									    {
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
+										    
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_NOME_ABREVIADO.getIndice(), nomeAbreviado, "String"));
+										    
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_DATA_ENTRADA.getIndice(), dataEntrada, "Date"));
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
+										    
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_NOMENCLATURA_CORRETA.getIndice(), nomePadronizado, "String"));
+									    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TIPO_DE_AGENDAMENTO.getIndice(), tipoAgendamento, "String"));
+										    
+										    correlacionarCDR(colunasFilipeta, registro, linhaPlanilhaFilipetaNaoImpressa, celulasFilipetasNaoImpressas, formatoData, formatoDataHora, formatoHora);
+										    
+										    linhaPlanilhaFilipetaNaoImpressa++;
+									    }
+									    else
+									    {
+										    if(demandaReprimidaPorExpecialidadeCDR.containsKey(nomePadronizado))
+										    {
+										    	int demandaReprimida = demandaReprimidaPorExpecialidadeCDR.get(nomePadronizado);
+										    	demandaReprimida++;
+										    	demandaReprimidaPorExpecialidadeCDR.put(nomePadronizado, demandaReprimida);
+										    	
+										    	int maximoDias = maximoTempoEmDiasPorExpecialidadeCDR.get(nomePadronizado);
+										    	if(tempoDeEsperaEmDias > maximoDias)
+										    		maximoDias = tempoDeEsperaEmDias;
+										    	maximoTempoEmDiasPorExpecialidadeCDR.put(nomePadronizado, maximoDias);
+										    }
+										    else
+										    {
+										    	demandaReprimidaPorExpecialidadeCDR.put(nomePadronizado, 1);
+										    	maximoTempoEmDiasPorExpecialidadeCDR.put(nomePadronizado, tempoDeEsperaEmDias);
+										    }
+									    	
+									    	celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
+										    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
+										    							    
+										    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOME_ABREVIADO.getIndice(), nomeAbreviado, "String"));
+										    
+										    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_DATA_ENTRADA.getIndice(), dataEntrada, "Date"));
+										    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
+										    
+										    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOMENCLATURA_CORRETA.getIndice(), nomePadronizado, "String"));
+										    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_AGENDAMENTO.getIndice(), tipoAgendamento, "String"));
+										    
+										    correlacionarCDR(colunasCDR, registro, linhaPlanilhaCDR, celulasCDR, formatoData, formatoDataHora, formatoHora);
+										    
+										    linhaPlanilhaCDR++;
+									    }
+									}
+									
+									reader.close();
+									
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+								arquivoDemandaReprimida.gravarDadosEmCelula(ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CDR.getDescricao(), celulasCDR, true, false, ParametrosArquivoDemandaReprimidaCDR.LINHA_INICIAL_PLANILHA_CDR.getIndice(), null);
+								arquivoDemandaReprimida.forcarCalculos();
+		
+								arquivoDemandaReprimida.gravarDadosEmCelula(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.NOME_PLANILHA_FILIPETAS_NAO_IMPRESSAS.getDescricao(), celulasFilipetasNaoImpressas, true, false, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.LINHA_INICIAL_PLANILHA_CDR.getIndice(), null);
+								arquivoDemandaReprimida.forcarCalculos();
 							}
-							
-							Iterable<CSVRecord> registros = format.parse(reader);
-							for(CSVRecord registro : registros)						
-							{
-								String nomeAbreviado = Utils.somenteIniciais(registro.get(colunaNomePaciente).replaceAll("\"", ""));
-
-							    System.out.println(linhaPlanilhaCDR + " " + registro.get(0));
-							    System.out.println(registro.get(colunaDataEntrada));
-							    LocalDate dataEntrada = LocalDate.parse(registro.get(colunaDataEntrada).replaceAll("\"", ""), DateTimeFormatter.ofPattern(formatoDataHora));
-							    
-							    int tempoDeEsperaEmDias = (int)ChronoUnit.DAYS.between(dataEntrada, dataDaColeta);
-							    
-							    String especialidadeExame = registro.get(colunaEspecialidadeExame).replaceAll("\"", "");
-							    String nomePadronizado = "";
-							    String tipoAgendamento = "";
-							    
-							    if(nomenclaturasPadronizadas.containsKey(especialidadeExame.toUpperCase().trim()))
-							    {
-							    	nomePadronizado = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getNomenclatura();
-							    	tipoAgendamento = nomenclaturasPadronizadas.get(especialidadeExame.toUpperCase().trim()).getFluxo();
-							    }
-							    
-							    if(registro.get(colunaStatus).equals(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.TEXTO_STATUS_AGENDADO.getDescricao())) 
-							    {
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
-								    
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_NOME_ABREVIADO.getIndice(), nomeAbreviado, "String"));
-								    
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_DATA_ENTRADA.getIndice(), dataEntrada, "Date"));
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
-								    
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_NOMENCLATURA_CORRETA.getIndice(), nomePadronizado, "String"));
-							    	celulasFilipetasNaoImpressas.add(new CelulaExcel(linhaPlanilhaFilipetaNaoImpressa, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.INDICE_COLUNA_TIPO_DE_AGENDAMENTO.getIndice(), tipoAgendamento, "String"));
-								    
-								    correlacionarCDR(colunasFilipeta, registro, linhaPlanilhaFilipetaNaoImpressa, celulasFilipetasNaoImpressas, formatoData, formatoDataHora, formatoHora);
-								    
-								    linhaPlanilhaFilipetaNaoImpressa++;
-							    }
-							    else
-							    {
-								    if(demandaReprimidaPorExpecialidadeCDR.containsKey(nomePadronizado))
-								    {
-								    	int demandaReprimida = demandaReprimidaPorExpecialidadeCDR.get(nomePadronizado);
-								    	demandaReprimida++;
-								    	demandaReprimidaPorExpecialidadeCDR.put(nomePadronizado, demandaReprimida);
-								    	
-								    	int maximoDias = maximoTempoEmDiasPorExpecialidadeCDR.get(nomePadronizado);
-								    	if(tempoDeEsperaEmDias > maximoDias)
-								    		maximoDias = tempoDeEsperaEmDias;
-								    	maximoTempoEmDiasPorExpecialidadeCDR.put(nomePadronizado, maximoDias);
-								    }
-								    else
-								    {
-								    	demandaReprimidaPorExpecialidadeCDR.put(nomePadronizado, 1);
-								    	maximoTempoEmDiasPorExpecialidadeCDR.put(nomePadronizado, tempoDeEsperaEmDias);
-								    }
-							    	
-							    	celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_UNIDADE.getIndice(), tipoUnidade, "String"));
-								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_UNIDADE_DE_SAUDE.getIndice(), unidade, "String"));
-								    							    
-								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOME_ABREVIADO.getIndice(), nomeAbreviado, "String"));
-								    
-								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_DATA_ENTRADA.getIndice(), dataEntrada, "Date"));
-								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TEMPO_DE_ESPERA_EM_DIAS.getIndice(), tempoDeEsperaEmDias, "Int"));
-								    
-								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_NOMENCLATURA_CORRETA.getIndice(), nomePadronizado, "String"));
-								    celulasCDR.add(new CelulaExcel(linhaPlanilhaCDR, ParametrosArquivoDemandaReprimidaCDR.INDICE_COLUNA_TIPO_DE_AGENDAMENTO.getIndice(), tipoAgendamento, "String"));
-								    
-								    correlacionarCDR(colunasCDR, registro, linhaPlanilhaCDR, celulasCDR, formatoData, formatoDataHora, formatoHora);
-								    
-								    linhaPlanilhaCDR++;
-							    }
-							}
-							
-							reader.close();
-							
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
-						
-						arquivoDemandaReprimida.gravarDadosEmCelula(ParametrosArquivoDemandaReprimidaCDR.NOME_PLANILHA_CDR.getDescricao(), celulasCDR, true, false, ParametrosArquivoDemandaReprimidaCDR.LINHA_INICIAL_PLANILHA_CDR.getIndice(), null);
-						arquivoDemandaReprimida.forcarCalculos();
-
-						arquivoDemandaReprimida.gravarDadosEmCelula(ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.NOME_PLANILHA_FILIPETAS_NAO_IMPRESSAS.getDescricao(), celulasFilipetasNaoImpressas, true, false, ParametrosArquivoDemandaReprimidaFilipetasNaoImpressas.LINHA_INICIAL_PLANILHA_CDR.getIndice(), null);
-						arquivoDemandaReprimida.forcarCalculos();
+						else
+						{
+							JOptionPane optionPane = new JOptionPane("O arquivo " + itemDaPasta.getName() + " não contém o termo " + consultaOuExame + "\r\nFavor comunicar a equipe do CDIDR.", JOptionPane.INFORMATION_MESSAGE);
+							JDialog dialog = optionPane.createDialog("Aviso");
+							dialog.setModal(false); // não bloqueia
+							dialog.setVisible(true);
+						}
 						
 					}
 						

@@ -1,10 +1,14 @@
 package utils;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
+
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.tess4j.Tesseract;
 
 public class Utils {
 	
@@ -131,6 +135,44 @@ public class Utils {
 		{
 			return null;
 		}
+	}
+	
+	public static String primeiraMaiuscula(String texto) 
+	{
+		String[] palavras = texto.toLowerCase().split(" ");
+		StringBuilder resultado = new StringBuilder();
+
+		for (String palavra : palavras) 
+		{
+
+			if (!palavra.isEmpty()) 
+			{
+				resultado.append(Character.toUpperCase(palavra.charAt(0))).append(palavra.substring(1)).append(" ");
+			}
+		}
+		return resultado.toString().trim();
+
+	}
+	
+	public static String obterTextoDeImagem(String caminhoImagem)
+	{
+		String texto = "";
+		try
+		{
+			ITesseract tesseract = new Tesseract();
+			// Pasta onde ficam os arquivos .traineddata
+			tesseract.setDatapath("C:\\Users\\PMC514991-2\\Documents\\SIRESP\\Dicionarios OCR");
+			tesseract.setLanguage("por");
+			texto = tesseract.doOCR(new File(caminhoImagem));
+			System.out.println("Texto: " + texto);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return "";
+		}
+		
+		return texto;
 	}
 
 }

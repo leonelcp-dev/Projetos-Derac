@@ -148,9 +148,12 @@ public class InteracaoComGEFIC
         }
         else if(escolha == 1)
         {
-        	RelatoriosGEFIC relatorioGEFIC = new RelatoriosGEFIC();
+        	String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+        	String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
         	
-        	relatorioGEFIC.baixarFilaNominalCompleta(driver, true, false);
+        	RelatoriosGEFIC relatorioGEFIC = new RelatoriosGEFIC(pastaBase, pastaDownloads, ambiente);
+        	
+        	relatorioGEFIC.baixarFilaNominalCompleta(driver, true, false, LocalDate.now());
         	
         }
        

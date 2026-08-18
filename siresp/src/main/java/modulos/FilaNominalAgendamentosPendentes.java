@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -43,7 +44,22 @@ public class FilaNominalAgendamentosPendentes {
 	private DateTimeFormatter formatoDataPasta;
 	LocalDate dataProcessamento;
 	String dataFormatadaPasta;
+	boolean execucaoSequencial;
 
+	public FilaNominalAgendamentosPendentes()
+	{
+		pastaDestinoArquivos = null;
+		pastaDownloads = null;
+		execucaoSequencial = false;
+	}
+	
+	public FilaNominalAgendamentosPendentes(String pastaDestinoArquivos, String pastaDownloads)
+	{
+		this.pastaDestinoArquivos = pastaDestinoArquivos;
+		this.pastaDownloads = pastaDownloads;
+		execucaoSequencial = true;
+	}
+	
 	public String baixarFilaAgendamentosPendentes(WebDriver driver)
 	{			
 		formatoDataPasta = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -65,8 +81,11 @@ public class FilaNominalAgendamentosPendentes {
 		//definindo a formatação dos meses para permitir que seja possível criar a estrutura das pastas
 		meses = new MesesFormatados();
 		
-		pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
-		pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
+		if(pastaDestinoArquivos == null)
+			pastaDestinoArquivos = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde se encontram os dados das filas nominais", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE);
+		
+		if(pastaDownloads == null)
+			pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE);
 		
 	
 		//definindo entidades para o censo de leitos
@@ -135,14 +154,17 @@ public class FilaNominalAgendamentosPendentes {
 					e.printStackTrace();
 				}
 				
-				baixarArquivos(driver, paginaWeb, entidade);
+				String downloadConcluido = baixarArquivos(driver, paginaWeb, entidade);
 				
+				while(!downloadConcluido.equals(""))
+					downloadConcluido = baixarArquivos(driver, paginaWeb, entidade);
 			}
 			else
 				System.out.println("Unidade não encontrada: " + entidade.getCNES() + " - " + entidade.getUnidade() + "(" + entidade.getDistrito() + ")");
 		}
 		
-		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
+		if(!execucaoSequencial)
+			JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";	
 	}
@@ -174,6 +196,15 @@ public class FilaNominalAgendamentosPendentes {
 					e.printStackTrace();
 				}
 				arquivoMaisRecente = pastaOrigem.arquivoRecentementeModificado();
+				
+				boolean existe = !driver.findElements(By.xpath("//button[contains(translate(@aria-label, '\u00A0', ' '), 'Go back')]")).isEmpty();
+				
+				if(existe)
+				{
+					WebElement button = driver.findElement(By.xpath("//button[contains(translate(@aria-label, '\u00A0', ' '), 'Go back')]"));
+					button.click();
+					return "Erro no Download";
+				}
 				
 				System.out.println(arquivoMaisRecente + " ----- " + ultimoRecente);
 			}while(arquivoMaisRecente.equals(ultimoRecente) || !arquivoMaisRecente.endsWith(ParametrosArquivoFilasNominais.EXTENSAO_ARQUIVO_REGULADA_AGENDAMENTO.getDescricao()));

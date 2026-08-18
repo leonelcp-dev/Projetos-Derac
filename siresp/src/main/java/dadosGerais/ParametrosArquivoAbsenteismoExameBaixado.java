@@ -28,7 +28,7 @@ public enum ParametrosArquivoAbsenteismoExameBaixado {
 	INDICE_COLUNA_MOTIVO_ALTA(17, 17, "Motivo Alta", "String", ""),
 	INDICE_COLUNA_USUARIO(18, 18, "Usuário", "String", ""),
 	INDICE_COLUNA_EXECUTANTE(19, 19, "Executante", "String", ""),
-	LINHA_INICIAL_ARQUIVO_SIRESP(20, 6,"Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	LINHA_INICIAL_ARQUIVO_SIRESP(20, 5,"Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
 	COLUNA_INICIAL_ARQUIVO_SIRESP(21, 0,"Ajustado de acordo com o Java, no arquivo é a coluna A (1)", "", ""),
 	EXTENSAO_ARQUIVO_ABSENTEISMO(22, 0, "xls", "", "");
 

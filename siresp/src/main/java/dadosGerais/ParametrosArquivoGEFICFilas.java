@@ -35,6 +35,15 @@ public enum ParametrosArquivoGEFICFilas {
 	INDICE_COLUNA_TEMPO_MAXIMO_ESPERA(24, 24, "Tempo máximo de espera", "Integer", ""),
 	INDICE_COLUNA_OBSERVACOES(25, 25, "Observações", "String", ""),
 	
+	MASCARA_DATA_DOWNLOAD(30, 0, "######", "", ""),
+	MASCARA_STATUS(31, 0, "@@@@@@", "", ""),
+	NOME_ARQUIVO_FILA_GERAL(32, 0, "GEFIC - FILA GERAL - " + MASCARA_DATA_DOWNLOAD.getDescricao() + " - " + MASCARA_STATUS.getDescricao() + ".xlsx", "", ""),
+	NOME_ARQUIVO_FILA_OPM(33, 0, "GEFIC - FILA OPM - " + MASCARA_DATA_DOWNLOAD.getDescricao() + " - " + MASCARA_STATUS.getDescricao() + ".xlsx", "", ""),
+	NOME_ARQUIVO_PACIENTE_POR_ESPECIALIDADE(34, 0, "GEFIC - PACIENTE POR ESPECIALIDADE - " + MASCARA_DATA_DOWNLOAD.getDescricao() + ".xlsx", "", ""),
+	NOME_ARQUIVO_PACIENTE_POR_ESPECIALIDADE_OPM(35, 0, "GEFIC - PACIENTE POR ESPECIALIDADE OPM - " + MASCARA_DATA_DOWNLOAD.getDescricao() + ".xlsx", "", ""),
+	NOME_ARQUIVO_TEMPO_ESPERA_POR_PROCEDIMENTO(36, 0, "GEFIC - TEMPO DE ESPERA POR PROCEDIMENTO - " + MASCARA_DATA_DOWNLOAD.getDescricao() + ".xlsx", "", ""),
+	NOME_ARQUIVO_TEMPO_ESPERA_POR_PROCEDIMENTO_OPM(37, 0, "GEFIC - TEMPO DE ESPERA POR PROCEDIMENTO OPM - " + MASCARA_DATA_DOWNLOAD.getDescricao() + ".xlsx", "", ""),
+	
 	NOME_PLANILHA_OUTROS(42, 1, "MOTIVO OUTROS", "", ""),
 	
 	LINHA_INICIAL_ARQUIVO(43, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),

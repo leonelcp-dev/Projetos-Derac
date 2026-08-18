@@ -659,8 +659,8 @@ public class OfertaDemandaDeAcessoR1 {
 		ordenarPlanilhaDeOfertas();
 		ordenarPlanilhaDeDemandas();
 		atualizarCopiaOriginalRelatorioProducao();
-		//copiarRelatorioProducaoParaCDIDR();
-		//copiarRelatorioProducaoParaCDRA();
+		copiarRelatorioProducaoParaCDIDR();
+		copiarRelatorioProducaoParaCDRA();
 		
 		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
@@ -3293,6 +3293,7 @@ public class OfertaDemandaDeAcessoR1 {
 				}
 				
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getExecutante(), "String"));
+				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CNES.getIndice(), entidade.getCNES(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_VINCULO.getIndice(), entidade.getVinculo(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), dataInicioCompetencia, "Date mes/ano"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_TIPO_OFERTA.getIndice(), tipoDeBusca, ""));
@@ -3425,6 +3426,7 @@ public class OfertaDemandaDeAcessoR1 {
 	private OfertaEDemanda montarObjetoOferta(OfertaEDemanda oferta, EntidadeExecutanteR1 entidade, String tipoOferta, LocalDate dataInicioCompetencia, int linhaExcel, String especialidade, ArrayList<String> dadosSequenciais, int ofertaPreExistente)
 	{
 		oferta.setUnidade(entidade.getExecutante());
+		oferta.setCNES(entidade.getCNES());
 		oferta.setVinculo(entidade.getVinculo());
 		
 		Locale localeBR = Locale.of("pt", "BR");
@@ -4095,6 +4097,7 @@ public class OfertaDemandaDeAcessoR1 {
 		for(OfertaEDemanda oferta : ofertasEDemandasJaRegistradas)
 		{
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_UNIDADE.getIndice(), oferta.getUnidade(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_UNIDADE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CNES.getIndice(), oferta.getCNES(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_CNES.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_VINCULO.getIndice(), oferta.getVinculo(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_VINCULO.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_COMPETENCIA.getIndice(), oferta.getCompetencia(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_COMPETENCIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoOfertaDemanda.INDICE_COLUNA_TIPO_OFERTA.getIndice(), oferta.getTipoDeOferta(), ParametrosArquivoOfertaDemanda.INDICE_COLUNA_TIPO_OFERTA.getTipo()));

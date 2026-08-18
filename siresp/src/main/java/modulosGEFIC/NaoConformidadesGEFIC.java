@@ -76,8 +76,8 @@ public class NaoConformidadesGEFIC
 				mapaDePastas.put(registro.get(0) + registro.get(1), registro.get(2));
 			}
 			
-			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDIDRGEFIC.REFERENCIA_PASTAS_MONITORAMENTO_LEITOS_CDIDR.getTextoIdentificador()))
-				pastaBaseAmbulatorialCDIDR = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDIDRGEFIC.REFERENCIA_PASTAS_MONITORAMENTO_LEITOS_CDIDR.getTextoIdentificador());
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDIDRGEFIC.REFERENCIA_PASTAS_MONITORAMENTO_GEFIC.getTextoIdentificador()))
+				pastaBaseAmbulatorialCDIDR = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDIDRGEFIC.REFERENCIA_PASTAS_MONITORAMENTO_GEFIC.getTextoIdentificador());
 			else
 			{
 				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Ambulatorial compartilhada");

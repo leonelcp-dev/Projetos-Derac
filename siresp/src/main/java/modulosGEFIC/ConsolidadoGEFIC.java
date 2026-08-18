@@ -240,16 +240,16 @@ public class ConsolidadoGEFIC
     			
     	}
 		
-    	//atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
-    	//atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
+    	atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
+    	atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
     	
     	if(ehOPM)
     	{
-    		//atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosOPM, deParaStatusOPM);
+    		atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosOPM, deParaStatusOPM);
     	}
     	else
     	{
-    		//atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosCirurgiaEletiva, deParaStatusCirurgiasEletivas);
+    		atualizarStatusDasSaidasDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia, statusRealizadosCirurgiaEletiva, deParaStatusCirurgiasEletivas);
     		atualizarNaoConformidades(competencia);
     	}
 		

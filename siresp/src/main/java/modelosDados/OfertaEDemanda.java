@@ -5,6 +5,9 @@ public class OfertaEDemanda {
 
     @ExcelColumn(header = "Unidade")
     private String unidade;
+    
+    @ExcelColumn(header = "CNES")
+    private String cnes;
 
     @ExcelColumn(header = "Vínculo")
     private String vinculo;
@@ -128,6 +131,14 @@ public class OfertaEDemanda {
 
 	public void setUnidade(String unidade) {
 		this.unidade = unidade;
+	}
+	
+	public String getCNES() {
+		return cnes;
+	}
+
+	public void setCNES(String cnes) {
+		this.cnes = cnes;
 	}
 
 	public String getVinculo() {
