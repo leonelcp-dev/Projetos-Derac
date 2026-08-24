@@ -1,10 +1,23 @@
 package extracao_dados.siresp;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.DuplicateHeaderMode;
 import org.openqa.selenium.BuildInfo;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -14,8 +27,10 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPaginaWebSIRESPInicio;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import io.opentelemetry.sdk.metrics.data.Data;
+import modelosDados.EntidadeLeito;
 import modelosDados.UrgenciaAguardandoDetalhado;
 import modulos.AbrirGoogleChrome;
 import modulos.Absenteismo;
@@ -48,15 +63,41 @@ public class InteracaoComSIRESPPaginaInicial
     public static void main( String[] args )
     {
     	
-    	String usuarioComum = "leocpereira";
-    	String senhaUsuarioComum = "Cross@1234";
-    	String cpfUsuarioComum = "04633274627";
-    	String rgUsuarioComum = "558864338";
+    	String nomeUsuario = System.getProperty("user.name");
+    	System.out.println(nomeUsuario);
+		HashMap<String, String> mapaDeAcessos = new HashMap<String, String>();
     	
-    	String usuarioTARM = "vleitao";
-    	String senhaUsuarioTARM = "Trazodona100mg@";
-    	String cpfUsuarioTARM = "33969231892";
-    	String rgUsuarioTARM = "419450269";
+    	try {
+			
+			Reader reader = null;
+			
+			reader = new InputStreamReader(new FileInputStream("C:\\Users\\" + nomeUsuario + "\\Documents\\SIRESP\\parametros_acesso.csv"), StandardCharsets.ISO_8859_1);
+				
+			CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(';').setQuote('"').setHeader().setSkipHeaderRecord(true).setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL).build();
+			
+			Iterable<CSVRecord> registros = format.parse(reader);
+			for(CSVRecord registro : registros)						
+			{
+				mapaDeAcessos.put(registro.get(0), registro.get(1));
+			}
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+			JOptionPane.showMessageDialog(null, "Erro ao encontrar o arquivo com as credenciais de acesso");
+			return;
+		}
+		
+    	String usuarioComum = mapaDeAcessos.get("USUARIO_CDR");
+    	String senhaUsuarioComum = mapaDeAcessos.get("SENHA_CDR");
+    	String cpfUsuarioComum = mapaDeAcessos.get("CPF_CDR");
+    	String rgUsuarioComum = mapaDeAcessos.get("RG_CDR");
+    	
+    	String usuarioTARM = mapaDeAcessos.get("USUARIO_REGULADA");
+    	String senhaUsuarioTARM = mapaDeAcessos.get("SENHA_REGULADA");
+    	String cpfUsuarioTARM = mapaDeAcessos.get("CPF_REGULADA");
+    	String rgUsuarioTARM = mapaDeAcessos.get("RG_REGULADA");
     	
     	//ChromeOptions options = new ChromeOptions();
     	
@@ -90,8 +131,6 @@ public class InteracaoComSIRESPPaginaInicial
     			ambiente = "TESTE";
     	}
     	
-    	String nomeUsuario = System.getProperty("user.name");
-    	
 //    	options.addArguments("user-data-dir=C:/Usuários/" + nomeUsuario + "/AppData/Local/Google/Chrome/User Data");
 //    	options.addArguments("profile-directory=Default");
     	
@@ -107,8 +146,10 @@ public class InteracaoComSIRESPPaginaInicial
     	String[] opcoesChrome = {"Sim", "Não"}; 
         //int escolhaChrome = JOptionPane.showOptionDialog( null, "Deseja abrir o Google Chrome no modo de processamento?", "Google Chrome", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoesChrome, opcoesChrome[0] );
     	int escolhaChrome = 0;
+    	
+    	boolean chromeRunning = isPortOpen("localhost", 9222);
         
-        if(escolhaChrome == 0)
+        if(!chromeRunning)
         {
         	AbrirGoogleChrome chrome = new AbrirGoogleChrome();
         	try {
@@ -175,37 +216,68 @@ public class InteracaoComSIRESPPaginaInicial
         {
         	AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
         	
-        	String retorno = InteracaoComSIRESPPaginaInicial.acessarModuloAmbulatorial(driver, paginaWeb, paginaInicial, usuarioTARM, senhaUsuarioTARM, cpfUsuarioTARM, rgUsuarioTARM);
+        	String retorno;
+        	
+        	driver.get(paginaInicial);
+        	retorno = InteracaoComSIRESPPaginaInicial.acessarModuloAmbulatorial(driver, paginaWeb, paginaInicial, usuarioTARM, senhaUsuarioTARM, cpfUsuarioTARM, rgUsuarioTARM, nomeUsuario);
         	if(retorno.equals(""))
         	{
-        		FilaNominalAgendamentosPendentes filaNominalReguladaAgendamento = new FilaNominalAgendamentosPendentes("C:\\Users\\PMC514991-2\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\PMC514991-2\\Downloads");
+        		FilaNominalAgendamentosPendentes filaNominalReguladaAgendamento = new FilaNominalAgendamentosPendentes("C:\\Users\\" + nomeUsuario + "\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\" + nomeUsuario + "\\Downloads");
         		filaNominalReguladaAgendamento.baixarFilaAgendamentosPendentes(driver);
 				
-				FilaNominalSolicitacoesPendentes filaNominalReguladaSolicitacao = new FilaNominalSolicitacoesPendentes("C:\\Users\\PMC514991-2\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\PMC514991-2\\Downloads");
+				FilaNominalSolicitacoesPendentes filaNominalReguladaSolicitacao = new FilaNominalSolicitacoesPendentes("C:\\Users\\" + nomeUsuario + "\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\" + nomeUsuario + "\\Downloads");
 				filaNominalReguladaSolicitacao.baixarFilaSolicitacoesPendentes(driver);
+				
+				paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPInicio.XPATH_BOTAO_FECHAR.getTextoIdentificador());
+				///html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table[1]/tbody/tr/td[5]/a
         	}
         	
         	driver.get(paginaInicial);
-        	retorno = InteracaoComSIRESPPaginaInicial.acessarModuloAmbulatorial(driver, paginaWeb, paginaInicial, usuarioComum, senhaUsuarioComum, cpfUsuarioComum, rgUsuarioComum);
+        	retorno = InteracaoComSIRESPPaginaInicial.acessarModuloAmbulatorial(driver, paginaWeb, paginaInicial, usuarioComum, senhaUsuarioComum, cpfUsuarioComum, rgUsuarioComum, nomeUsuario);
         	
         	if(retorno.equals(""))
         	{
-				FilaNominalCDRNaoRegulada filaNominalCDR = new FilaNominalCDRNaoRegulada("C:\\Users\\PMC514991-2\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\PMC514991-2\\Downloads");
+        		FilaNominalCDRNaoRegulada filaNominalCDR = new FilaNominalCDRNaoRegulada("C:\\Users\\" + nomeUsuario + "\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\" + nomeUsuario + "\\Downloads");
 				filaNominalCDR.baixarFilaCDR(driver);
+				
+				paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPInicio.XPATH_BOTAO_FECHAR.getTextoIdentificador());
+//				///html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table[1]/tbody/tr/td[5]/a
         	}
-        	
+
         	LocalDate dataHoje = LocalDate.now();
-        	DemandaReprimida demandaReprimida = new DemandaReprimida("C:\\Users\\PMC514991-2", dataHoje.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        	DemandaReprimida demandaReprimida = new DemandaReprimida("C:\\Users\\" + nomeUsuario, dataHoje.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         	demandaReprimida.montarDemandaReprimidaDiaria("PRODUCAO");
         	
-        	driver.get(paginaInicial);
-        	retorno = InteracaoComSIRESPPaginaInicial.acessarModuloAmbulatorial(driver, paginaWeb, paginaInicial, usuarioComum, senhaUsuarioComum, cpfUsuarioComum, rgUsuarioComum);
-        	
-        	if(retorno.equals(""))
-        	{
-				FilaNominalCDRNaoRegulada filaNominalCDR = new FilaNominalCDRNaoRegulada("C:\\Users\\PMC514991-2\\OneDrive - Prefeitura Municipal de Campinas\\01. AMBULATORIAL\\FILAS NOMINAIS - UNIDADES", "C:\\Users\\PMC514991-2\\Downloads");
-				filaNominalCDR.baixarFilaCDR(driver);
-        	}
+//        	String competenciaInicial;
+//        	String competenciaFinal;
+//        	
+//        	int dia = dataHoje.getDayOfMonth();
+//        	int mes = dataHoje.getMonthValue();
+//        	int ano = dataHoje.getYear();
+//        	int anoAnterior = ano;
+//        	int proximoAno = ano;
+//        	
+//        	int mesAnterior = mes - 1;
+//        	int proximoMes = mes + 1;
+//        	
+//        	if(mesAnterior < 1)
+//        	{
+//        		mesAnterior = 12;
+//        		anoAnterior = ano - 1;
+//        	}
+//        	
+//        	if(proximoMes > 12)
+//        	{
+//        		proximoMes = 1;
+//        		proximoAno = ano + 1;
+//        	}
+//        	
+//        	if(dataHoje.getDayOfMonth() <= 10)
+//        	{
+//        		if(mesAnterior < 10)
+//        			competenciaInicial = "0";
+//        		competencialInicial
+//        	}
         }
         else if(escolha == 2)
         {
@@ -288,18 +360,18 @@ public class InteracaoComSIRESPPaginaInicial
         	}
         }
         
-        driver.quit();
+        driver.close();
     }
     
-    public static String acessarModuloAmbulatorial(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String paginaInicial, String login, String senha, String cpf, String rg)
+    public static String acessarModuloAmbulatorial(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String paginaInicial, String login, String senha, String cpf, String rg, String nomeUsuario)
     {
-    	String destinoImagem = "C:\\Users\\PMC514991-2\\Downloads\\imagem.png";
+    	String destinoImagem = "C:\\Users\\" + nomeUsuario + "\\Downloads\\imagem.png";
     	InteracaoComSIRESPPaginaInicial.CPF = cpf;
     	InteracaoComSIRESPPaginaInicial.RG = rg;
 	    
 		String retorno = InteracaoComSIRESPPaginaInicial.autenticarNoSistema(driver, paginaWeb, "", destinoImagem, login, senha);
 		
-		if(!retorno.equals(""))
+		while(!retorno.equals(""))
 		{
 			driver.get(paginaInicial);
 			retorno = InteracaoComSIRESPPaginaInicial.autenticarNoSistema(driver, paginaWeb, "", destinoImagem, login, senha);
@@ -410,6 +482,19 @@ public class InteracaoComSIRESPPaginaInicial
 		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
 		
 		return "";
+    }
+    
+    public static boolean isPortOpen(String host, int port) {
+    	try (Socket socket = new Socket(host, port)) {
+
+    		return true;
+
+    	} catch (Exception e) {
+
+    		return false;
+
+    	}
+
     }
 }
 

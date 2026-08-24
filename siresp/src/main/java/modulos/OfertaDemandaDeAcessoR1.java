@@ -37,6 +37,7 @@ import dadosGerais.CorrelacaoArquivosOfertaDemanda;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDRA;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDTI;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoAgendamentosPendentesRegulada;
 import dadosGerais.ParametrosArquivoCenso;
@@ -97,6 +98,7 @@ public class OfertaDemandaDeAcessoR1 {
 	private String pastaBase;
 	private String pastaBaseDemandaReprimidaCDIDR;
 	private String pastaBaseCDRA;
+	private String pastaBaseCDTI;
 	private String pastaDownloads;
 	private MesesFormatados meses;
 	private DateTimeFormatter formatoDataPaginaWeb;
@@ -121,7 +123,8 @@ public class OfertaDemandaDeAcessoR1 {
 	HashMap<String, NovasSolicitacoes> novasSolicitacoesCDR;
 	HashMap<String, NovasSolicitacoes> novasSolicitacoesRegulada;
 	private IdentificadoresPastasCompartilhadasCDIDR diretoriosCDIDR; 
-	private IdentificadoresPastasCompartilhadasCDRA diretoriosCDRA; 
+	private IdentificadoresPastasCompartilhadasCDRA diretoriosCDRA;
+	private IdentificadoresPastasCompartilhadasCDTI diretoriosCDTI;
 
 	public OfertaDemandaDeAcessoR1(String pastaBase, String ambiente)
 	{
@@ -141,6 +144,7 @@ public class OfertaDemandaDeAcessoR1 {
 				
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDR.valueOf(ambiente.toUpperCase());
 		diretoriosCDRA = IdentificadoresPastasCompartilhadasCDRA.valueOf(ambiente.toUpperCase());
+		diretoriosCDTI = IdentificadoresPastasCompartilhadasCDTI.valueOf(ambiente.toUpperCase());
 		
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
 		
@@ -208,6 +212,14 @@ public class OfertaDemandaDeAcessoR1 {
 			else
 			{
 				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Demanda Reprimida compartilhada");
+				return "";
+			}
+			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador()))
+				pastaBaseCDTI = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Demanda Reprimida compartilhada CDTI");
 				return "";
 			}
 			
@@ -661,6 +673,7 @@ public class OfertaDemandaDeAcessoR1 {
 		atualizarCopiaOriginalRelatorioProducao();
 		copiarRelatorioProducaoParaCDIDR();
 		copiarRelatorioProducaoParaCDRA();
+		copiarRelatorioProducaoParaCDTI();
 		
 		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
@@ -2000,7 +2013,8 @@ public class OfertaDemandaDeAcessoR1 {
 					demanda.setTempoDeEspera("-");
 				}
 			}
-				
+			
+			demanda.setOfertaAtiva(montarAnaliseDeOfertaAtiva(demanda.getProcedimento()));
 
 			celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_PROCEDIMENTOS.getIndice(), demanda.getProcedimento(), "String"));
 			celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TIPO_DE_OFERTA.getIndice(), demanda.getTipoDeOferta(), "String"));
@@ -2045,6 +2059,8 @@ public class OfertaDemandaDeAcessoR1 {
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getIndice(), demanda.getMaisVelhoNaFila(), "String"));
 			else
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getIndice(), Integer.parseInt(demanda.getMaisVelhoNaFila()), "Int"));
+			
+			celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_ATIVA.getIndice(), demanda.getOfertaAtiva(), "String"));
 				
 		}
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaPlanilhaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
@@ -3423,6 +3439,8 @@ public class OfertaDemandaDeAcessoR1 {
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 	}
 	
+
+	
 	private OfertaEDemanda montarObjetoOferta(OfertaEDemanda oferta, EntidadeExecutanteR1 entidade, String tipoOferta, LocalDate dataInicioCompetencia, int linhaExcel, String especialidade, ArrayList<String> dadosSequenciais, int ofertaPreExistente)
 	{
 		oferta.setUnidade(entidade.getExecutante());
@@ -3916,6 +3934,20 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
+	private String copiarRelatorioProducaoParaCDTI()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, ParametrosArquivoOfertaDemanda.NOME_ARQUIVO_CONSOLIDADO.getDescricao());
+		
+		String pastaRelatorioCDTI = pastaBaseCDTI + "\\" + diretoriosCDTI.getPastaRelatorioOfertaDemanda();
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDTI + "\\" + nomeArquivo);
+		
+		return "";
+	}
+	
 	private String gerarCopiaTemporariaRelatorioProducao()
 	{
 		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();
@@ -4180,6 +4212,7 @@ public class OfertaDemandaDeAcessoR1 {
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TAXA_PERDA_PRIMARIA.getIndice(), demanda.getTaxaPerdaPrimaria(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_TAXA_PERDA_PRIMARIA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getIndice(), demanda.getTempoDeEspera(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getIndice(), demanda.getMaisVelhoNaFila(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_MAIS_VELHO_NA_FILA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_ATIVA.getIndice(), demanda.getOfertaAtiva(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_ATIVA.getTipo()));
 			
 			linhaArquivoDemanda++;
 		}
@@ -4240,6 +4273,78 @@ public class OfertaDemandaDeAcessoR1 {
 		}
 		
 		return celula;
+	}
+	
+	private String montarAnaliseDeOfertaAtiva(String procedimento)
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getNomeArquivoOfertaDemanda(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), ParametrosArquivoOfertaPlanilhaDemanda.LINHA_INICIAL_ARQUIVO.getIndice());
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		String resultado = "";
+		
+		Locale localeBR = Locale.of("pt", "BR");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", localeBR);
+		String inicioCompetenciaFormatado = dataInicioCompetencia.format(formatter);
+		
+		Demanda demanda = demandasProcessadas.get(procedimento + inicioCompetenciaFormatado);
+		
+		if(demanda != null)
+		{
+			int ofertaAtiva = 0;
+			boolean ofertaEstaAtiva = false;
+			
+			try
+			{
+				ofertaAtiva = Integer.parseInt(demanda.getOfertaTotal());
+			}catch(Exception e)
+			{
+				
+			}
+			
+			if(ofertaAtiva > 0)
+			{
+				ofertaEstaAtiva = true;
+			}
+			
+			LocalDate mesDeAnalise = dataInicioCompetencia.minusMonths(0).withDayOfMonth(1);
+			
+			for(int mes = 1; mes <= 5; mes++)
+			{
+				mesDeAnalise = mesDeAnalise.minusMonths(1).withDayOfMonth(1);
+				String competencia = mesDeAnalise.format(formatter);
+				
+				Demanda demandaDeAnalise = demandasProcessadas.get(demanda.getProcedimento() + competencia);
+				
+				try
+				{
+					ofertaAtiva = Integer.parseInt(demandaDeAnalise.getOfertaTotal());
+				}catch(Exception e)
+				{
+					
+				}
+				
+				if(ofertaAtiva > 0)
+				{
+					ofertaEstaAtiva = true;
+				}
+			}
+			
+			if(ofertaEstaAtiva)
+			{
+				//celulas.add(new CelulaExcel(demanda.getLinhaExcel(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_ATIVA.getIndice(), "Sim", "String"));
+				resultado = "Sim";
+			}
+			else
+			{
+				//celulas.add(new CelulaExcel(demanda.getLinhaExcel(), ParametrosArquivoOfertaPlanilhaDemanda.INDICE_COLUNA_OFERTA_ATIVA.getIndice(), "Não", "String"));
+				resultado = "Não";
+			}
+			
+			//arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoOfertaPlanilhaDemanda.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoOfertaDemanda.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		}
+		
+		return resultado;
 	}
 	
 }

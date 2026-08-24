@@ -157,11 +157,15 @@ public class Utils {
 	public static String obterTextoDeImagem(String caminhoImagem)
 	{
 		String texto = "";
+		
+    	String nomeUsuario = System.getProperty("user.name");
+    	System.out.println(nomeUsuario);
+		
 		try
 		{
 			ITesseract tesseract = new Tesseract();
 			// Pasta onde ficam os arquivos .traineddata
-			tesseract.setDatapath("C:\\Users\\PMC514991-2\\Documents\\SIRESP\\Dicionarios OCR");
+			tesseract.setDatapath("C:\\Users\\" + nomeUsuario + "\\Documents\\SIRESP\\Dicionarios OCR");
 			tesseract.setLanguage("por");
 			texto = tesseract.doOCR(new File(caminhoImagem));
 			System.out.println("Texto: " + texto);

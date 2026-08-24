@@ -139,12 +139,21 @@ public class InteracaoComGEFIC
         	String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
         	String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
         	
+        	String opcoesSimNao[] = {"Sim", "Não"};
+        	int obterStatusAtualDaFila = JOptionPane.showOptionDialog(null, "Favor informar se será atualizada a planilha GERAL do arquivo consolidado.", "Tipo de Execução", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoesSimNao, null);
+        	
+        	boolean executarStatus;
+        	if(obterStatusAtualDaFila == 0)
+        		executarStatus = true;
+        	else
+        		executarStatus = false;
+        		
 			String competenciaInicial = JOptionPane.showInputDialog(null, "Insira os dados do mês/ano do início do processamento (MM/yyyy)", "Competência Inicial", JOptionPane.QUESTION_MESSAGE).trim();
 			
 	        ConsolidadoGEFIC consolidadoGEFIC = new ConsolidadoGEFIC();
 	        
-	        consolidadoGEFIC.gerarArquivoConsolidadoGEFIC(driver, ambiente, pastaBase, pastaDownloads, false, competenciaInicial);
-	        consolidadoGEFIC.gerarArquivoConsolidadoGEFIC(driver, ambiente, pastaBase, pastaDownloads, true, competenciaInicial);
+	        consolidadoGEFIC.gerarArquivoConsolidadoGEFIC(driver, ambiente, pastaBase, pastaDownloads, false, competenciaInicial, executarStatus);
+	        //consolidadoGEFIC.gerarArquivoConsolidadoGEFIC(driver, ambiente, pastaBase, pastaDownloads, true, competenciaInicial, executarStatus);
         }
         else if(escolha == 1)
         {

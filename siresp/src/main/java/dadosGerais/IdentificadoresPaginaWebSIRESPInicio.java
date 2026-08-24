@@ -26,6 +26,9 @@ public enum IdentificadoresPaginaWebSIRESPInicio {
 	XPATH_TEXTO_DOCUMENTO_SOLICITADO(0, "/html/body/form/table/tbody/tr[3]/td/table[2]/tbody/tr[1]/td/table/tbody/tr/td/table/tbody/tr/td[3]/table/tbody/tr/td/table/tbody/tr/td[1]/label"),
 	XPATH_MODULO_AMBULATORIAL(0, "/html/body/div/div[4]/div/div/div[2]/div[1]/a"),
 	XPATH_BOTAO_OK_CODIGO_SEGURANCA_INVALIDO(0, "/html/body/div[2]/div/div[6]/button[1]"),
+	XPATH_BOTAO_FECHAR(0, "/html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table[1]/tbody/tr/td[5]/a"),
+	XPATH_UNIDADE_AUTENTICADA(0, "/html/body/form/table/tbody/tr[1]/td/table/tbody/tr[2]/td[1]/table/tbody/tr/td[5]"),
+	XPATH_CAIXA_OPCOES_UNIDADES(0, "/html/body/form/table/tbody"),
 	XPATH_TEXTO_DIGITOS_DOCUMENTOS(0, "/html/body/form/table/tbody/tr[3]/td/table[2]/tbody/tr[1]/td/table/tbody/tr/td/table/tbody/tr/td[3]/table/tbody/tr/td/table/tbody/tr/td[1]/input[1]");
 	
 	

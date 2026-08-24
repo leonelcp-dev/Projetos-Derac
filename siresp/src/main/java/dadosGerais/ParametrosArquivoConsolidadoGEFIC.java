@@ -11,6 +11,8 @@ public enum ParametrosArquivoConsolidadoGEFIC {
 	INDICE_LINHA_INICIAL_RELATORIOS(1, 4, "Ajustado de acordo com a linha 5 do arquivo", "", ""),
 	INDICE_LINHA_INICIAL_ENTRADA_SAIDA(2, 5, "Ajustado de acordo com a linha 5 do arquivo", "", ""),
 	
+	MASCARA_ANO_DINAMICO(3, 0, "######", "", ""),
+	
 	NOME_PLANILHA_GERAL(16, 0, "GERAL", "", ""),
 	NOME_PLANILHA_ENTRADA_SAIDA(17, 0, "ENTRADA_SAIDA", "", ""),
 	NOME_PLANILHA_CIRURGIAS_REALIZADAS(18, 0, "CIRURGIAS REALIZADAS", "", ""),
@@ -35,7 +37,10 @@ public enum ParametrosArquivoConsolidadoGEFIC {
 	TEXTO_SIM(32, 0, "SIM", "", ""),
 	TEXTO_NAO(33, 0, "NÃO", "", ""),
 	
-	EXTENSAO_ARQUIVO(34, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO(34, 0, "xlsx", "", ""),
+	
+	NOME_ARQUIVO_CONSOLIDADO_GEFIC_ELETIVAS(35, 0, "GEFIC " + MASCARA_ANO_DINAMICO.getDescricao() + ".xlsx", "", ""),
+	NOME_ARQUIVO_CONSOLIDADO_GEFIC_OPM(36, 0, "GEFIC OPM " + MASCARA_ANO_DINAMICO.getDescricao() + ".xlsx", "", "");
 	
 
 	private int idUnico;

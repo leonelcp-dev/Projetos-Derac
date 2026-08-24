@@ -35,16 +35,19 @@ public class FilaGEFIC
 	@ExcelColumn(header = "CID")
 	private String CID;
 	
-	@ExcelColumn(header = "Data indicação", pattern="dd/MM/yyyy")
+	//, pattern="dd/MM/yyyy"
+	
+	
+	@ExcelColumn(header = "Data indicação")
 	private String dataIndicacao;
 	
-	@ExcelColumn(header = "Data de inserção", pattern="dd/MM/yyyy")
+	@ExcelColumn(header = "Data de inserção")
 	private String dataInsercao;
 	
-	@ExcelColumn(header = "Data de execução", pattern="dd/MM/yyyy")
+	@ExcelColumn(header = "Data de execução")
 	private String dataExecucao;
 	
-	@ExcelColumn(header = "Data de saída", pattern="dd/MM/yyyy")
+	@ExcelColumn(header = "Data de saída")
 	private String dataSaida;
 	
 	@ExcelColumn(header = "Estabelecimento")
@@ -79,6 +82,8 @@ public class FilaGEFIC
 	
 	@ExcelColumn(header = "Observações")
 	private String observacoes;
+	
+	private int tempoEsperaNumerico;
 	
 	public String getPosicao() {
 	return posicao;
@@ -286,6 +291,14 @@ public class FilaGEFIC
 
 	public void setObservacoes(String observacoes) {
 		this.observacoes = observacoes;
+	}
+
+	public int getTempoEsperaNumerico() {
+		return tempoEsperaNumerico;
+	}
+
+	public void setTempoEsperaNumerico(int tempoEsperaNumerico) {
+		this.tempoEsperaNumerico = tempoEsperaNumerico;
 	}
 	
 }

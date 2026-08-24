@@ -19,6 +19,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
+import dadosGerais.IdentificadoresPaginaWebSIRESPInicio;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoFilasNominais;
@@ -120,16 +121,24 @@ public class FilaNominalAgendamentosPendentes {
 		{
 			driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
 			
+			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
+			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 			
-			String value = elementosRadioUnidades.get(entidade.getCNES());
+			boolean unidadesVisiveis = paginaWeb.elementoEstaVisivel(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador());
+			
+			String value;
+			if(!unidadesVisiveis)
+				value = entidade.getNomeUnidadeSIRESP();
+			else
+				value = elementosRadioUnidades.get(entidade.getCNES());
 			
 			if(value != null)
 			{
 						
-				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());
-				paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
 				
-				boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, value);
+				
+				if(unidadesVisiveis)
+					paginaWeb.clicarRadioInputByValue(driver, value);
 				
 				paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
 				

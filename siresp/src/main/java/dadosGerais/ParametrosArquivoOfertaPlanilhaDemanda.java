@@ -18,13 +18,14 @@ public enum ParametrosArquivoOfertaPlanilhaDemanda {
 	INDICE_COLUNA_TAXA_PERDA_PRIMARIA(8, 9, "Taxa de Perda Primária", "Porcentagem", ""),
 	INDICE_COLUNA_CALCULOS_TEMPO_DE_ESPERA(9, 10,"Cálculos Tempo de Espera", "Int", ""),
 	INDICE_COLUNA_MAIS_VELHO_NA_FILA(10, 11,"Mais Velho na Fila", "Int", ""),
+	INDICE_COLUNA_OFERTA_ATIVA(11, 12,"Oferta ativa", "String", ""),
 	
-	LINHA_INICIAL_ARQUIVO(11, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
+	LINHA_INICIAL_ARQUIVO(12, 10, "Ajustado de acordo com o Java, no arquivo é a linha 11", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(12, 0, "Demandas", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(13, 0, "Demandas", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(13, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(14, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(14, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(15, 0, "xls", "", "");
 	
 
 	private int idUnico;

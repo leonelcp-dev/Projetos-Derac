@@ -38,6 +38,9 @@ public class Demanda {
     @ExcelColumn(header = "Maior tempo de espera em dias")
     private String maisVelhoNaFila;
     
+    @ExcelColumn(header = "Oferta ativa")
+    private String ofertaAtiva;
+    
     private int linhaExcel;
 
 	public String getCompetencia() {
@@ -142,6 +145,14 @@ public class Demanda {
 
 	public void setTaxaPerdaPrimaria(String taxaPerdaPrimaria) {
 		this.taxaPerdaPrimaria = taxaPerdaPrimaria;
+	}
+
+	public String getOfertaAtiva() {
+		return ofertaAtiva;
+	}
+
+	public void setOfertaAtiva(String ofertaAtiva) {
+		this.ofertaAtiva = ofertaAtiva;
 	}
 
 }

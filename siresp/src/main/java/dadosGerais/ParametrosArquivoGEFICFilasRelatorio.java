@@ -16,10 +16,10 @@ public enum ParametrosArquivoGEFICFilasRelatorio {
 	INDICE_COLUNA_SUBESPECIALIDADE(5, 5, "Subesecialidade", "String", ""),
 	INDICE_COLUNA_PROCEDIMENTO(6, 6, "Procedimento", "String", ""),
 	INDICE_COLUNA_CID(7, 7, "CID", "String", ""),
-	INDICE_COLUNA_DATA_INDICACAO(8, 8, "Data indicação", "Date", "MMM/yyyy"),
-	INDICE_COLUNA_DATA_INSERCAO(9, 9, "Data de inserção", "Date", "MMM/yyyy"),
-	INDICE_COLUNA_DATA_EXECUCAO(10, 10, "Data de execução", "Date", "MMM/yyyy"),
-	INDICE_COLUNA_DATA_SAIDA(11, 11, "Data de saída", "Date mes/ano", "MMM/yyyy"),
+	INDICE_COLUNA_DATA_INDICACAO(8, 8, "Data indicação", "Date", "dd/MM/yyyy"),
+	INDICE_COLUNA_DATA_INSERCAO(9, 9, "Data de inserção", "Date", "dd/MM/yyyy"),
+	INDICE_COLUNA_DATA_EXECUCAO(10, 10, "Data de execução", "Date", "dd/MM/yyyy"),
+	INDICE_COLUNA_DATA_SAIDA(11, 11, "Data de saída", "Date mes/ano", "dd/MM/yyyy"),
 	INDICE_COLUNA_ESTABELECIMENTO(12, 12, "Estabelecimento", "String", ""),
 	INDICE_COLUNA_SITUACAO(13, 13, "Situação", "String", ""),
 	INDICE_COLUNA_CIDADE(14, 14, "Cidade", "String", ""),
@@ -28,7 +28,7 @@ public enum ParametrosArquivoGEFICFilasRelatorio {
 	INDICE_COLUNA_TEMPO_MAXIMO_ESPERA(17, 17, "Tempo máximo de espera", "Integer", ""),
 	INDICE_COLUNA_OBSERVACOES(18, 18, "Observações", "String", ""),
 	
-	NOME_PLANILHA_OUTROS(42, 1, "MOTIVO OUTROS", "", ""),
+	NOME_PLANILHA(42, 1, "Fila Nominal", "", ""),
 	
 	LINHA_INICIAL_ARQUIVO(43, 1, "Ajustado de acordo com o Java, no arquivo é a linha 2", "", ""),
 	

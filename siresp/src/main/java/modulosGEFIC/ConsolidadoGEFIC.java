@@ -38,6 +38,7 @@ import dadosGerais.ParametrosArquivoGEFICSaidaPacientes;
 import dadosGerais.ParametrosArquivoGEFICSaidaPacientesAnalitico;
 import dadosGerais.ParametrosArquivoGEFICTransferenciaPacientes;
 import dadosGerais.ParametrosArquivoLeitosPlanilhaMonitoramento;
+import dadosGerais.ParametrosArquivoOfertaDemanda;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFormaResolucao;
@@ -78,6 +79,7 @@ public class ConsolidadoGEFIC
 	String dataFormatadaFinalCompetencia;
 	boolean ehOPM;
 	boolean jaConsolidouTransferencias;
+	boolean obterStatusAtualDaFila;
 	HashMap<String, Integer> transferidosPorOrigem;
 	HashMap<String, Integer> transferidosPorDestino;
 	String ambiente;
@@ -106,7 +108,7 @@ public class ConsolidadoGEFIC
 		jaConsolidouTransferencias = false;
 	}
 	
-	public String gerarArquivoConsolidadoGEFIC(WebDriver driver, String ambiente, String pastaBaseInformada, String pastaDownloads, boolean ehOPM, String competencia)
+	public String gerarArquivoConsolidadoGEFIC(WebDriver driver, String ambiente, String pastaBaseInformada, String pastaDownloads, boolean ehOPM, String competencia, boolean executarStatusAtualDaFila)
 	{			
 		this.ehOPM = ehOPM;
 		this.ambiente = ambiente;
@@ -240,7 +242,9 @@ public class ConsolidadoGEFIC
     			
     	}
 		
-    	atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades);
+    	if(executarStatusAtualDaFila)
+    		atualizarQuantidadeGeralDePacientes(paginaWeb, driver, deParaNomesEntidades, competencia);
+    	
     	atualizarQuantidadeEntradaSaidaDePacientes(paginaWeb, driver, deParaSiglasEntidades, competencia);
     	
     	if(ehOPM)
@@ -270,6 +274,8 @@ public class ConsolidadoGEFIC
 		}
 						
 
+		copiarConsolidadoGEFICParaBancoDeDados(dataInicioCompetencia);
+		
 		//atualizarCopiaOriginalRelatorioProducao();
 		//copiarRelatorioProducaoParaCDIDR();
 		//copiarRelatorioProducaoParaCDRA();
@@ -277,13 +283,33 @@ public class ConsolidadoGEFIC
 		return "";	
 	}
 	
-	private String atualizarQuantidadeGeralDePacientes(AcoesGeraisPaginaWeb paginaWeb, WebDriver driver, HashMap<String, String> deParaNomesEntidades)
+	private String copiarConsolidadoGEFICParaBancoDeDados(LocalDate data)
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), "" + data.getYear());
+		Arquivo arquivo = new Arquivo(caminhoArquivo, ParametrosArquivoConsolidadoGEFIC.NOME_ARQUIVO_CONSOLIDADO_GEFIC_ELETIVAS.getDescricao().replace(ParametrosArquivoConsolidadoGEFIC.NOME_ARQUIVO_CONSOLIDADO_GEFIC_ELETIVAS.getDescricao(), "" + data.getYear()));
+		
+		String pastaRelatorioCDIDR = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getCopiaArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), "" + data.getYear());
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
+		
+		return "";
+	}
+	
+	private String atualizarQuantidadeGeralDePacientes(AcoesGeraisPaginaWeb paginaWeb, WebDriver driver, HashMap<String, String> deParaNomesEntidades, String competencia)
 	{
 		//gerarCopiaTemporariaRelatorioProducao();
 		
-		LocalDate dataAtual = LocalDate.now();
+		dataFormatadaInicioCompetencia = "01/" + competencia;
 		
-		String mesAtual = (new MesesFormatados()).getMeses().get(dataAtual.getMonthValue() - 1).getMesDescricao();
+		dataInicioCompetencia = LocalDate.parse(dataFormatadaInicioCompetencia, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		
+		dataFinalCompetencia = dataInicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
+		dataFormatadaFinalCompetencia = dataFinalCompetencia.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		
+		String mesAtual = (new MesesFormatados()).getMeses().get(dataInicioCompetencia.getMonthValue() - 1).getMesDescricao();
 		
 		ArrayList<String> opcoes = new ArrayList<String>();
 		
@@ -312,9 +338,9 @@ public class ConsolidadoGEFIC
 		
 		AcoesArquivoExcel arquivoConsolidado;
 		if(ehOPM)
-			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICOPM().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataAtual.getYear())), 0);
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICOPM().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
 		else
-			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataAtual.getYear())), 0);
+			arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoGEFICCirurgiasEletivas().replace(IdentificadoresPastasCompartilhadasCDIDRGEFIC.MASCARA_NOMES_DINAMICOS.getTextoIdentificador(), String.valueOf(dataInicioCompetencia.getYear())), 0);
 		
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoConsolidadoGEFIC.NOME_PLANILHA_GERAL.getDescricao(), 0);
 		
@@ -988,8 +1014,8 @@ public class ConsolidadoGEFIC
 		arquivoConsolidado.gravarDadosEmCelula(planilhaRealizado, celulasAtendidos, false, false, 0, null);
 		arquivoConsolidado.gravarDadosEmCelula(planilhaCancelado, celulasCancelados, false, false, 0, null);
 		
-		registrarObservacaoOutros(paginaWeb, driver, casosMotivoOutros);
-		montarPlanilhaMotivoOutros(arquivoConsolidado, casosMotivoOutros);
+		//registrarObservacaoOutros(paginaWeb, driver, casosMotivoOutros);
+		//montarPlanilhaMotivoOutros(arquivoConsolidado, casosMotivoOutros);
 		
 		return "";
 	}
