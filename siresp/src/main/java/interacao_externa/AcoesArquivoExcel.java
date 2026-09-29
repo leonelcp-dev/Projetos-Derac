@@ -797,7 +797,7 @@ public class AcoesArquivoExcel {
 		}catch(Exception e)
 		{
 			String textoCelula = celula.getStringCellValue();
-			//System.out.println(textoCelula);
+			System.out.println(textoCelula);
 			data = LocalDateTime.parse(textoCelula.substring(0, formato.length()), DateTimeFormatter.ofPattern(formato));
 		}
 		

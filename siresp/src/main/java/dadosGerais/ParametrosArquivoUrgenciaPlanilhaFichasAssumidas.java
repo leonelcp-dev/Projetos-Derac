@@ -5,20 +5,19 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
+public enum ParametrosArquivoUrgenciaPlanilhaFichasAssumidas {
 		
 	INDICE_COLUNA_DATA(0, 1, "Data", "Date", "dd/MM/yyyy"),
-	INDICE_COLUNA_HORARIO_EXTRACAO(1, 2, "Data", "Time", "HH:mm:ss"),
-	INDICE_COLUNA_SOLICITANTE(2, 3, "Solicitante", "String", ""),
-	INDICE_COLUNA_RECURSO(3, 4, "Recurso", "String", ""),
-	INDICE_COLUNA_FICHA(4, 5,"Ficha", "String", ""),
-	INDICE_COLUNA_HORAS_DE_ESPERA(5, 6, "Horas de Espera", "Int", ""),
-	INDICE_COLUNA_DIAS_DE_ESPERA(6, 7, "Dias de Espera", "Int", ""),
-	INDICE_COLUNA_QUANTIDADE(7, 8, "Quantidade", "Int", ""),
+	INDICE_COLUNA_PERIODO(1, 2, "Período", "String", ""),
+	INDICE_COLUNA_REGULADOR(2, 3, "Regulador", "String", ""),
+	INDICE_COLUNA_ASSUMIDOS(4, 5, "Casos Assumidos", "Int", ""),
+	INDICE_COLUNA_ENCAMINHADOS(5, 6, "Casos Encaminhados", "Int", ""),
+	INDICE_COLUNA_REGULADOS(6, 7, "Casos Regulados", "Int", ""),
+	INDICE_COLUNA_PENDENTES(7, 8, "Casos Pendentes", "Int", ""),
 	
 	LINHA_INICIAL_ARQUIVO(21, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_MONITORAMENTO(22, 0, "Detalhado Urgência Aguardando", "", ""),
+	NOME_PLANILHA_MONITORAMENTO(22, 0, "Fichas Assumidas", "", ""),
 	
 	DIVISOR_CAMPOS(23, 0, "####", "", ""),
 	
@@ -35,7 +34,7 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoUrgenciaPlanilhaFichasAssumidas(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);
@@ -84,10 +83,10 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
 		this.formato = formato;
 	}	
 	
-    private static final Map<Integer, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado> POR_ID_UNICO =
-        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado::getIdUnico, Function.identity()));
+    private static final Map<Integer, ParametrosArquivoUrgenciaPlanilhaFichasAssumidas> POR_ID_UNICO =
+        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoUrgenciaPlanilhaFichasAssumidas::getIdUnico, Function.identity()));
 
-    public static ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado poIdUnico(int idUnico) {
+    public static ParametrosArquivoUrgenciaPlanilhaFichasAssumidas poIdUnico(int idUnico) {
         return POR_ID_UNICO.get(idUnico); // pode retornar null se não existir
     }
 

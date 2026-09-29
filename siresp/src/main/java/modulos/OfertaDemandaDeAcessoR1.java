@@ -3934,6 +3934,7 @@ public class OfertaDemandaDeAcessoR1 {
 		return "";
 	}
 	
+	
 	private String copiarRelatorioProducaoParaCDTI()
 	{
 		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaRelatorioOfertaEDemanda();

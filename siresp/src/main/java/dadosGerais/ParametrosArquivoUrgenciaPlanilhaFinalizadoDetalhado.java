@@ -12,7 +12,8 @@ public enum ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado {
 	INDICE_COLUNA_RECURSO(2, 3, "Recurso", "String", ""),
 	INDICE_COLUNA_FICHA(3, 4,"Ficha", "String", ""),
 	INDICE_COLUNA_HORAS_DE_ESPERA(4, 5, "Horas de Espera", "Int", ""),
-	INDICE_COLUNA_QUANTIDADE(5, 6, "Quantidade", "Int", ""),
+	INDICE_COLUNA_DIAS_DE_ESPERA(5, 6, "Dias de Espera", "Int", ""),
+	INDICE_COLUNA_QUANTIDADE(6, 7, "Quantidade", "Int", ""),
 	
 	LINHA_INICIAL_ARQUIVO(21, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	

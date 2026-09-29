@@ -16,6 +16,10 @@ public class DadosAcumuladosLeitos {
     private int totalBloqueado;
     private int bloqueadoIsolamento;
     private int bloqueadoAguardandoPaciente;
+    private int bloqueadoSazonalidade;
+    private int bloqueadoReservaInterna;
+    private int bloqueadoManutencao;
+    private int bloqueadoAdministrativo;
     private int bloqueadoOutros;   
     private int leitosVagos;
 
@@ -33,6 +37,10 @@ public class DadosAcumuladosLeitos {
          totalBloqueado = 0;
          bloqueadoIsolamento = 0;
          bloqueadoAguardandoPaciente = 0;
+         bloqueadoSazonalidade = 0;
+         bloqueadoReservaInterna = 0;
+         bloqueadoManutencao = 0;
+         bloqueadoAdministrativo = 0;
          bloqueadoOutros = 0;   
          leitosVagos = 0;
     }
@@ -82,6 +90,26 @@ public class DadosAcumuladosLeitos {
     	bloqueadoIsolamento++;
     }
     
+    public void incrementarBloqueadoSazonalidade()
+    {
+    	bloqueadoSazonalidade++;
+    }
+    
+    public void incrementarBloqueadoReservaInterna()
+    {
+    	bloqueadoReservaInterna++;
+    }
+    
+    public void incrementarBloqueadoManutencao()
+    {
+    	bloqueadoManutencao++;
+    }
+
+    public void incrementarBloqueadoAdministrativo()
+    {
+    	bloqueadoAdministrativo++;
+    }
+
     public void incrementarBloqueadoAguardandoPaciente()
     {
     	bloqueadoAguardandoPaciente++;
@@ -225,6 +253,38 @@ public class DadosAcumuladosLeitos {
 
 	public void setNaoConveniadoOcupado(int naoConveniadoOcupado) {
 		this.naoConveniadoOcupado = naoConveniadoOcupado;
+	}
+
+	public int getBloqueadoSazonalidade() {
+		return bloqueadoSazonalidade;
+	}
+
+	public void setBloqueadoSazonalidade(int bloqueadoSazonalidade) {
+		this.bloqueadoSazonalidade = bloqueadoSazonalidade;
+	}
+
+	public int getBloqueadoAdministrativo() {
+		return bloqueadoAdministrativo;
+	}
+
+	public void setBloqueadoAdministrativo(int bloqueadoAdministrativo) {
+		this.bloqueadoAdministrativo = bloqueadoAdministrativo;
+	}
+
+	public int getBloqueadoReservaInterna() {
+		return bloqueadoReservaInterna;
+	}
+
+	public void setBloqueadoReservaInterna(int bloqueadoReservaInterna) {
+		this.bloqueadoReservaInterna = bloqueadoReservaInterna;
+	}
+
+	public int getBloqueadoManutencao() {
+		return bloqueadoManutencao;
+	}
+
+	public void setBloqueadoManutencao(int bloqueadoManutencao) {
+		this.bloqueadoManutencao = bloqueadoManutencao;
 	}
 
 }

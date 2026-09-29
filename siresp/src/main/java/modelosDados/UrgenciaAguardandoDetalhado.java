@@ -22,6 +22,9 @@ public class UrgenciaAguardandoDetalhado
 	@ExcelColumn(header = "Horas de Espera")
 	private String horasDeEspera;
 	
+	@ExcelColumn(header = "Dias de Espera")
+	private String diasDeEspera;
+	
 	@ExcelColumn(header = "Quantidade")
 	private String quantidade;
 	
@@ -119,5 +122,13 @@ public class UrgenciaAguardandoDetalhado
 
 	public void setHorasDeEsperaOrdenacao(int horasDeEsperaOrdenacao) {
 		this.horasDeEsperaOrdenacao = horasDeEsperaOrdenacao;
+	}
+	
+	public String getDiasDeEspera() {
+		return diasDeEspera;
+	}
+
+	public void setDiasDeEspera(String diasDeEspera) {
+		this.diasDeEspera = diasDeEspera;
 	}
 }

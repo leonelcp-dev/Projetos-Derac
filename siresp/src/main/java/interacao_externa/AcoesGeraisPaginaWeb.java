@@ -60,6 +60,8 @@ public class AcoesGeraisPaginaWeb {
 		return true;
 	}
 	
+	
+	
 	public boolean clicarMenuUL(WebDriver driverPagina, String iframe, String idInicial, List<String> SequenciaMenus)
 	{
 		try
@@ -848,6 +850,16 @@ public class AcoesGeraisPaginaWeb {
 	public boolean haElementosPorClassName(WebDriver driverPagina, String classname)
 	{
 		List<WebElement> elements = driverPagina.findElements(By.className(classname)); 
+
+		if(elements.isEmpty())
+			return false;
+		
+		return true;
+	}
+	
+	public boolean haElementosPorID(WebDriver driverPagina, String id)
+	{
+		List<WebElement> elements = driverPagina.findElements(By.id(id)); 
 
 		if(elements.isEmpty())
 			return false;

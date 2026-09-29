@@ -40,6 +40,7 @@ import modelosDados.CelulaExcel;
 import modelosDados.IntervalosUrgencia;
 import modelosDados.OfertaEDemanda;
 import modelosDados.UrgenciaAguardandoDetalhado;
+import tratamentoDeArquivos.Arquivo;
 import modelosDados.UrgenciaAguardandoAgrupado;
 
 public class UrgenciaAguardando 
@@ -64,11 +65,28 @@ public class UrgenciaAguardando
 	{
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRUrgencia.valueOf(ambiente);
 		pastaBaseAmbulatorialCDIDR = pastaBase;
+		this.pastaBase = pastaBase;
 	}
 	
 	public UrgenciaAguardando()
 	{
 
+	}
+	
+	public String copiarRelatorioUrgenciaParaCDIDR()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgencia();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, diretoriosCDIDR.getNomeArquivoConsolidado());
+		
+		String pastaRelatorioCDIDR = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgenciaCDIDR();
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		//LocalDate data = LocalDate.now();
+		//nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
+		
+		return "";
 	}
 	
 	public String obterAgrupamentoDeEsperaUrgencia(WebDriver driver, String ambiente)
@@ -77,7 +95,8 @@ public class UrgenciaAguardando
 		
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
 		
-    	pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+		if(pastaBase == null)
+			pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 		
     	try {
 			
@@ -258,7 +277,7 @@ public class UrgenciaAguardando
 		ordenarPlanilhaDetalhada();
 		//atualizarCopiaOriginalRelatorioProducao();
 		//copiarRelatorioProducaoParaCDIDR();
-		//copiarRelatorioProducaoParaCDRA();
+		copiarRelatorioUrgenciaParaCDIDR();
 		
 		return "";	
 	}
@@ -469,7 +488,12 @@ public class UrgenciaAguardando
 				urgencia.setSolicitante(chave.split(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.DIVISOR_CAMPOS.getDescricao())[1]);
 				urgencia.setRecurso(chave.split(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.DIVISOR_CAMPOS.getDescricao())[2]);
 				urgencia.setFicha(chave.split(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.DIVISOR_CAMPOS.getDescricao())[3]);
-				urgencia.setHorasDeEspera(chave.split(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.DIVISOR_CAMPOS.getDescricao())[4]);
+				
+				int horasDeEspera = Integer.parseInt(chave.split(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.DIVISOR_CAMPOS.getDescricao())[4]);
+				int diasDeEspera = horasDeEspera / 24;
+				
+				urgencia.setHorasDeEspera(String.valueOf(horasDeEspera));
+				urgencia.setDiasDeEspera(String.valueOf(diasDeEspera));
 				
 				linhaArquivo++;
 				linha = linhaArquivo;
@@ -486,6 +510,7 @@ public class UrgenciaAguardando
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), "String"));
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), "String"));
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_HORAS_DE_ESPERA.getIndice(), Integer.parseInt(urgencia.getHorasDeEspera()), "Integer"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_DIAS_DE_ESPERA.getIndice(), Integer.parseInt(urgencia.getDiasDeEspera()), "Integer"));
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_QUANTIDADE.getIndice(), quantidadeEmEspera, "Integer"));
 			
 		}
@@ -745,6 +770,7 @@ public class UrgenciaAguardando
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_RECURSO.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_FICHA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_HORAS_DE_ESPERA.getIndice(), urgencia.getHorasDeEspera(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_HORAS_DE_ESPERA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_DIAS_DE_ESPERA.getIndice(), urgencia.getDiasDeEspera(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_DIAS_DE_ESPERA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_QUANTIDADE.getIndice(), urgencia.getQuantidade(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_QUANTIDADE.getTipo()));
 
 			

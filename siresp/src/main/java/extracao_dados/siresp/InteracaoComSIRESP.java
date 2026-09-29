@@ -2,15 +2,18 @@ package extracao_dados.siresp;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
 import org.openqa.selenium.BuildInfo;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.bidi.network.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import interacao_externa.AcoesGeraisPaginaWeb;
 import modelosDados.UrgenciaAguardandoDetalhado;
@@ -72,6 +75,7 @@ public class InteracaoComSIRESP
     	}
     	
     	String nomeUsuario = System.getProperty("user.name");
+    	System.out.println(System.getProperty("user.home"));
     	
 //    	options.addArguments("user-data-dir=C:/Usuários/" + nomeUsuario + "/AppData/Local/Google/Chrome/User Data");
 //    	options.addArguments("profile-directory=Default");
@@ -92,6 +96,7 @@ public class InteracaoComSIRESP
         {
         	AbrirGoogleChrome chrome = new AbrirGoogleChrome();
         	try {
+        		
 				chrome.abrir(nomeUsuario);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -103,6 +108,8 @@ public class InteracaoComSIRESP
 		ChromeOptions options = new ChromeOptions(); 
 		options.addArguments("user-data-dir=C:\\chrome-temp"); 
 		options.addArguments("profile-directory=Default"); // ou "Profile 1" 
+		//options.addArguments("--disable-gpu");
+		//options.addArguments("--no-sandbox");
 		options.setExperimentalOption("debuggerAddress", "127.0.0.1:9222");
 
     	WebDriver driver = new ChromeDriver(options);
@@ -111,11 +118,25 @@ public class InteracaoComSIRESP
     	//((JavascriptExecutor) driver).executeScript("window.focus();");
     	
         driver.get("https://www.siresp.saude.sp.gov.br/principal.php");
+        //driver.get("https://www.google.com/");    
+        
+        //testando se a página está carregada
+		/*
+		 * JavascriptExecutor js = (JavascriptExecutor) driver;
+		 * 
+		 * String readyState = (String) js.executeScript("return document.readyState");
+		 * 
+		 * System.out.println(readyState);
+		 */
         
         //driver.navigate().refresh();
         
         BuildInfo buildInfo = new BuildInfo();
-        System.out.println(buildInfo.getReleaseLabel());
+        System.out.println("Selenium: " + buildInfo.getReleaseLabel());
+        
+        Capabilities caps = ((RemoteWebDriver) driver).getCapabilities();
+        System.out.println("Chrome: " + caps.getBrowserVersion());
+        System.out.println("Chrome Version: " + ((Map<?, ?>) caps.getCapability("chrome")).get("chromedriverVersion"));
 
         System.out.println("Page Title: " + driver.getTitle());
         
@@ -221,15 +242,15 @@ public class InteracaoComSIRESP
     		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
         	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
         	
-        	LocalDate dataInicial = LocalDate.of(2026, 7, 0);
-        	LocalDate dataFinal = LocalDate.of(2026, 7, 30);
+        	LocalDate dataInicial = LocalDate.of(2026, 1, 1);
+        	LocalDate dataFinal = LocalDate.of(2026, 7, 31);
         	
         	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))
         	{
         		String dataString = data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         		System.out.println(dataString);
         	    
-        		urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
+        		urgenciaFinalizado.obterAgrupamentoFinalizadoUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
         	}
         }
         

@@ -32,6 +32,9 @@ import org.openqa.selenium.WebDriver;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
+import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado;
+import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador;
+import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFormaResolucao;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaProducaoRegulador;
@@ -49,6 +52,8 @@ import modelosDados.DadosAcumuladosVagaZero;
 import modelosDados.EntidadeExecutanteR1;
 import modelosDados.EntidadeLeito;
 import modelosDados.IntervalosUrgencia;
+import modelosDados.UrgenciaFichasFinalizadasAssumidasRegulador;
+import modelosDados.UrgenciaFichasFinalizadasAssumidasReguladorMensal;
 import modelosDados.UrgenciaFinalizadoDetalhado;
 import modelosDados.UrgenciaFormaResolucao;
 import modelosDados.UrgenciaProducaoRegulador;
@@ -73,43 +78,84 @@ public class UrgenciaFinalizado
 	private LocalDate dataInformada;
 	private String dataFormatada;
 	
+	private String caminhoArquivoConsolidado;
+	private String ultimaPlanilhaProcessadaNoDia;
+	private int primeiraLinhaDaUltimaPlanilhaProcessadaNoDia;
+	private int colunaDataDaUltimaPlanilhaProcessadaNoDia;
+	
 	ArrayList<String> unidadesSolicitantes;
+	ArrayList<String> reguladores;
 	HashMap<String, UrgenciaFinalizadoAgrupado> urgenciasAgrupadasJaRegistradas;
 	HashMap<String, UrgenciaFinalizadoDetalhado> urgenciasDetalhadasJaRegistradas;
 	HashMap<String, UrgenciaVagaZero> urgenciasVagaZero;
 	HashMap<String, UrgenciaFormaResolucao> urgenciasFormaDeResolucao;
 	HashMap<String, UrgenciaProducaoRegulador> urgenciasProducaoRegulador;
 	HashMap<String, UrgenciaProducaoReguladorMensal> urgenciasProducaoreguladorMensal;
+	HashMap<String, UrgenciaFichasFinalizadasAssumidasRegulador> urgenciasFichasAssumidasRegulador;
+	HashMap<String, UrgenciaFichasFinalizadasAssumidasReguladorMensal> urgenciasFichasAssumidasReguladorMensal;
 	private IdentificadoresPastasCompartilhadasCDIDRUrgencia diretoriosCDIDR; 
 
 	public UrgenciaFinalizado(String pastaBase, String ambiente)
 	{
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRUrgencia.valueOf(ambiente);
 		pastaBaseAmbulatorialCDIDR = pastaBase;
+		this.pastaBase = pastaBase;
+		
+		setDadosReferenciaisParaAutomatizacaoDeLogin(true, ambiente);
 	}
 	
 	public UrgenciaFinalizado()
 	{
-
+		setDadosReferenciaisParaAutomatizacaoDeLogin(false, "");
 	}
 	
-	public String obterAgrupamentoDeEsperaUrgencia(WebDriver driver, String ambiente, String data, String caminhoPastaBase, String caminhoPastaDownloads)
-	{			
-		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRUrgencia.valueOf(ambiente.toUpperCase());
+	public String copiarRelatorioUrgenciaParaCDIDR()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgencia();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, diretoriosCDIDR.getNomeArquivoConsolidado());
 		
-		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
-    	
-		pastaBase = caminhoPastaBase;
-		pastaDownloads = caminhoPastaDownloads;
+		String pastaRelatorioCDIDR = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgenciaCDIDR();
 		
-		if(data == null)
-			dataDeAnalise = JOptionPane.showInputDialog(null, "Insira a data do dia de análise (formato: dd/mm/yyyy)", "Data da Análise", JOptionPane.QUESTION_MESSAGE).trim();
-		else
-			dataDeAnalise = data;
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		//LocalDate data = LocalDate.now();
+		//nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
 		
-		dataInformada = LocalDate.parse(dataDeAnalise, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		dataFormatada = dataInformada.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
 		
+		return "";
+	}
+	
+	public String copiarRelatorioUrgenciaParaLeitosCDIDR()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgencia();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, diretoriosCDIDR.getNomeArquivoConsolidado());
+		
+		String pastaRelatorioCDIDR = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoLeitosCDIDR();
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		//LocalDate data = LocalDate.now();
+		//nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
+		
+		return "";
+	}
+	
+	private void setDadosReferenciaisParaAutomatizacaoDeLogin(boolean setCaminho, String ambiente)
+	{
+		ultimaPlanilhaProcessadaNoDia = ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao();
+		primeiraLinhaDaUltimaPlanilhaProcessadaNoDia = ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice();
+		colunaDataDaUltimaPlanilhaProcessadaNoDia = ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_DATA.getIndice();
+		
+		if(setCaminho)
+		{
+			definirPastaCDIDR(ambiente);
+			caminhoArquivoConsolidado = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia();
+		}
+	}
+	
+	private String definirPastaCDIDR(String ambiente)
+	{
     	try {
 			
 			Reader reader = null;
@@ -154,6 +200,28 @@ public class UrgenciaFinalizado
 			JOptionPane.showMessageDialog(null, "Erro ao encontrar o arquivos de parâmetros da pasta");
 			return "";
 		}
+    	
+    	return "";
+	}
+	
+	public String obterAgrupamentoFinalizadoUrgencia(WebDriver driver, String ambiente, String data, String caminhoPastaBase, String caminhoPastaDownloads)
+	{			
+		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRUrgencia.valueOf(ambiente.toUpperCase());
+		
+		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
+    	
+		pastaBase = caminhoPastaBase;
+		pastaDownloads = caminhoPastaDownloads;
+		
+		if(data == null)
+			dataDeAnalise = JOptionPane.showInputDialog(null, "Insira a data do dia de análise (formato: dd/mm/yyyy)", "Data da Análise", JOptionPane.QUESTION_MESSAGE).trim();
+		else
+			dataDeAnalise = data;
+		
+		dataInformada = LocalDate.parse(dataDeAnalise, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		dataFormatada = dataInformada.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		
+		definirPastaCDIDR(ambiente);
 		
 		//gerarCopiaTemporariaRelatorioProducao();
     	
@@ -295,7 +363,7 @@ public class UrgenciaFinalizado
 		}
     	
 		urgenciasFormaDeResolucao = new HashMap<String, UrgenciaFormaResolucao>();
-		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaVagaZero.LINHA_INICIAL_ARQUIVO.getIndice();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaFormaResolucao.LINHA_INICIAL_ARQUIVO.getIndice();
 		
 		for(UrgenciaFormaResolucao urgencia : listaFormasDeResolucao)
 		{
@@ -321,14 +389,18 @@ public class UrgenciaFinalizado
 			
 		}
     	
+    	reguladores = new ArrayList<String>();
 		urgenciasProducaoRegulador = new HashMap<String, UrgenciaProducaoRegulador>();
-		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaVagaZero.LINHA_INICIAL_ARQUIVO.getIndice();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.LINHA_INICIAL_ARQUIVO.getIndice();
 		
 		for(UrgenciaProducaoRegulador urgencia : listaProducaoRegulador)
 		{
 			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
 			urgencia.setLinhaExcel(linhaArquivo);
 			urgencia.setLinhaUtilizada(false);
+			
+			if(!reguladores.contains(urgencia.getRegulador()))
+				reguladores.add(urgencia.getRegulador());
 			
 			urgenciasProducaoRegulador.put(urgencia.getData() + urgencia.getRegulador() + urgencia.getExecutante() + urgencia.getRecurso() + urgencia.getFicha(), urgencia);
 			
@@ -349,7 +421,7 @@ public class UrgenciaFinalizado
 		}
     	
 		urgenciasProducaoreguladorMensal = new HashMap<String, UrgenciaProducaoReguladorMensal>();
-		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaVagaZero.LINHA_INICIAL_ARQUIVO.getIndice();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice();
 		
 		for(UrgenciaProducaoReguladorMensal urgencia : listaProducaoReguladorMensal)
 		{
@@ -358,6 +430,59 @@ public class UrgenciaFinalizado
 			urgencia.setLinhaUtilizada(false);
 			
 			urgenciasProducaoreguladorMensal.put(urgencia.getCompetencia() + urgencia.getRegulador(), urgencia);
+			
+			linhaArquivo++;
+		}
+		
+		//Fichas Assumidas Regulador Detalhada
+    	ArrayList<UrgenciaFichasFinalizadasAssumidasRegulador> listaFichasAssumidasRegulador = new ArrayList<>();
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaFichasAssumidasRegulador = ExcelBinder.readSheet(in, UrgenciaFichasFinalizadasAssumidasRegulador.class, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+    	
+		urgenciasFichasAssumidasRegulador = new HashMap<String, UrgenciaFichasFinalizadasAssumidasRegulador>();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaFichasFinalizadasAssumidasRegulador urgencia : listaFichasAssumidasRegulador)
+		{
+			urgencia.setData(normalizarDataParaDiaMesAno(urgencia.getData(), "dd/MM/yyyy"));
+			urgencia.setLinhaExcel(linhaArquivo);
+			urgencia.setLinhaUtilizada(false);
+			
+			urgenciasFichasAssumidasRegulador.put(urgencia.getData() + urgencia.getRegulador() + urgencia.getExecutante() + urgencia.getRecurso() + urgencia.getFicha(), urgencia);
+			
+			linhaArquivo++;
+		}
+		
+		//Fichas Assumidas Regulador Detalhada Mensal
+    	ArrayList<UrgenciaFichasFinalizadasAssumidasReguladorMensal> listaFichasAssumidasReguladorMensal = new ArrayList<>();
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaFichasAssumidasReguladorMensal = ExcelBinder.readSheet(in, UrgenciaFichasFinalizadasAssumidasReguladorMensal.class, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+    	
+		urgenciasFichasAssumidasReguladorMensal = new HashMap<String, UrgenciaFichasFinalizadasAssumidasReguladorMensal>();
+		linhaArquivo = ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaFichasFinalizadasAssumidasReguladorMensal urgencia : listaFichasAssumidasReguladorMensal)
+		{
+			urgencia.setCompetencia(normalizarDataParaDiaMesAno(urgencia.getCompetencia(), "MMM/yyyy"));
+			urgencia.setLinhaExcel(linhaArquivo);
+			urgencia.setLinhaUtilizada(false);
+			
+			urgenciasFichasAssumidasReguladorMensal.put(urgencia.getCompetencia() + urgencia.getRegulador(), urgencia);
 			
 			linhaArquivo++;
 		}
@@ -398,6 +523,8 @@ public class UrgenciaFinalizado
 		HashMap<String, Integer> urgenciasFormaDeResolucao = new HashMap<String, Integer>();
 		HashMap<String, Integer> urgenciasProducaoRegulador = new HashMap<String, Integer>();
 		HashMap<String, Integer> urgenciasProducaoReguladorMensal = new HashMap<String, Integer>();
+		HashMap<String, Integer> urgenciasFichasAssumidasRegulador = new HashMap<String, Integer>();
+		HashMap<String, Integer> urgenciasFichasAssumidasReguladorMensal = new HashMap<String, Integer>();
 		
 		for(String opcaoRegulacao : opcoesTranferenciaPelaRegulacao)
 		{
@@ -416,7 +543,7 @@ public class UrgenciaFinalizado
 			
 			System.out.println("Abrindo: " + arquivo.getCaminhoCompleto());
 
-			montarDadosDeUrgenciaFinalizados(arquivo.getCaminhoCompleto(), dataInformada, urgenciasAgrupadas, urgenciasDetalhadas, vagasZero, urgenciasFormaDeResolucao, urgenciasProducaoRegulador);
+			montarDadosDeUrgenciaFinalizados(arquivo.getCaminhoCompleto(), dataInformada, urgenciasAgrupadas, urgenciasDetalhadas, vagasZero, urgenciasFormaDeResolucao, urgenciasProducaoRegulador, urgenciasFichasAssumidasRegulador);
 			
 			arquivo.apagar();
 		}
@@ -432,13 +559,17 @@ public class UrgenciaFinalizado
 		String textoDataFinalizacao = dataInformada.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		
 		montarPlanilhaUrgenciaAgrupada(dataInformada, textoDataFinalizacao, urgenciasAgrupadas);
-		montarPlanilhaUrgenciaDetalhada(dataInformada, textoDataFinalizacao, urgenciasDetalhadas);		
+		montarPlanilhaUrgenciaDetalhada(dataInformada, textoDataFinalizacao, urgenciasDetalhadas);
 		montarPlanilhaVagaZero(dataInformada, textoDataFinalizacao, vagasZero);
 		montarPlanilhaFormaDeResolucao(dataInformada, textoDataFinalizacao, urgenciasFormaDeResolucao);
 		montarPlanilhaProducaoRegulador(dataInformada, textoDataFinalizacao, urgenciasProducaoRegulador);
+		montarPlanilhaFichasAssumidasRegulador(dataInformada, textoDataFinalizacao, urgenciasFichasAssumidasRegulador);
 		
 		montarDadosProducaoReguladorMensal(urgenciasProducaoReguladorMensal);
 		montarPlanilhaProducaoReguladorMensal(dataInformada, urgenciasProducaoReguladorMensal);
+		
+		montarDadosFichasAssumidasReguladorMensal(urgenciasFichasAssumidasReguladorMensal);
+		montarPlanilhaFichasAssumidasReguladorMensal(dataInformada, urgenciasFichasAssumidasReguladorMensal);
 		
 		ordenarPlanilhaAgrupada();
 		ordenarPlanilhaDetalhada();
@@ -446,9 +577,12 @@ public class UrgenciaFinalizado
 		ordenarPlanilhaFormasDeResolucao();
 		ordenarPlanilhaProducaoRegulador();
 		ordenarPlanilhaProducaoReguladorMensal();
+		ordenarPlanilhaFichasAssumidasRegulador();
+		ordenarPlanilhaFichasAssumidasReguladorMensal();
 		//atualizarCopiaOriginalRelatorioProducao();
 		//copiarRelatorioProducaoParaCDIDR();
-		//copiarRelatorioProducaoParaCDRA();
+		copiarRelatorioUrgenciaParaCDIDR();
+		copiarRelatorioUrgenciaParaLeitosCDIDR();
 		
 		return "";	
 	}
@@ -502,7 +636,7 @@ public class UrgenciaFinalizado
 		return intervalos;
 	}
 	
-	private String montarDadosDeUrgenciaFinalizados(String caminhoArquivo, LocalDate dataHoraDeExtracao, HashMap<String, ArrayList<IntervalosUrgencia>> urgenciasAgrupadas, HashMap<String, Integer> urgenciasDetalhadas, HashMap<String, DadosAcumuladosVagaZero> vagasZero, HashMap<String, Integer> urgenciasFormaDeResolucao, HashMap<String, Integer> urgenciasProducaoRegulador)
+	private String montarDadosDeUrgenciaFinalizados(String caminhoArquivo, LocalDate dataHoraDeExtracao, HashMap<String, ArrayList<IntervalosUrgencia>> urgenciasAgrupadas, HashMap<String, Integer> urgenciasDetalhadas, HashMap<String, DadosAcumuladosVagaZero> vagasZero, HashMap<String, Integer> urgenciasFormaDeResolucao, HashMap<String, Integer> urgenciasProducaoRegulador, HashMap<String, Integer> urgenciasFichasAssumidasRegulador)
 	{
 		
 		String textoDataFinalizacao = dataHoraDeExtracao.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -641,8 +775,18 @@ public class UrgenciaFinalizado
 				
 				if(localDeRegulacao.equals(ParametrosArquivoUrgenciaRelatorioProdutividade.TEXTO_CENTRAL_MUNICIPAL_REGULACAO_CAMPINAS.getDescricao()))
 				{
+					String regulador = registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_REGULADOR_FINAl.getIndice());
+					
+					if(regulador.equals(ParametrosArquivoUrgenciaRelatorioProdutividade.TEXTO_TRACO_VAZIO.getDescricao()))
+						regulador = ParametrosArquivoUrgenciaRelatorioProdutividade.TEXTO_SES_SP.getDescricao();
+					else
+					{
+						if(!reguladores.contains(regulador))
+							reguladores.add(regulador);
+					}
+					
 					String textoMapa = textoDataFinalizacao + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao() + 
-							registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_REGULADOR_FINAl.getIndice()) + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+							regulador + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
 					
 					if(entidadeExecutante.equals(""))
 						textoMapa += ParametrosArquivoUrgenciaPlanilhaFormaResolucao.TEXTO_EXECUTANTE_VAZIO.getDescricao() + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
@@ -661,6 +805,33 @@ public class UrgenciaFinalizado
 					else
 					{
 						urgenciasProducaoRegulador.put(textoMapa, 1);
+					}
+				}
+				
+				String reguladorInicial = registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_REGULADOR_INICIAL.getIndice());
+				
+				if(reguladores.contains(reguladorInicial))
+				{
+					String textoMapa = textoDataFinalizacao + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao() + 
+							reguladorInicial + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+					
+					if(entidadeExecutante.equals(""))
+						textoMapa += ParametrosArquivoUrgenciaPlanilhaFormaResolucao.TEXTO_EXECUTANTE_VAZIO.getDescricao() + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+					else
+						textoMapa += entidadeExecutante + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao();
+					
+					textoMapa += registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_RECURSO_SOLICITADO_1.getIndice()).trim() + ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.DIVISOR_CAMPOS.getDescricao() +
+							registro.get(ParametrosArquivoUrgenciaRelatorioProdutividade.INDICE_COLUNA_TIPO_DE_FICHA.getIndice()).replace("Ficha ", "").trim();
+					
+					if(urgenciasFichasAssumidasRegulador.containsKey(textoMapa))
+					{
+						int quantidade = urgenciasFichasAssumidasRegulador.get(textoMapa);
+						quantidade++;
+						urgenciasFichasAssumidasRegulador.put(textoMapa, quantidade);
+					}
+					else
+					{
+						urgenciasFichasAssumidasRegulador.put(textoMapa, 1);
 					}
 				}
 				
@@ -706,6 +877,44 @@ public class UrgenciaFinalizado
 			{
 				int quantidade = Integer.parseInt(urgencia.getQuantidade());
 				producaoReguladorMensal.put(chave, quantidade);
+			}
+		}
+		
+		return "";
+	}
+	
+	public String montarDadosFichasAssumidasReguladorMensal(HashMap<String, Integer> fichasAssumidasReguladorMensal)
+	{
+		ArrayList<UrgenciaFichasFinalizadasAssumidasRegulador> listaUrgencias = new ArrayList<UrgenciaFichasFinalizadasAssumidasRegulador>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaUrgencias = ExcelBinder.readSheet(in, UrgenciaFichasFinalizadasAssumidasRegulador.class, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+	
+		for(UrgenciaFichasFinalizadasAssumidasRegulador urgencia : listaUrgencias)
+		{
+			String competencia = normalizarDataParaDiaMesAno(urgencia.getData(), "MMM/yyyy");
+
+			String chave = competencia + ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.DIVISOR_CAMPOS.getDescricao() + urgencia.getRegulador();
+			if(fichasAssumidasReguladorMensal.containsKey(chave))
+			{
+				int quantidade = fichasAssumidasReguladorMensal.get(chave);
+				quantidade += Integer.parseInt(urgencia.getQuantidade());
+				fichasAssumidasReguladorMensal.put(chave, quantidade);
+			}
+			else
+			{
+				int quantidade = Integer.parseInt(urgencia.getQuantidade());
+				fichasAssumidasReguladorMensal.put(chave, quantidade);
 			}
 		}
 		
@@ -803,7 +1012,12 @@ public class UrgenciaFinalizado
 				urgencia.setSolicitante(chave.split(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.DIVISOR_CAMPOS.getDescricao())[1]);
 				urgencia.setRecurso(chave.split(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.DIVISOR_CAMPOS.getDescricao())[2]);
 				urgencia.setFicha(chave.split(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.DIVISOR_CAMPOS.getDescricao())[3]);
-				urgencia.setHorasDeEspera(chave.split(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.DIVISOR_CAMPOS.getDescricao())[4]);
+				
+				int horasDeEspera = Integer.parseInt(chave.split(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.DIVISOR_CAMPOS.getDescricao())[4]);
+				int diasDeEspera = horasDeEspera / 24;
+				
+				urgencia.setHorasDeEspera(String.valueOf(horasDeEspera));
+				urgencia.setDiasDeEspera(String.valueOf(diasDeEspera));
 				
 				linhaArquivo++;
 				linha = linhaArquivo;
@@ -821,6 +1035,7 @@ public class UrgenciaFinalizado
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), "String"));
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), "String"));
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_HORAS_DE_ESPERA.getIndice(), Integer.parseInt(urgencia.getHorasDeEspera()), "Integer"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_DIAS_DE_ESPERA.getIndice(), Integer.parseInt(urgencia.getDiasDeEspera()), "Integer"));
 			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_QUANTIDADE.getIndice(), quantidadeEmEspera, "Integer"));
 			
 		}
@@ -1022,6 +1237,70 @@ public class UrgenciaFinalizado
 		return "";
 	}
 	
+	private String montarPlanilhaFichasAssumidasRegulador(LocalDate dataHoraDeExtracao, String textoDataExtracao, HashMap<String, Integer> fichasAssumidasRegulador)
+	{
+		AcoesArquivoExcel arquivoCenso = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoCenso.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		int linhaArquivo = arquivoCenso.getUltimaLinhaPreenchida();
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(String chave : fichasAssumidasRegulador.keySet())
+		{
+			String chaveJaRegistrada = chave.replaceAll(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.DIVISOR_CAMPOS.getDescricao(), "").replace(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.TEXTO_EXECUTANTE_VAZIO.getDescricao(), "");
+			
+			UrgenciaFichasFinalizadasAssumidasRegulador urgencia;
+			int linha;
+			
+			System.out.println(chaveJaRegistrada);
+			if(urgenciasFichasAssumidasRegulador.containsKey(chaveJaRegistrada))
+			{
+				urgencia = urgenciasFichasAssumidasRegulador.get(chaveJaRegistrada);
+				urgencia.setLinhaUtilizada(true);
+				
+				linha = urgencia.getLinhaExcel();
+			}
+			else
+			{
+				String[] componentesChave = chave.split(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.DIVISOR_CAMPOS.getDescricao());
+				
+				urgencia = new UrgenciaFichasFinalizadasAssumidasRegulador();
+				urgencia.setData(textoDataExtracao);
+				urgencia.setRegulador(componentesChave[1]);
+				
+				if(componentesChave[2].equals(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.TEXTO_EXECUTANTE_VAZIO.getDescricao()))
+					urgencia.setExecutante("");
+				else
+					urgencia.setExecutante(componentesChave[2]);
+				
+				urgencia.setRecurso(componentesChave[3]);
+				urgencia.setFicha(componentesChave[4]);
+				
+				linhaArquivo++;
+				linha = linhaArquivo;
+				urgencia.setLinhaExcel(linha);
+				
+				urgenciasFichasAssumidasRegulador.put(chaveJaRegistrada, urgencia);
+				
+			}
+			
+			int quantidade = fichasAssumidasRegulador.get(chave);
+			
+			//System.out.println(textoDataExtracao);
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_DATA.getIndice(), LocalDate.parse(textoDataExtracao, DateTimeFormatter.ofPattern("dd/MM/yyyy")), "Date"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_EXECUTANTE.getIndice(), urgencia.getExecutante(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_QUANTIDADE.getIndice(), quantidade, "Integer"));
+			
+		}
+		
+		arquivoCenso.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
 	private String montarPlanilhaProducaoReguladorMensal(LocalDate dataHoraDeExtracao, HashMap<String, Integer> producaoRegulador)
 	{
 		AcoesArquivoExcel arquivoCenso = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
@@ -1071,6 +1350,59 @@ public class UrgenciaFinalizado
 		}
 		
 		arquivoCenso.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	private String montarPlanilhaFichasAssumidasReguladorMensal(LocalDate dataHoraDeExtracao, HashMap<String, Integer> fichasAssumidasRegulador)
+	{
+		AcoesArquivoExcel arquivoCenso = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoCenso.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		int linhaArquivo = arquivoCenso.getUltimaLinhaPreenchida();
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(String chave : fichasAssumidasRegulador.keySet())
+		{
+			String chaveJaRegistrada = chave.replaceAll(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.DIVISOR_CAMPOS.getDescricao(), "");
+			
+			UrgenciaFichasFinalizadasAssumidasReguladorMensal urgencia;
+			int linha;
+			
+			System.out.println(chaveJaRegistrada);
+			if(urgenciasFichasAssumidasReguladorMensal.containsKey(chaveJaRegistrada))
+			{
+				urgencia = urgenciasFichasAssumidasReguladorMensal.get(chaveJaRegistrada);
+				urgencia.setLinhaUtilizada(true);
+				
+				linha = urgencia.getLinhaExcel();
+			}
+			else
+			{
+				String[] componentesChave = chave.split(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.DIVISOR_CAMPOS.getDescricao());
+				
+				urgencia = new UrgenciaFichasFinalizadasAssumidasReguladorMensal();
+				urgencia.setCompetencia(componentesChave[0]);
+				urgencia.setRegulador(componentesChave[1]);
+								
+				linhaArquivo++;
+				linha = linhaArquivo;
+				urgencia.setLinhaExcel(linha);
+				
+				urgenciasFichasAssumidasReguladorMensal.put(chaveJaRegistrada, urgencia);
+				
+			}
+			
+			int quantidade = fichasAssumidasRegulador.get(chave);
+			
+			//System.out.println(textoDataExtracao);
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_COMPENTENCIA.getIndice(), urgencia.getCompetencia(), "Date"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), "String"));
+			celulas.add(new CelulaExcel(urgencia.getLinhaExcel(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_QUANTIDADE.getIndice(), quantidade, "Integer"));
+			
+		}
+		
+		arquivoCenso.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		
 		return "";
 	}
@@ -1302,6 +1634,7 @@ public class UrgenciaFinalizado
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_RECURSO.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_FICHA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_HORAS_DE_ESPERA.getIndice(), urgencia.getHorasDeEspera(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_HORAS_DE_ESPERA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_DIAS_DE_ESPERA.getIndice(), urgencia.getDiasDeEspera(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_DIAS_DE_ESPERA.getTipo()));
 			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_QUANTIDADE.getIndice(), urgencia.getQuantidade(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_QUANTIDADE.getTipo()));
 
 			
@@ -1486,6 +1819,60 @@ public class UrgenciaFinalizado
 		return "";
 	}
 	
+	public String ordenarPlanilhaFichasAssumidasRegulador()
+	{
+		ArrayList<UrgenciaFichasFinalizadasAssumidasRegulador> listaUrgencias = new ArrayList<UrgenciaFichasFinalizadasAssumidasRegulador>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaUrgencias = ExcelBinder.readSheet(in, UrgenciaFichasFinalizadasAssumidasRegulador.class, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		int linhaArquivo = ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaFichasFinalizadasAssumidasRegulador urgencia : listaUrgencias)
+		{
+			String dataExtracao = urgencia.getData();
+			urgencia.setData(normalizarDataParaDiaMesAno(dataExtracao, "dd/MM/yyyy"));
+			urgencia.setDataOrdenacao(normalizarDataParaAnoMesDia(dataExtracao));
+		}
+		
+		Collections.sort(listaUrgencias, Comparator
+		    .comparing(UrgenciaFichasFinalizadasAssumidasRegulador::getDataOrdenacao).reversed()
+		    .thenComparing(UrgenciaFichasFinalizadasAssumidasRegulador::getRegulador)
+		    .thenComparing(UrgenciaFichasFinalizadasAssumidasRegulador::getExecutante)
+		    .thenComparing(UrgenciaFichasFinalizadasAssumidasRegulador::getRecurso)
+		    .thenComparing(UrgenciaFichasFinalizadasAssumidasRegulador::getFicha)
+		);		
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(UrgenciaFichasFinalizadasAssumidasRegulador urgencia : listaUrgencias)
+		{
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_DATA.getIndice(), urgencia.getData(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_DATA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_REGULADOR.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_EXECUTANTE.getIndice(), urgencia.getExecutante(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_EXECUTANTE.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_RECURSO.getIndice(), urgencia.getRecurso(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_RECURSO.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_FICHA.getIndice(), urgencia.getFicha(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_FICHA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_QUANTIDADE.getIndice(), urgencia.getQuantidade(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_QUANTIDADE.getTipo()));			
+			linhaArquivo++;
+		}
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
 	public String ordenarPlanilhaProducaoReguladorMensal()
 	{
 		ArrayList<UrgenciaProducaoReguladorMensal> listaUrgencias = new ArrayList<UrgenciaProducaoReguladorMensal>();
@@ -1530,6 +1917,54 @@ public class UrgenciaFinalizado
 		arquivoConsolidado.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
 		
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	public String ordenarPlanilhaFichasAssumidasReguladorMensal()
+	{
+		ArrayList<UrgenciaFichasFinalizadasAssumidasReguladorMensal> listaUrgencias = new ArrayList<UrgenciaFichasFinalizadasAssumidasReguladorMensal>();
+    	
+    	System.out.println(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia());
+    	
+    	try (FileInputStream in = new FileInputStream(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia())) {
+    		listaUrgencias = ExcelBinder.readSheet(in, UrgenciaFichasFinalizadasAssumidasReguladorMensal.class, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+			
+		}
+		
+		int linhaArquivo = ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice();
+		
+		for(UrgenciaFichasFinalizadasAssumidasReguladorMensal urgencia : listaUrgencias)
+		{
+			String competencia = urgencia.getCompetencia();
+			urgencia.setCompetencia(normalizarDataParaDiaMesAno(competencia, "MMM/yyyy"));
+			urgencia.setCompetenciaOrdenacao(normalizarDataParaAnoMesDia(competencia));
+		}
+		
+		Collections.sort(listaUrgencias, Comparator
+		    .comparing(UrgenciaFichasFinalizadasAssumidasReguladorMensal::getCompetenciaOrdenacao).reversed()
+		    .thenComparing(UrgenciaFichasFinalizadasAssumidasReguladorMensal::getRegulador)
+		);		
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		for(UrgenciaFichasFinalizadasAssumidasReguladorMensal urgencia : listaUrgencias)
+		{
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_COMPENTENCIA.getIndice(), urgencia.getCompetencia(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_COMPENTENCIA.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_REGULADOR.getIndice(), urgencia.getRegulador(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_REGULADOR.getTipo()));
+			celulas.add(criarCelula(linhaArquivo, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_QUANTIDADE.getIndice(), urgencia.getQuantidade(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_QUANTIDADE.getTipo()));			
+			linhaArquivo++;
+		}
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, true, false, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.LINHA_INICIAL_ARQUIVO.getIndice(), null);
 		
 		return "";
 	}
@@ -1605,6 +2040,38 @@ public class UrgenciaFinalizado
 		}
 		
 		return celula;
+	}
+
+	public String getUltimaPlanilhaProcessadaNoDia() {
+		return ultimaPlanilhaProcessadaNoDia;
+	}
+
+	public void setUltimaPlanilhaProcessadaNoDia(String ultimaPlanilhaProcessadaNoDia) {
+		this.ultimaPlanilhaProcessadaNoDia = ultimaPlanilhaProcessadaNoDia;
+	}
+
+	public int getPrimeiraLinhaDaUltimaPlanilhaProcessadaNoDia() {
+		return primeiraLinhaDaUltimaPlanilhaProcessadaNoDia;
+	}
+
+	public void setPrimeiraLinhaDaUltimaPlanilhaProcessadaNoDia(int primeiraLinhaDaUltimaPlanilhaProcessadaNoDia) {
+		this.primeiraLinhaDaUltimaPlanilhaProcessadaNoDia = primeiraLinhaDaUltimaPlanilhaProcessadaNoDia;
+	}
+
+	public int getColunaDataDaUltimaPlanilhaProcessadaNoDia() {
+		return colunaDataDaUltimaPlanilhaProcessadaNoDia;
+	}
+
+	public void setColunaDataDaUltimaPlanilhaProcessadaNoDia(int colunaDataDaUltimaPlanilhaProcessadaNoDia) {
+		this.colunaDataDaUltimaPlanilhaProcessadaNoDia = colunaDataDaUltimaPlanilhaProcessadaNoDia;
+	}
+
+	public String getCaminhoArquivoConsolidado() {
+		return caminhoArquivoConsolidado;
+	}
+
+	public void setCaminhoArquivoConsolidado(String caminhoArquivoConsolidado) {
+		this.caminhoArquivoConsolidado = caminhoArquivoConsolidado;
 	}
 	
 }

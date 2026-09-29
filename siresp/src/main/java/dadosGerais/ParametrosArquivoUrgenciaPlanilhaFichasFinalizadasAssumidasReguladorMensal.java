@@ -5,20 +5,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
+public enum ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal {
 		
-	INDICE_COLUNA_DATA(0, 1, "Data", "Date", "dd/MM/yyyy"),
-	INDICE_COLUNA_HORARIO_EXTRACAO(1, 2, "Data", "Time", "HH:mm:ss"),
-	INDICE_COLUNA_SOLICITANTE(2, 3, "Solicitante", "String", ""),
-	INDICE_COLUNA_RECURSO(3, 4, "Recurso", "String", ""),
-	INDICE_COLUNA_FICHA(4, 5,"Ficha", "String", ""),
-	INDICE_COLUNA_HORAS_DE_ESPERA(5, 6, "Horas de Espera", "Int", ""),
-	INDICE_COLUNA_DIAS_DE_ESPERA(6, 7, "Dias de Espera", "Int", ""),
-	INDICE_COLUNA_QUANTIDADE(7, 8, "Quantidade", "Int", ""),
+	INDICE_COLUNA_COMPENTENCIA(0, 1, "Competência", "Date mes/ano", "MMM/yyyy"),
+	INDICE_COLUNA_REGULADOR(1, 2, "Regulador", "String", ""),
+	INDICE_COLUNA_QUANTIDADE(2, 3, "Quantidade", "Int", ""),
 	
 	LINHA_INICIAL_ARQUIVO(21, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_MONITORAMENTO(22, 0, "Detalhado Urgência Aguardando", "", ""),
+	NOME_PLANILHA_MONITORAMENTO(22, 0, "Fichas Assumidas Regulador Mes", "", ""),
 	
 	DIVISOR_CAMPOS(23, 0, "####", "", ""),
 	
@@ -26,7 +21,8 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(26, 0, "xls", "", ""),
 	
 	INDICE_COLUNA_DATA_PROCESSAMENTO(27, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
-	INDICE_LINHA_DATA_PROCESSAMENTO(28, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),;
+	INDICE_LINHA_DATA_PROCESSAMENTO(28, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	TEXTO_EXECUTANTE_VAZIO(29, 0, "VAZIO", "", "");
 	
 
 	private int idUnico;
@@ -35,7 +31,7 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
 	private String tipo;
 	private String formato;
 			
-	ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado(int idUnico, int indice, String descricao, String tipo, String formato)
+	ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal(int idUnico, int indice, String descricao, String tipo, String formato)
 	{
 		this.setIdUnico(idUnico);
 		this.setIndice(indice);
@@ -84,10 +80,10 @@ public enum ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado {
 		this.formato = formato;
 	}	
 	
-    private static final Map<Integer, ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado> POR_ID_UNICO =
-        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado::getIdUnico, Function.identity()));
+    private static final Map<Integer, ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal> POR_ID_UNICO =
+        Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal::getIdUnico, Function.identity()));
 
-    public static ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado poIdUnico(int idUnico) {
+    public static ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal poIdUnico(int idUnico) {
         return POR_ID_UNICO.get(idUnico); // pode retornar null se não existir
     }
 

@@ -22,16 +22,20 @@ public enum ParametrosArquivoLeitosPlanilhaConsolidado {
 	INDICE_COLUNA_TOTAL_BLOQUEADO(12, 13, "Total Bloqueado", "Int", ""),
 	INDICE_COLUNA_ISOLAMENTO_BLOQUEADO(13, 14, "Isolamento", "Int", ""),
 	INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO(14, 15, "Aguardando Paciente", "Int", ""),
-	INDICE_COLUNA_OUTROS_BLOQUEADO(15, 16, "Outros", "Int", ""),
-	INDICE_COLUNA_LEITOS_VAGOS(16, 17, "Vagos", "Int", ""),
-	INDICE_COLUNA_TAXA_DE_OCUPACAO(17, 18, "Taxa de Ocupação", "Porcentagem", ""),
+	INDICE_COLUNA_SAZONALIDADE_BLOQUEADO(15, 16, "Sazonalidade", "Int", ""),
+	INDICE_COLUNA_RESERVA_INTERNA_BLOQUEADO(16, 17, "Reserva Interna", "Int", ""),
+	INDICE_COLUNA_MANUTENCAO_BLOQUEADO(17, 18, "Manutenção", "Int", ""),
+	INDICE_COLUNA_ADMINISTRATIVO_BLOQUEADO(18, 19, "Administrativo", "Int", ""),
+	INDICE_COLUNA_OUTROS_BLOQUEADO(19, 20, "Outros", "Int", ""),
+	INDICE_COLUNA_LEITOS_VAGOS(20, 21, "Vagos", "Int", ""),
+	INDICE_COLUNA_TAXA_DE_OCUPACAO(21, 22, "Taxa de Ocupação", "Porcentagem", ""),
 	
-	LINHA_INICIAL_ARQUIVO(18, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
+	LINHA_INICIAL_ARQUIVO(22, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	
-	NOME_PLANILHA_CONSOLIDADA(19, 0, "Consolidado Leitos", "", ""),
+	NOME_PLANILHA_CONSOLIDADA(23, 0, "Consolidado Leitos", "", ""),
 	
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(20, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(21, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(24, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(25, 0, "xls", "", "");
 	
 
 	private int idUnico;

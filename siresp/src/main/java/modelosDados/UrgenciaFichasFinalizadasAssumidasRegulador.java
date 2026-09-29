@@ -1,14 +1,17 @@
 package modelosDados;
 
-public class UrgenciaFinalizadoDetalhado 
+public class UrgenciaFichasFinalizadasAssumidasRegulador 
 {
 	@ExcelColumn(header = "Data", pattern = "dd/MM/yyyy")
 	private String data;
 	
 	private String dataOrdenacao;
 	
-	@ExcelColumn(header = "Solicitante")
-	private String solicitante;
+	@ExcelColumn(header = "Regulador")
+	private String regulador;
+	
+	@ExcelColumn(header = "Executante")
+	private String executante;
 	
 	@ExcelColumn(header = "Recurso")
 	private String recurso;
@@ -16,29 +19,13 @@ public class UrgenciaFinalizadoDetalhado
 	@ExcelColumn(header = "Ficha")
 	private String ficha;
 	
-	@ExcelColumn(header = "Horas de Espera")
-	private String horasDeEspera;
-	
-	@ExcelColumn(header = "Dias de Espera")
-	private String diasDeEspera;
-	
 	@ExcelColumn(header = "Quantidade")
 	private String quantidade;
-	
-	private int horasDeEsperaOrdenacao;
 	
 	private int linhaExcel;
 	
 	private boolean linhaUtilizada;
 	
-	public String getSolicitante() {
-		return solicitante;
-	}
-	
-	public void setSolicitante(String solicitante) {
-		this.solicitante = solicitante;
-	}
-
 	public String getData() {
 		return data;
 	}
@@ -71,22 +58,6 @@ public class UrgenciaFinalizadoDetalhado
 		this.linhaExcel = linhaExcel;
 	}
 
-	public String getHorasDeEspera() {
-		return horasDeEspera;
-	}
-
-	public void setHorasDeEspera(String horasDeEspera) {
-		this.horasDeEspera = horasDeEspera;
-	}
-	
-	public String getDiasDeEspera() {
-		return diasDeEspera;
-	}
-
-	public void setDiasDeEspera(String diasDeEspera) {
-		this.diasDeEspera = diasDeEspera;
-	}
-
 	public String getQuantidade() {
 		return quantidade;
 	}
@@ -113,11 +84,19 @@ public class UrgenciaFinalizadoDetalhado
 		this.dataOrdenacao = dataOrdenacao;
 	}
 
-	public int getHorasDeEsperaOrdenacao() {
-		return horasDeEsperaOrdenacao;
+	public String getExecutante() {
+		return executante;
 	}
 
-	public void setHorasDeEsperaOrdenacao(int horasDeEsperaOrdenacao) {
-		this.horasDeEsperaOrdenacao = horasDeEsperaOrdenacao;
+	public void setExecutante(String executante) {
+		this.executante = executante;
+	}
+
+	public String getRegulador() {
+		return regulador;
+	}
+
+	public void setRegulador(String regulador) {
+		this.regulador = regulador;
 	}
 }

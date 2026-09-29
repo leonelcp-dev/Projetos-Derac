@@ -1,5 +1,6 @@
 package extracao_dados.siresp;
 
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -8,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.sql.DataTruncation;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPaginaWebSIRESPInicio;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
+import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.AcoesGeraisPaginaWeb;
 import io.opentelemetry.sdk.metrics.data.Data;
 import modelosDados.EntidadeLeito;
@@ -59,6 +62,13 @@ public class InteracaoComSIRESPPaginaInicial
 	
 	public static String CPF;
 	public static String RG;
+	
+	private static String XpathModulo;
+	private static String IdLogin;
+	private static String IdSenha;
+	private static String IdTextoCaptcha;
+	private static String IdBotaoEntrar;
+	private static String idImagemCaptcha;
 	
     public static void main( String[] args )
     {
@@ -98,6 +108,11 @@ public class InteracaoComSIRESPPaginaInicial
     	String senhaUsuarioTARM = mapaDeAcessos.get("SENHA_REGULADA");
     	String cpfUsuarioTARM = mapaDeAcessos.get("CPF_REGULADA");
     	String rgUsuarioTARM = mapaDeAcessos.get("RG_REGULADA");
+    	
+    	String usuarioUrgencia = mapaDeAcessos.get("USUARIO_URGENCIA");
+    	String senhaUsuarioUrgencia = mapaDeAcessos.get("SENHA_URGENCIA");
+    	String cpfUsuarioUrgencia = mapaDeAcessos.get("CPF_URGENCIA");
+    	String rgUsuarioUrgencia = mapaDeAcessos.get("RG_URGENCIA");
     	
     	//ChromeOptions options = new ChromeOptions();
     	
@@ -336,27 +351,66 @@ public class InteracaoComSIRESPPaginaInicial
         }
         else if(escolha == 10)
         {
-        	UrgenciaAguardando urgenciaAguardando = new UrgenciaAguardando();
-        	urgenciaAguardando.obterAgrupamentoDeEsperaUrgencia(driver, ambiente);
-        }
-        
-        else if(escolha == 11)
-        {
-        	UrgenciaFinalizado urgenciaFinalizado = new UrgenciaFinalizado();
+        	AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
         	
-        	String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
-    		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
-        	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
+        	String pastaBase = "C:\\Users\\" + nomeUsuario;
+        	String pastaDownloads = "C:\\Users\\" + nomeUsuario + "\\Downloads";
         	
-        	LocalDate dataInicial = LocalDate.of(2026, 7, 0);
-        	LocalDate dataFinal = LocalDate.of(2026, 7, 30);
+        	String retorno;
         	
-        	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))
+        	driver.get(paginaInicial);
+        	retorno = InteracaoComSIRESPPaginaInicial.acessarModuloUrgencia(driver, paginaWeb, paginaInicial, usuarioUrgencia, senhaUsuarioUrgencia, cpfUsuarioUrgencia, rgUsuarioUrgencia, nomeUsuario);
+        	if(retorno.equals(""))
         	{
-        		String dataString = data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        		System.out.println(dataString);
-        	    
-        		urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
+	        	UrgenciaAguardando urgenciaAguardando = new UrgenciaAguardando(pastaBase, ambiente);
+	        	urgenciaAguardando.obterAgrupamentoDeEsperaUrgencia(driver, ambiente);
+	       
+	        	UrgenciaFinalizado urgenciaFinalizado = new UrgenciaFinalizado(pastaBase, ambiente);
+	        	
+	        	//String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
+	    		//String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
+	        	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
+	        	
+	        	
+	        	//recuperando a última data processada, caso o arquivo esteja vazio, será considerada a data de ontem (atual - 1)
+	        	AcoesArquivoExcel arquivoExcel = new AcoesArquivoExcel(urgenciaFinalizado.getCaminhoArquivoConsolidado(), 0);
+	        	arquivoExcel.abrirPlanilha(urgenciaFinalizado.getUltimaPlanilhaProcessadaNoDia(), urgenciaFinalizado.getPrimeiraLinhaDaUltimaPlanilhaProcessadaNoDia());
+	        	
+	        	String valorData = arquivoExcel.getValorDaCelulaComoString(urgenciaFinalizado.getPrimeiraLinhaDaUltimaPlanilhaProcessadaNoDia(), urgenciaFinalizado.getColunaDataDaUltimaPlanilhaProcessadaNoDia(), "dd/MM/yyyy");
+	        	
+	        	LocalDate dataInicial;
+	        	LocalDate dataFinal;;
+	        	
+	        	LocalDate hoje = LocalDate.now();
+	        	LocalDate ontem = hoje.minusDays(1);
+	        	
+	        	try {
+	        		
+	        		System.out.println("Última data: " + valorData);
+	        		dataInicial = LocalDate.parse(valorData, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        		
+	        		if(dataInicial.isBefore(ontem))
+		        		dataInicial.plusDays(1);
+	        			
+					
+				} catch (Exception e) {
+					// TODO: handle exception
+					
+		        	dataInicial = ontem;
+				}
+	        
+	        	dataFinal = ontem;
+	        	
+	        	System.out.println("Data inicial: " + dataInicial.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+	        	System.out.println("Data final: " + dataFinal.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+	        	
+	        	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))
+	        	{
+	        		String dataString = data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+	        		System.out.println(dataString);
+	        	    
+	        		urgenciaFinalizado.obterAgrupamentoFinalizadoUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
+	        	}
         	}
         }
         
@@ -369,6 +423,13 @@ public class InteracaoComSIRESPPaginaInicial
     	InteracaoComSIRESPPaginaInicial.CPF = cpf;
     	InteracaoComSIRESPPaginaInicial.RG = rg;
 	    
+		XpathModulo = IdentificadoresPaginaWebSIRESPInicio.XPATH_MODULO_AMBULATORIAL.getTextoIdentificador();
+    	IdLogin = IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_LOGIN_AMBULATORIAL.getTextoIdentificador();
+    	IdSenha = IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_SENHA_AMBULATORIAL.getTextoIdentificador();
+    	idImagemCaptcha = IdentificadoresPaginaWebSIRESPInicio.ID_IMAGEM_CAPTCHA_AMBULATORIAL.getTextoIdentificador();
+    	IdTextoCaptcha = IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_CAPTCHA_AMBULATORIAL.getTextoIdentificador();
+    	IdBotaoEntrar = IdentificadoresPaginaWebSIRESPInicio.ID_BOTAO_ENTRAR_AMBULATORIAL.getTextoIdentificador();
+    	
 		String retorno = InteracaoComSIRESPPaginaInicial.autenticarNoSistema(driver, paginaWeb, "", destinoImagem, login, senha);
 		
 		while(!retorno.equals(""))
@@ -397,14 +458,57 @@ public class InteracaoComSIRESPPaginaInicial
 		return "";
     }
     
+    public static String acessarModuloUrgencia(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String paginaInicial, String login, String senha, String cpf, String rg, String nomeUsuario)
+    {
+    	String destinoImagem = "C:\\Users\\" + nomeUsuario + "\\Downloads\\imagem.png";
+    	InteracaoComSIRESPPaginaInicial.CPF = cpf;
+    	InteracaoComSIRESPPaginaInicial.RG = rg;
+	    
+		XpathModulo = IdentificadoresPaginaWebSIRESPInicio.XPATH_MODULO_URGENCIA.getTextoIdentificador();
+    	IdLogin = IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_LOGIN_URGENCIA.getTextoIdentificador();
+    	IdSenha = IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_SENHA_URGENCIA.getTextoIdentificador();
+    	idImagemCaptcha = IdentificadoresPaginaWebSIRESPInicio.ID_IMAGEM_CAPTCHA_URGENCIA.getTextoIdentificador();
+    	IdTextoCaptcha = IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_CAPTCHA_URGENCIA.getTextoIdentificador();
+    	IdBotaoEntrar = IdentificadoresPaginaWebSIRESPInicio.ID_BOTAO_ENTRAR_URGENCIA.getTextoIdentificador();
+    	
+		String retorno = InteracaoComSIRESPPaginaInicial.autenticarNoSistema(driver, paginaWeb, "", destinoImagem, login, senha);
+		
+		while(!retorno.equals(""))
+		{
+			driver.get(paginaInicial);
+			retorno = InteracaoComSIRESPPaginaInicial.autenticarNoSistema(driver, paginaWeb, "", destinoImagem, login, senha);
+		}
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		retorno = InteracaoComSIRESPPaginaInicial.acessarUnidadeCentralRegMunicipal(driver, paginaWeb);
+		
+		if(retorno.equals(""))
+			paginaWeb.voltarAoFramePai(driver);
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		InteracaoComSIRESPPaginaInicial.validarDocumento(driver, paginaWeb);
+		
+		return "";
+    }
+    
     public static String autenticarNoSistema(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String urlInicialImagem, String destino, String login, String senha)
     {
-    	paginaWeb.clicarLinkPeloXPath(driver, IdentificadoresPaginaWebSIRESPInicio.XPATH_MODULO_AMBULATORIAL.getTextoIdentificador());
+    	paginaWeb.clicarLinkPeloXPath(driver, XpathModulo);
     	
-    	paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_LOGIN_AMBULATORIAL.getTextoIdentificador(), login);
-    	paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_SENHA_AMBULATORIAL.getTextoIdentificador(), senha);
+    	paginaWeb.preencherInputText(driver, IdLogin, login);
+    	paginaWeb.preencherInputText(driver, IdSenha, senha);
     	
-    	paginaWeb.baixarScreenshot(driver, urlInicialImagem, IdentificadoresPaginaWebSIRESPInicio.ID_IMAGEM_CAPTCHA_AMBULATORIAL.getTextoIdentificador(), destino);
+    	paginaWeb.baixarScreenshot(driver, urlInicialImagem, idImagemCaptcha, destino);
     	
     	try {
 			Thread.sleep(3000);
@@ -415,9 +519,9 @@ public class InteracaoComSIRESPPaginaInicial
     	
     	String textoCaptcha = Utils.obterTextoDeImagem(destino);
     	
-    	paginaWeb.preencherInputText(driver, IdentificadoresPaginaWebSIRESPInicio.ID_TEXTO_CAPTCHA_AMBULATORIAL.getTextoIdentificador(), textoCaptcha);
+    	paginaWeb.preencherInputText(driver, IdTextoCaptcha, textoCaptcha);
     	
-    	paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESPInicio.ID_BOTAO_ENTRAR_AMBULATORIAL.getTextoIdentificador(), "id");
+    	paginaWeb.clicarBotaoSubmit(driver, IdBotaoEntrar, "id");
 
     	try {
 			Thread.sleep(1000);
@@ -434,6 +538,7 @@ public class InteracaoComSIRESPPaginaInicial
     	
     	return "";
     }
+    
     
     public static String validarDocumento(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb)
     {
@@ -480,6 +585,28 @@ public class InteracaoComSIRESPPaginaInicial
 		boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, valueSMSCampinas);
 		
 		paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.ID_AMBULATORIAL_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "id");
+		
+		return "";
+    }
+    
+    public static String acessarUnidadeCentralRegMunicipal(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb)
+    {
+    	String valueSMSCampinas = "9933_CENTRAL REGULAÇÃO MUNICIPAL - CAMPINAS_45";
+    	//String value = elementosRadioUnidades.get("5416655 - SMS - CAMPINAS");
+		//System.out.println(value);
+		
+		paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_MENU.getTextoIdentificador());		
+	
+		if(paginaWeb.haElementosPorID(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador()))
+		{
+			paginaWeb.trocarFrame(driver, IdentificadoresPaginaWebSIRESP.ID_FRAME_COMPONENTES.getTextoIdentificador());
+		
+			boolean unidadeEncontrada = paginaWeb.clicarRadioInputByValue(driver, valueSMSCampinas);
+		
+			paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebSIRESP.NAME_URGENCIA_BOTAO_OK_ESCOLHER_UNIDADE.getTextoIdentificador(), "name");
+		}
+		else
+			return "acesso direto";
 		
 		return "";
     }

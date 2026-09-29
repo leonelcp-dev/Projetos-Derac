@@ -50,6 +50,18 @@ public class ConsolidadoLeitos {
     @ExcelColumn(header = "Aguardando Paciente")
     private String bloqueadoAguardandoPaciente;
     
+    @ExcelColumn(header = "Sazonalidade")
+    private String bloqueadoSazonalidade;
+    
+    @ExcelColumn(header = "Reserva Interna")
+    private String bloqueadoReservaInterna;
+    
+    @ExcelColumn(header = "Manutenção")
+    private String bloqueadoManutencao;
+    
+    @ExcelColumn(header = "Administrativo")
+    private String bloqueadoAdministrativo;
+    
     @ExcelColumn(header = "Outros")
     private String bloqueadoOutros;   
     
@@ -220,6 +232,38 @@ public class ConsolidadoLeitos {
 
 	public void setNaoConveniadoOcupado(String naoConveniadoOcupado) {
 		this.naoConveniadoOcupado = naoConveniadoOcupado;
+	}
+
+	public String getBloqueadoSazonalidade() {
+		return bloqueadoSazonalidade;
+	}
+
+	public void setBloqueadoSazonalidade(String bloqueadoSazonalidade) {
+		this.bloqueadoSazonalidade = bloqueadoSazonalidade;
+	}
+
+	public String getBloqueadoReservaInterna() {
+		return bloqueadoReservaInterna;
+	}
+
+	public void setBloqueadoReservaInterna(String bloqueadoReservaInterna) {
+		this.bloqueadoReservaInterna = bloqueadoReservaInterna;
+	}
+
+	public String getBloqueadoManutencao() {
+		return bloqueadoManutencao;
+	}
+
+	public void setBloqueadoManutencao(String bloqueadoManutencao) {
+		this.bloqueadoManutencao = bloqueadoManutencao;
+	}
+
+	public String getBloqueadoAdministrativo() {
+		return bloqueadoAdministrativo;
+	}
+
+	public void setBloqueadoAdministrativo(String bloqueadoAdministrativo) {
+		this.bloqueadoAdministrativo = bloqueadoAdministrativo;
 	}
 
 }

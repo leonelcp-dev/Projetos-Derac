@@ -16,20 +16,21 @@ public enum ParametrosArquivoNovasSolicitacoesExame {
 	INDICE_COLUNA_TIPO_EXAME(6, 6, "Tipo Exame", "String", ""),
 	INDICE_COLUNA_ESPECIALIDADE_EXAME(7, 7, "Especialidade/Exame", "String", ""),
 	INDICE_COLUNA_CID(8, 8, "CID", "String", ""),
-	INDICE_COLUNA_DATA_INCLUSAO(9, 9, "Data Inclusão", "DateTime", "dd/MM/yyyy HH:mm:ss"),
-	INDICE_COLUNA_DATA_SAIDA(10, 10, "Data Saída", "DateTime", "dd/MM/yyyy HH:mm:ss"),
-	INDICE_COLUNA_TOTAL_DIAS_AGUARDANDO(11, 11, "Total dias Aguardando", "String", ""),
-	INDICE_COLUNA_PROFISSIONAL(12, 12, "Profissional", "String", ""),
-	INDICE_COLUNA_UNIDADE_INDICADA_PARA_AGENDAMENTO(13, 13, "Unidade Indicada para Agendamento", "String", ""),
+	INDICE_COLUNA_STATUS(9, 9, "Status", "String", ""),
+	INDICE_COLUNA_DATA_INCLUSAO(10, 10, "Data Inclusão", "DateTime", "dd/MM/yyyy HH:mm:ss"),
+	INDICE_COLUNA_DATA_SAIDA(11, 11, "Data Saída", "DateTime", "dd/MM/yyyy HH:mm:ss"),
+	INDICE_COLUNA_TOTAL_DIAS_AGUARDANDO(12, 12, "Total dias Aguardando", "String", ""),
+	INDICE_COLUNA_PROFISSIONAL(13, 13, "Profissional", "String", ""),
+	INDICE_COLUNA_UNIDADE_INDICADA_PARA_AGENDAMENTO(14, 14, "Unidade Indicada para Agendamento", "String", ""),
 
-	ARQUIVO_FINAL_LINHA_INICIAL(14, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
-	ARQUIVO_BAIXADO_LINHA_INICIAL(15, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
+	ARQUIVO_FINAL_LINHA_INICIAL(15, 1,"Ajustado de acordo com o Java, no arquivo é a Linha 2", "", ""),
+	ARQUIVO_BAIXADO_LINHA_INICIAL(16, 9,"Ajustado de acordo com o Java, no arquivo é a Linha 10", "", ""),
 	
-	NOME_PLANILHA_ARQUIVO_DOWNLOAD(16, 8,"demanda_por_recurso_qualitativo", "", ""),
-	NOME_PLANILHA_ARQUIVO_FORMATADO(17, 8,"BD - CDR", "", ""),
+	NOME_PLANILHA_ARQUIVO_DOWNLOAD(17, 8,"demanda_por_recurso_qualitativo", "", ""),
+	NOME_PLANILHA_ARQUIVO_FORMATADO(18, 8,"BD - CDR", "", ""),
 	
-	EXTENSAO_ARQUIVO_BAIXADO(18, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_FORMATADO(19, 0, "xlsx", "", "");
+	EXTENSAO_ARQUIVO_BAIXADO(19, 0, "xlsx", "", ""),
+	EXTENSAO_ARQUIVO_FORMATADO(20, 0, "xlsx", "", "");
 
 	private int idUnico;
 	private int indice;

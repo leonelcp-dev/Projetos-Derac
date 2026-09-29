@@ -7,11 +7,24 @@ public enum IdentificadoresPaginaWebSIRESPInicio {
 	ID_FRAME_DISTRIBUICAO_COTAS_TABELA_RESULTADOS(0, "frame1"),
 	ID_MENU(0, "example"),
 	
+	ID_TEXTO_LOGIN_URGENCIA(0, "usuario_1"),
+	ID_TEXTO_SENHA_URGENCIA(0, "senha_1"),
+	ID_TEXTO_CAPTCHA_URGENCIA(0, "txt_captcha_1"),
+	ID_IMAGEM_CAPTCHA_URGENCIA(0, "captcha_1"),
+	ID_BOTAO_ENTRAR_URGENCIA(0, "btn_entrar_1"),
+	
+	ID_TEXTO_LOGIN_LEITO(0, "usuario_1"),
+	ID_TEXTO_SENHA_LEITO(0, "senha_1"),
+	ID_TEXTO_CAPTCHA_LEITO(0, "txt_captcha_1"),
+	ID_IMAGEM_CAPTCHA_LEITO(0, "captcha_1"),
+	ID_BOTAO_ENTRAR_LEITO(0, "btn_entrar_1"),
+	
 	ID_TEXTO_LOGIN_AMBULATORIAL(0, "usuario_4"),
 	ID_TEXTO_SENHA_AMBULATORIAL(0, "senha_4"),
 	ID_TEXTO_CAPTCHA_AMBULATORIAL(0, "txt_captcha_4"),
 	ID_IMAGEM_CAPTCHA_AMBULATORIAL(0, "captcha_4"),
 	ID_BOTAO_ENTRAR_AMBULATORIAL(0, "btn_entrar_4"),
+	
 	ID_TEXTO_DIGITOS_DOCUMENTOS(0, "digito_doc"),
 	ID_BOTAO_ENTRAR_VALIDAR_DOCUMENTO(0, "btn_entrar"),
 	
@@ -24,7 +37,11 @@ public enum IdentificadoresPaginaWebSIRESPInicio {
 	QUANTIDADE_DIGITOS(3, "QUANTIDADE_DIGITOS"),
 	
 	XPATH_TEXTO_DOCUMENTO_SOLICITADO(0, "/html/body/form/table/tbody/tr[3]/td/table[2]/tbody/tr[1]/td/table/tbody/tr/td/table/tbody/tr/td[3]/table/tbody/tr/td/table/tbody/tr/td[1]/label"),
+	
 	XPATH_MODULO_AMBULATORIAL(0, "/html/body/div/div[4]/div/div/div[2]/div[1]/a"),
+	XPATH_MODULO_LEITOS(0, "/html/body/div/div[4]/div/div/div[2]/div[4]/a"),
+	XPATH_MODULO_URGENCIA(0, "/html/body/div/div[4]/div/div/div[2]/div[2]/a"),
+	
 	XPATH_BOTAO_OK_CODIGO_SEGURANCA_INVALIDO(0, "/html/body/div[2]/div/div[6]/button[1]"),
 	XPATH_BOTAO_FECHAR(0, "/html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table[1]/tbody/tr/td[5]/a"),
 	XPATH_UNIDADE_AUTENTICADA(0, "/html/body/form/table/tbody/tr[1]/td/table/tbody/tr[2]/td[1]/table/tbody/tr/td[5]"),
