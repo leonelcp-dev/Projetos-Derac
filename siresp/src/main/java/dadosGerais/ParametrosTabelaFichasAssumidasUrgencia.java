@@ -11,12 +11,12 @@ public enum ParametrosTabelaFichasAssumidasUrgencia {
 	INDICE_COLUNA_CASOS_ASSUMIDOS(1, 1, "Casos Assumidos", "Int", ""),
 	INDICE_COLUNA_CASOS_ENCAMINHADOS(2, 2, "Casos Encaminhados", "Int", ""),
 	INDICE_COLUNA_CASOS_REGULADOS_QUANTIDADE(3, 3, "Casos Regulados", "Int", ""),
-	INDICE_COLUNA_CASOS_REGULADOS_PORCENTAGEM(4, 3, "Casos Regulados", "Double", ""),
-	INDICE_COLUNA_CASOS_PENDENTES_QUANTIDADE(5, 3, "Casos Pendentes", "Int", ""),
-	INDICE_COLUNA_CASOS_PENDENTES_PORCENTAGEM(6, 3, "Casos Pendentes", "Double", ""),
+	INDICE_COLUNA_CASOS_REGULADOS_PORCENTAGEM(4, 4, "Casos Regulados", "Double", ""),
+	INDICE_COLUNA_CASOS_PENDENTES_QUANTIDADE(5, 5, "Casos Pendentes", "Int", ""),
+	INDICE_COLUNA_CASOS_PENDENTES_PORCENTAGEM(6, 6, "Casos Pendentes", "Double", ""),
 		
 	QUANTIDADE_ESPERADA_DE_COLUNAS(7, 11, "Quantidade Esperada de Colunas", "", ""),
-	LINHA_INICIAL_TABELA(8, 3, "Primeira linha de resultados", "", ""),
+	LINHA_INICIAL_TABELA(8, 2, "Primeira linha de resultados", "", ""),
 	
 	TEXTO_TOTAL(9, 0, "Total", "", ""),
 	

@@ -35,7 +35,10 @@ public enum ParametrosArquivoLeitosPlanilhaConsolidado {
 	NOME_PLANILHA_CONSOLIDADA(23, 0, "Consolidado Leitos", "", ""),
 	
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA(24, 0, "xlsx", "", ""),
-	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(25, 0, "xls", "", "");
+	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(25, 0, "xls", "", ""),
+	INDICE_COLUNA_DATA_PROCESSAMENTO(26, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
+	INDICE_LINHA_DATA_PROCESSAMENTO(27, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	TEXTO_NAO_CADASTRADO(31, 8, "***NÃO CADASTRADO***", "", "");
 	
 
 	private int idUnico;

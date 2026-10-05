@@ -42,7 +42,8 @@ public enum ParametrosArquivoLeitosPlanilhaMonitoramento {
 	EXTENSAO_ARQUIVO_OFERTA_DEMANDA_BAIXADO(28, 0, "xls", "", ""),
 	
 	INDICE_COLUNA_DATA_PROCESSAMENTO(29, 2, "Ajustado de acordo com o Java, no arquivo é a coluna 3 (C)", "", ""),
-	INDICE_LINHA_DATA_PROCESSAMENTO(30, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),;
+	INDICE_LINHA_DATA_PROCESSAMENTO(30, 7, "Ajustado de acordo com o Java, no arquivo é a linha 8", "", ""),
+	TEXTO_NAO_CADASTRADO(31, 8, "***NÃO CADASTRADO***", "", "");
 	
 
 	private int idUnico;

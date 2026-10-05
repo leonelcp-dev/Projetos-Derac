@@ -10,10 +10,12 @@ public enum ParametrosArquivoUrgenciaPlanilhaFichasAssumidas {
 	INDICE_COLUNA_DATA(0, 1, "Data", "Date", "dd/MM/yyyy"),
 	INDICE_COLUNA_PERIODO(1, 2, "Período", "String", ""),
 	INDICE_COLUNA_REGULADOR(2, 3, "Regulador", "String", ""),
-	INDICE_COLUNA_ASSUMIDOS(4, 5, "Casos Assumidos", "Int", ""),
-	INDICE_COLUNA_ENCAMINHADOS(5, 6, "Casos Encaminhados", "Int", ""),
-	INDICE_COLUNA_REGULADOS(6, 7, "Casos Regulados", "Int", ""),
-	INDICE_COLUNA_PENDENTES(7, 8, "Casos Pendentes", "Int", ""),
+	INDICE_COLUNA_ASSUMIDOS(3, 4, "Casos Assumidos", "Int", ""),
+	INDICE_COLUNA_ENCAMINHADOS(4, 5, "Casos Encaminhados", "Int", ""),
+	INDICE_COLUNA_REGULADOS(5, 6, "Casos Regulados", "Int", ""),
+	INDICE_COLUNA_PENDENTES(6, 7, "Casos Pendentes", "Int", ""),
+	
+	TEXTO_CELULA_VAZIA(8, 0, "-", "", ""),
 	
 	LINHA_INICIAL_ARQUIVO(21, 11, "Ajustado de acordo com o Java, no arquivo é a linha 12", "", ""),
 	

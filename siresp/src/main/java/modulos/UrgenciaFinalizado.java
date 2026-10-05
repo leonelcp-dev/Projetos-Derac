@@ -31,6 +31,7 @@ import org.openqa.selenium.WebDriver;
 
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDTI;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador;
@@ -67,6 +68,7 @@ public class UrgenciaFinalizado
 {
 	private String pastaBaseAmbulatorialCDIDR;
 	private String pastaBase;
+	private String pastaBaseCDTI;
 	private String pastaDownloads;
 
 	HashMap<String, EntidadeLeito> mapaEntidadesFinalizacaoUrgencia;
@@ -94,6 +96,7 @@ public class UrgenciaFinalizado
 	HashMap<String, UrgenciaFichasFinalizadasAssumidasRegulador> urgenciasFichasAssumidasRegulador;
 	HashMap<String, UrgenciaFichasFinalizadasAssumidasReguladorMensal> urgenciasFichasAssumidasReguladorMensal;
 	private IdentificadoresPastasCompartilhadasCDIDRUrgencia diretoriosCDIDR; 
+	private IdentificadoresPastasCompartilhadasCDTI diretoriosCDTI;
 
 	public UrgenciaFinalizado(String pastaBase, String ambiente)
 	{
@@ -137,6 +140,20 @@ public class UrgenciaFinalizado
 		//nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
 		
 		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
+		
+		return "";
+	}
+	
+	private String copiarRelatorioProducaoParaCDTI()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgencia();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, diretoriosCDIDR.getNomeArquivoConsolidado());
+		
+		String pastaRelatorioCDTI = pastaBaseCDTI + "\\" + diretoriosCDTI.getPastaLeitosUrgencia();
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDTI + "\\" + nomeArquivo);
 		
 		return "";
 	}
@@ -192,6 +209,14 @@ public class UrgenciaFinalizado
 				return "";
 			}
 			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador()))
+				pastaBaseCDTI = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Demanda Reprimida compartilhada CDTI");
+				return "";
+			}
+			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -207,6 +232,7 @@ public class UrgenciaFinalizado
 	public String obterAgrupamentoFinalizadoUrgencia(WebDriver driver, String ambiente, String data, String caminhoPastaBase, String caminhoPastaDownloads)
 	{			
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRUrgencia.valueOf(ambiente.toUpperCase());
+		diretoriosCDTI = IdentificadoresPastasCompartilhadasCDTI.valueOf(ambiente.toUpperCase());
 		
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
     	
@@ -571,6 +597,7 @@ public class UrgenciaFinalizado
 		montarDadosFichasAssumidasReguladorMensal(urgenciasFichasAssumidasReguladorMensal);
 		montarPlanilhaFichasAssumidasReguladorMensal(dataInformada, urgenciasFichasAssumidasReguladorMensal);
 		
+		preencherDataDeProcessamento();
 		ordenarPlanilhaAgrupada();
 		ordenarPlanilhaDetalhada();
 		ordenarPlanilhaVagaZero();
@@ -583,10 +610,12 @@ public class UrgenciaFinalizado
 		//copiarRelatorioProducaoParaCDIDR();
 		copiarRelatorioUrgenciaParaCDIDR();
 		copiarRelatorioUrgenciaParaLeitosCDIDR();
+		copiarRelatorioProducaoParaCDTI();
 		
 		return "";	
 	}
 	
+
 	private Arquivo baixarArquivos(WebDriver driver, AcoesGeraisPaginaWeb paginaWeb, String ultimoRecente) 
 	{
 		Pasta pastaOrigem = new Pasta(pastaDownloads, false);
@@ -2072,6 +2101,64 @@ public class UrgenciaFinalizado
 
 	public void setCaminhoArquivoConsolidado(String caminhoArquivoConsolidado) {
 		this.caminhoArquivoConsolidado = caminhoArquivoConsolidado;
+	}
+	
+	private String preencherDataDeProcessamento()
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		LocalDate dataHoje = LocalDate.now();
+		
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFinalizadoAgrupado.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFinalizadoDetalhado.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaVagaZero.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaVagaZero.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaVagaZero.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaFormaResolucao.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaFormaResolucao.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFormaResolucao.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaProducaoReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasRegulador.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaFichasFinalizadasAssumidasReguladorMensal.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		return "";
 	}
 	
 }

@@ -49,6 +49,7 @@ import modulos.OfertaDemandaDeAcessoR1;
 import modulos.RemoverDaFilaCentralReg;
 import modulos.RemoverDuplicadoDeFila;
 import modulos.UrgenciaAguardando;
+import modulos.UrgenciaFichasAssumidas;
 import modulos.UrgenciaFinalizado;
 import utils.Utils;
 
@@ -366,6 +367,7 @@ public class InteracaoComSIRESPPaginaInicial
 	        	urgenciaAguardando.obterAgrupamentoDeEsperaUrgencia(driver, ambiente);
 	       
 	        	UrgenciaFinalizado urgenciaFinalizado = new UrgenciaFinalizado(pastaBase, ambiente);
+	        	UrgenciaFichasAssumidas urgenciaFichasAssumidas = new UrgenciaFichasAssumidas(pastaBase, ambiente);
 	        	
 	        	//String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 	    		//String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
@@ -410,6 +412,7 @@ public class InteracaoComSIRESPPaginaInicial
 	        		System.out.println(dataString);
 	        	    
 	        		urgenciaFinalizado.obterAgrupamentoFinalizadoUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
+	        		urgenciaFichasAssumidas.obterProducaoReguladorUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
 	        	}
         	}
         }

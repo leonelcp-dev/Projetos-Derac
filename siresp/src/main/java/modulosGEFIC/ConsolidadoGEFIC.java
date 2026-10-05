@@ -311,6 +311,8 @@ public class ConsolidadoGEFIC
 		
 		String mesAtual = (new MesesFormatados()).getMeses().get(dataInicioCompetencia.getMonthValue() - 1).getMesDescricao();
 		
+		System.out.println(mesAtual);
+		
 		ArrayList<String> opcoes = new ArrayList<String>();
 		
 		if(ehOPM)
@@ -364,6 +366,7 @@ public class ConsolidadoGEFIC
 				if(linha.size() > 1)
 				{
 					String unidade = deParaNomesEntidades.get(linha.get(0).toUpperCase().trim().replace(":", ""));
+					System.out.println(linha.get(0).toUpperCase() + " - " + unidade);
 					
 					if(unidade != null)
 					{

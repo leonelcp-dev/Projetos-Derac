@@ -30,6 +30,7 @@ import modulos.OfertaDemandaDeAcessoR1;
 import modulos.RemoverDaFilaCentralReg;
 import modulos.RemoverDuplicadoDeFila;
 import modulos.UrgenciaAguardando;
+import modulos.UrgenciaFichasAssumidas;
 import modulos.UrgenciaFinalizado;
 
 /**
@@ -237,20 +238,23 @@ public class InteracaoComSIRESP
         else if(escolha == 11)
         {
         	UrgenciaFinalizado urgenciaFinalizado = new UrgenciaFinalizado();
+        	UrgenciaFichasAssumidas urgenciaFichasAssumidas = new UrgenciaFichasAssumidas();
         	
         	String pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
     		String pastaDownloads = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta onde os downloads são salvos", "Pasta de Download", JOptionPane.QUESTION_MESSAGE).trim();
         	//urgenciaFinalizado.obterAgrupamentoDeEsperaUrgencia(driver, ambiente, null, pastaBase, pastaDownloads);
         	
-        	LocalDate dataInicial = LocalDate.of(2026, 1, 1);
-        	LocalDate dataFinal = LocalDate.of(2026, 7, 31);
+        	LocalDate dataInicial = LocalDate.of(2026, 10, 1);
+        	LocalDate dataFinal = LocalDate.of(2026, 10, 29);
         	
         	for(LocalDate data = dataInicial; !data.isAfter(dataFinal); data = data.plusDays(1))
         	{
         		String dataString = data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         		System.out.println(dataString);
         	    
+        		
         		urgenciaFinalizado.obterAgrupamentoFinalizadoUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
+        		urgenciaFichasAssumidas.obterProducaoReguladorUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
         	}
         }
         

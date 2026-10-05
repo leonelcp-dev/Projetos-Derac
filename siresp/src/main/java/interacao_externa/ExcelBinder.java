@@ -243,64 +243,88 @@ public class ExcelBinder {
     ) {
         if (cell == null) return null;
 
+        //System.out.println(cell.getStringCellValue());
+        
         CellType type = cell.getCellType();
         if (type == CellType.FORMULA) {
             type = evaluator.evaluateFormulaCell(cell);
         }
 
+//        System.out.println(cell.getAddress() + " | type=" + cell.getCellType());
+//        
+//        
+//        if (cell.getCellType() == CellType.FORMULA) {
+//        	System.out.println("cached=" + cell.getCachedFormulaResultType());
+//        }
+//        		
+//		DataFormatter format = new DataFormatter();
+//
+//		System.out.println(cell);
+//		
+//		System.out.println("valor=[" + format.formatCellValue(cell) + "]");
+        
         Class<?> targetType = fb.field.getType();
+        
 
-        // 1) Datas/horas nativas do Excel (número serial)
-        if (type == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-            Date date = cell.getDateCellValue();
-            Instant instant = date.toInstant();
-            ZoneId zone = ZoneId.systemDefault(); // ajuste se necessário
-            if (targetType == LocalDate.class) {
-                return instant.atZone(zone).toLocalDate();
-            } else if (targetType == LocalTime.class) {
-                return instant.atZone(zone).toLocalTime();
-            } else if (targetType == LocalDateTime.class) {
-                return instant.atZone(zone).toLocalDateTime();
-            } else {
-                // fallback para texto formatado
-            	//System.out.println(cell.getNumericCellValue());
-
-            	//System.out.println(cell.getCellType());
-            	//System.out.println(cell.getCellStyle().getDataFormatString());
-
-            	if(fb.pattern.equals("mmm/yyyy"))
-            	{
-
-            		// converte para LocalDate
-        		    LocalDate ld = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        		    // formata explicitamente em pt-BR
-        		    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM/yyyy", Locale.of("pt", "BR"));
-
-        		    String txt = ld.format(fmt).toLowerCase(); // jan/2023
-        		    return txt;
-
-            	}
-            	else if(fb.pattern.equals("dd/MM/yyyy"))
-            	{
-            		// converte para LocalDate
-        		    LocalDate ld = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        		    // formata explicitamente em pt-BR
-        		    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        		    String txt = ld.format(fmt).toLowerCase(); // jan/2023
-        		    return txt;
-
-            	}
-            		
-            	else
-            	{
-                	String txt = formatter.formatCellValue(cell, evaluator);
-                    //String txt = formatter.formatCellValue(cell);
-                    return coerceFromString(txt, targetType, fb.pattern);	
-            	}
-            }
+        try
+        {
+	        // 1) Datas/horas nativas do Excel (número serial)
+	        if (type == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+	            Date date = cell.getDateCellValue();
+	            Instant instant = date.toInstant();
+	            ZoneId zone = ZoneId.systemDefault(); // ajuste se necessário
+	            if (targetType == LocalDate.class) {
+	                return instant.atZone(zone).toLocalDate();
+	            } else if (targetType == LocalTime.class) {
+	                return instant.atZone(zone).toLocalTime();
+	            } else if (targetType == LocalDateTime.class) {
+	                return instant.atZone(zone).toLocalDateTime();
+	            } else {
+	                // fallback para texto formatado
+	            	//System.out.println(cell.getNumericCellValue());
+	
+	            	//System.out.println(cell.getCellType());
+	            	//System.out.println(cell.getCellStyle().getDataFormatString());
+	
+	            	if(fb.pattern.equals("mmm/yyyy"))
+	            	{
+	
+	            		// converte para LocalDate
+	        		    LocalDate ld = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	        		    // formata explicitamente em pt-BR
+	        		    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM/yyyy", Locale.of("pt", "BR"));
+	
+	        		    String txt = ld.format(fmt).toLowerCase(); // jan/2023
+	        		    return txt;
+	
+	            	}
+	            	else if(fb.pattern.equals("dd/MM/yyyy"))
+	            	{
+	            		// converte para LocalDate
+	        		    LocalDate ld = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	        		    // formata explicitamente em pt-BR
+	        		    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	
+	        		    String txt = ld.format(fmt).toLowerCase(); // jan/2023
+	        		    return txt;
+	
+	            	}
+	            		
+	            	else
+	            	{
+	                	String txt = formatter.formatCellValue(cell, evaluator);
+	                    //String txt = formatter.formatCellValue(cell);
+	                    return coerceFromString(txt, targetType, fb.pattern);	
+	            	}
+	            }
+	        }
         }
-
+        catch(IllegalStateException e)
+        {
+        	System.out.println("Valor Inconsistente: " + cell.getAddress() + " | type=" + cell.getCellType());
+        	return null;
+        }
+        
         // 2) Numérico
         if (type == CellType.NUMERIC) {
            // double d = cell.getNumericCellValue();

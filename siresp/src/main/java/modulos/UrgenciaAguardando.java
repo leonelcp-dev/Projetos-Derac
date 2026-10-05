@@ -27,6 +27,7 @@ import org.openqa.selenium.WebDriver;
 
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDTI;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoLeitosPlanilhaMonitoramento;
 import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado;
@@ -46,7 +47,9 @@ import modelosDados.UrgenciaAguardandoAgrupado;
 public class UrgenciaAguardando 
 {
 	private String pastaBaseAmbulatorialCDIDR;
+	
 	private String pastaBase;
+	private String pastaBaseCDTI;
 	LocalDate dataInicioReferencia;
 	LocalDate dataFinalReferencia;
 	LocalDate dataInicioCompetencia;
@@ -60,6 +63,7 @@ public class UrgenciaAguardando
 	HashMap<String, UrgenciaAguardandoAgrupado> urgenciasAgrupadasJaRegistradas;
 	HashMap<String, UrgenciaAguardandoDetalhado> urgenciasDetalhadasJaRegistradas;
 	private IdentificadoresPastasCompartilhadasCDIDRUrgencia diretoriosCDIDR; 
+	private IdentificadoresPastasCompartilhadasCDTI diretoriosCDTI;
 
 	public UrgenciaAguardando(String pastaBase, String ambiente)
 	{
@@ -89,9 +93,24 @@ public class UrgenciaAguardando
 		return "";
 	}
 	
+	private String copiarRelatorioProducaoParaCDTI()
+	{
+		String caminhoArquivo = pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoUrgencia();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, diretoriosCDIDR.getNomeArquivoConsolidado());
+		
+		String pastaRelatorioCDTI = pastaBaseCDTI + "\\" + diretoriosCDTI.getPastaLeitosUrgencia();
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDTI + "\\" + nomeArquivo);
+		
+		return "";
+	}
+	
 	public String obterAgrupamentoDeEsperaUrgencia(WebDriver driver, String ambiente)
 	{			
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRUrgencia.valueOf(ambiente.toUpperCase());
+		diretoriosCDTI = IdentificadoresPastasCompartilhadasCDTI.valueOf(ambiente.toUpperCase());
 		
 		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
 		
@@ -131,6 +150,14 @@ public class UrgenciaAguardando
 			else
 			{
 				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Ambulatorial compartilhada");
+				return "";
+			}
+			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador()))
+				pastaBaseCDTI = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Demanda Reprimida compartilhada CDTI");
 				return "";
 			}
 			
@@ -272,12 +299,14 @@ public class UrgenciaAguardando
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-						
+		
+		preencherDataDeProcessamento();
 		ordenarPlanilhaAgrupada();
 		ordenarPlanilhaDetalhada();
 		//atualizarCopiaOriginalRelatorioProducao();
 		//copiarRelatorioProducaoParaCDIDR();
 		copiarRelatorioUrgenciaParaCDIDR();
+		copiarRelatorioProducaoParaCDTI();
 		
 		return "";	
 	}
@@ -842,6 +871,28 @@ public class UrgenciaAguardando
 		}
 		
 		return celula;
+	}
+	
+	private String preencherDataDeProcessamento()
+	{
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseAmbulatorialCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		
+		ArrayList<CelulaExcel> celulas = new ArrayList<CelulaExcel>();
+		
+		LocalDate dataHoje = LocalDate.now();
+		
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaAguardandoAgrupado.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaAguardandoAgrupado.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaAguardandoAgrupado.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoUrgenciaPlanilhaAguardandoDetalhado.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		return "";
 	}
 	
 }

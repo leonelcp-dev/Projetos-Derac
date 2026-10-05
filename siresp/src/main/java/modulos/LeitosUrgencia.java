@@ -29,6 +29,7 @@ import org.apache.commons.csv.DuplicateHeaderMode;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRLeitos;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDRA;
+import dadosGerais.IdentificadoresPastasCompartilhadasCDTI;
 import dadosGerais.MesesFormatados;
 import dadosGerais.ParametrosArquivoCenso;
 import dadosGerais.ParametrosArquivoCensoPlanilhaCadastro;
@@ -55,7 +56,10 @@ import tratamentoDeArquivos.Arquivo;
 public class LeitosUrgencia 
 {
 	private IdentificadoresPastasCompartilhadasCDIDRLeitos diretoriosCDIDR;
+	private IdentificadoresPastasCompartilhadasCDTI diretoriosCDTI;
+	
 	private String pastaBase;
+	private String pastaBaseCDTI;
 	private String dataDeAnalise;
 	private String pastaBaseMonitoramentoLeitosCDIDR;
 	
@@ -131,6 +135,14 @@ public class LeitosUrgencia
 				return "";
 			}
 			
+			if(mapaDePastas.containsKey(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador()))
+				pastaBaseCDTI = pastaBase + "\\" + mapaDePastas.get(ambiente + IdentificadoresPastasCompartilhadasCDTI.REFERENCIA_PASTAS_CDTI.getTextoIdentificador());
+			else
+			{
+				JOptionPane.showMessageDialog(null, "Não foi identificada a localização da pasta Demanda Reprimida compartilhada CDTI");
+				return "";
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,6 +157,7 @@ public class LeitosUrgencia
 	public String consolidarDadosDeLeitos(String ambiente, boolean automatico)
 	{
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRLeitos.valueOf(ambiente.toUpperCase());
+		diretoriosCDTI = IdentificadoresPastasCompartilhadasCDTI.valueOf(ambiente.toUpperCase());
 		
 		if(pastaBase == null)
 			pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
@@ -197,12 +210,13 @@ public class LeitosUrgencia
 		for(dataInformada = dataInicial; !dataInformada.isAfter(dataFinal); dataInformada = dataInformada.plusDays(1))
 		{
 			montarRelatoriosDeLeitos();
-			preencherDataDeProcessamento();
 			ordenarPlanilhaDeMonitoramentoDeLeitos();
 			ordenarPlanilhaConsolidadaDeLeitos();
 		}
-		
+
+		preencherDataDeProcessamento();
 		copiarRelatorioUrgenciaParaCDIDR();
+		copiarRelatorioProducaoParaCDTI();
 		
 		return "";
 	}
@@ -221,6 +235,20 @@ public class LeitosUrgencia
 		//nomeArquivo  = nomeArquivo.replace(".xlsx", " - " + data.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx");
 		
 		arquivo.CopiarArquivo(pastaRelatorioCDIDR + "\\" + nomeArquivo);
+		
+		return "";
+	}
+	
+	private String copiarRelatorioProducaoParaCDTI()
+	{
+		String caminhoArquivo = pastaBaseMonitoramentoLeitosCDIDR + "\\" + diretoriosCDIDR.getPastaConsolidadoLeitos();
+		Arquivo arquivo = new Arquivo(caminhoArquivo, diretoriosCDIDR.getNomeArquivoConsolidado());
+		
+		String pastaRelatorioCDTI = pastaBaseCDTI + "\\" + diretoriosCDTI.getPastaLeitosUrgencia();
+		
+		String nomeArquivo = arquivo.getNomeDoArquivo();
+		
+		arquivo.CopiarArquivo(pastaRelatorioCDTI + "\\" + nomeArquivo);
 		
 		return "";
 	}
@@ -291,6 +319,7 @@ public class LeitosUrgencia
 			return null;
 			
 		}
+		
 		leitosConsolidadosJaMonitorados = new HashMap<String, HashMap<String, ConsolidadoLeitos>>();
 		
 		linhaArquivo = ParametrosArquivoLeitosPlanilhaConsolidado.LINHA_INICIAL_ARQUIVO.getIndice();
@@ -474,6 +503,9 @@ public class LeitosUrgencia
 					linhaArquivo++;
 				}
 				
+				if(enfermaria.equals("") && dadosLeito.getTotalDisponivel() == 0 && dadosLeito.getExtraNaoPactuadoOcupado() > 0)
+					enfermaria = ParametrosArquivoLeitosPlanilhaMonitoramento.TEXTO_NAO_CADASTRADO.getDescricao();
+				
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_UNIDADE.getIndice(), entidade.getNomeSIRESP(), "String"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_DATA.getIndice(), dataInformada, "Date"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ESPECIALIDADE.getIndice(), especialidade.toUpperCase(), "String"));
@@ -560,6 +592,9 @@ public class LeitosUrgencia
 					linhaArquivo++;
 				}
 				
+				if(enfermaria.equals("") && dadosLeito.getTotalDisponivel() == 0 && dadosLeito.getExtraNaoPactuadoOcupado() > 0)
+					enfermaria = ParametrosArquivoLeitosPlanilhaConsolidado.TEXTO_NAO_CADASTRADO.getDescricao();
+				
 				//parei aqui, escrever arquivo
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_DATA.getIndice(), dataInformada, "Date"));
 				celulas.add(new CelulaExcel(linhaExcel, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ESPECIALIDADE.getIndice(), especialidade.toUpperCase(), "String"));
@@ -609,6 +644,9 @@ public class LeitosUrgencia
 		bloqueiosVagosInternados.add(ParametrosArquivoCenso.TEXTO_MOTIVO_BLOQUEIO_INTERNACAO_COM_TRANSFERENCIA.getDescricao());
 		bloqueiosVagosInternados.add(ParametrosArquivoCenso.TEXTO_MOTIVO_BLOQUEIO_INTERNACAO_SEM_DOCUMENTO.getDescricao());
 		
+		ArrayList<String> bloqueiosLeitosDescartados = new ArrayList<String>();
+		bloqueiosLeitosDescartados.add(ParametrosArquivoCenso.TEXTO_MOTIVO_BLOQUEIO_DESATIVADO.getDescricao());
+		
 		int primeiraLinhaArquivo = ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice();
 		int ultimaLinhaPreenchidaDoArquivoCenso = arquivoCenso.getUlimtaLinhaPreenchidaEmUmaColuna(ParametrosArquivoCenso.LINHA_INICIAL_ARQUIVO_CENSO.getIndice(), ParametrosArquivoCenso.INDICE_COLUNA_DATA_RELATORIO.getIndice());
 		
@@ -626,6 +664,8 @@ public class LeitosUrgencia
 				
 				String tipoDeLeito = arquivoCenso.getValorDaCelulaComoString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_TIPO_DE_LEITO_3.getIndice(), "");
 				String leitoExtraPactuado = ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao();
+				String situacaoLeito = arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_SITUACAO.getIndice());
+				String motivoDoBloqueio = arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_MOTIVO_DO_BLOQUEIO.getIndice());
 				
 				LeitoCadastrado leito;
 				
@@ -641,9 +681,9 @@ public class LeitosUrgencia
 					leito.setStatus(statusLeito);
 					leito.setContabilizaNaTaxaDeOcupacao(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO.getDescricao());
 					
-					if(leitosExtrasCadastrados.containsKey(descricaoEnfermaria + descricaoLeito))
+					if(leitosExtrasCadastrados.containsKey(descricaoEnfermaria))
 					{
-						LeitoExtraCadastrado leitoExtra = leitosExtrasCadastrados.get(descricaoEnfermaria.toUpperCase() + descricaoLeito.toUpperCase());
+						LeitoExtraCadastrado leitoExtra = leitosExtrasCadastrados.get(descricaoEnfermaria.toUpperCase());
 						leito.setEnfermaria(leitoExtra.getEspecialidade());
 						
 						if(!leitoExtra.getPactuado().trim().equals(""))
@@ -651,7 +691,7 @@ public class LeitosUrgencia
 					}
 					else
 					{
-						leito.setEnfermaria("**NÃO CADASTRADO**");
+						leito.setEnfermaria("");
 					}
 				}
 				else
@@ -711,15 +751,20 @@ public class LeitosUrgencia
 					{
 						if(!tipoDeLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_EXTRA.getDescricao()))
 						{
-							consolidadoPorHospitalEspecialidade.incrementarTotalDisponivel();
-							consolidadoPorEspecialidade.incrementarTotalDisponivel();
+							if(!motivoDoBloqueio.equals(ParametrosArquivoCenso.TEXTO_MOTIVO_BLOQUEIO_ENCERRA.getDescricao()))
+							{
+								consolidadoPorHospitalEspecialidade.incrementarTotalDisponivel();
+								consolidadoPorEspecialidade.incrementarTotalDisponivel();
+							}
+							else
+							{
+								consolidadoPorHospitalEspecialidade.incrementarUsoNaoConveniado();
+								consolidadoPorEspecialidade.incrementarUsoNaoConveniado();
+							}
 						}
 					}
 					
 					//LeitosOcupados
-					String situacaoLeito = arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_SITUACAO.getIndice());
-					String motivoDoBloqueio = arquivoCenso.getValorDaCelulaString(linhaArquivo, ParametrosArquivoCenso.INDICE_COLUNA_MOTIVO_DO_BLOQUEIO.getIndice());
-					
 					if(situacaoLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_OCUPADO.getDescricao()))
 					{
 						if(leitoExtraPactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_PACTUADO.getDescricao()))
@@ -730,15 +775,18 @@ public class LeitosUrgencia
 						
 						if(tipoDeLeito.toUpperCase().equals(ParametrosArquivoCenso.TEXTO_LEITO_EXTRA.getDescricao()))
 						{
-							if(leitoExtraPactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao()))
+							if(!motivoDoBloqueio.equals(ParametrosArquivoCenso.TEXTO_MOTIVO_BLOQUEIO_DESATIVADO.getDescricao()))
 							{
-								consolidadoPorHospitalEspecialidade.incrementarExtraNaoPactuadoOcupado();
-								consolidadoPorEspecialidade.incrementarExtraNaoPactuadoOcupado();
-							}
-							else
-							{
-								consolidadoPorHospitalEspecialidade.incrementarExtraPactuadoOcupado();
-								consolidadoPorEspecialidade.incrementarExtraPactuadoOcupado();
+								if(leitoExtraPactuado.equals(ParametrosArquivoCensoPlanilhaCadastroExtra.TEXTO_NAO_PACTUADO.getDescricao()))
+								{
+									consolidadoPorHospitalEspecialidade.incrementarExtraNaoPactuadoOcupado();
+									consolidadoPorEspecialidade.incrementarExtraNaoPactuadoOcupado();
+								}
+								else
+								{
+									consolidadoPorHospitalEspecialidade.incrementarExtraPactuadoOcupado();
+									consolidadoPorEspecialidade.incrementarExtraPactuadoOcupado();
+								}
 							}
 						}
 						else if(leito.getContabilizaNaTaxaDeOcupacao().equals(ParametrosArquivoCensoPlanilhaCadastro.TEXTO_NAO_CONSIDERADO_TAXA_OCUPACAO_USO_INTERNO.getDescricao()))
@@ -772,10 +820,13 @@ public class LeitosUrgencia
 					}
 					
 					//Leitos bloqueados
-					if(statusLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_BLOQUEADO.getDescricao()))
+					if(statusLeito.equals(ParametrosArquivoCenso.TEXTO_LEITO_BLOQUEADO.getDescricao()) && !bloqueiosLeitosDescartados.contains(motivoDoBloqueio))
 					{
 						if(bloqueiosVagosInternados.contains(motivoDoBloqueio))
 						{
+							consolidadoPorHospitalEspecialidade.incrementarTotalOcupado();
+							consolidadoPorEspecialidade.incrementarTotalOcupado();
+							
 							consolidadoPorHospitalEspecialidade.incrementarRegularOcupado();
 							consolidadoPorEspecialidade.incrementarRegularOcupado();
 						}
@@ -963,7 +1014,7 @@ public class LeitosUrgencia
 				leito.setEspecialidade(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_ESPECIALIDADE.getIndice()));
 				leito.setPactuado(arquivoCenso.getValorDaCelulaString(linhaPlanilha, ParametrosArquivoCensoPlanilhaCadastroExtra.INDICE_COLUNA_PACTUADO.getIndice()).toUpperCase().trim());
 				
-				leitosCadastrados.put(leito.getDescricaoEnfermaria().toUpperCase() + leito.getDescricaoLeito().toUpperCase(), leito);
+				leitosCadastrados.put(leito.getDescricaoEnfermaria().toUpperCase(), leito);
 			}
 		}
 		
@@ -1090,7 +1141,7 @@ public class LeitosUrgencia
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getIndice(), leito.getBloqueadoIsolamento(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getIndice(), leito.getBloqueadoAguardandoPaciente(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_SAZONALIDADE_BLOQUEADO.getIndice(), leito.getBloqueadoSazonalidade(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_SAZONALIDADE_BLOQUEADO.getTipo()));
-			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA.getIndice(), leito.getBloqueadoReservaInterna(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA_BLOQUEADO.getIndice(), leito.getBloqueadoReservaInterna(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_RESERVA_INTERNA_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_MANUTENCAO_BLOQUEADO.getIndice(), leito.getBloqueadoManutencao(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_MANUTENCAO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ADMINISTRATIVO_BLOQUEADO.getIndice(), leito.getBloqueadoAdministrativo(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_ADMINISTRATIVO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_OUTROS_BLOQUEADO.getIndice(), leito.getBloqueadoOutros(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_OUTROS_BLOQUEADO.getTipo()));
@@ -1159,7 +1210,7 @@ public class LeitosUrgencia
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getIndice(), leito.getBloqueadoIsolamento(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ISOLAMENTO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getIndice(), leito.getBloqueadoAguardandoPaciente(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_AGUARDANDO_PACIENTE_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_SAZONALIDADE_BLOQUEADO.getIndice(), leito.getBloqueadoSazonalidade(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_SAZONALIDADE_BLOQUEADO.getTipo()));
-			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA.getIndice(), leito.getBloqueadoReservaInterna(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA.getTipo()));
+			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA_BLOQUEADO.getIndice(), leito.getBloqueadoReservaInterna(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_RESERVA_INTERNA_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_MANUTENCAO_BLOQUEADO.getIndice(), leito.getBloqueadoManutencao(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_MANUTENCAO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ADMINISTRATIVO_BLOQUEADO.getIndice(), leito.getBloqueadoAdministrativo(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_ADMINISTRATIVO_BLOQUEADO.getTipo()));
 			celulas.add(criarCelula(linhaArquivoDemanda, ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_OUTROS_BLOQUEADO.getIndice(), leito.getBloqueadoOutros(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_OUTROS_BLOQUEADO.getTipo()));
@@ -1248,6 +1299,12 @@ public class LeitosUrgencia
 		celulas.add(new CelulaExcel(ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoLeitosPlanilhaMonitoramento.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
 		
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLeitosPlanilhaMonitoramento.NOME_PLANILHA_MONITORAMENTO.getDescricao(), celulas, false, false, 0, null);
+		arquivoConsolidado.forcarCalculos();
+		
+		celulas.clear();
+		celulas.add(new CelulaExcel(ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_LINHA_DATA_PROCESSAMENTO.getIndice(), ParametrosArquivoLeitosPlanilhaConsolidado.INDICE_COLUNA_DATA_PROCESSAMENTO.getIndice(), dataHoje, "Date"));
+		
+		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLeitosPlanilhaConsolidado.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, false, false, 0, null);
 		arquivoConsolidado.forcarCalculos();
 		
 		return "";

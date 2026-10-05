@@ -6,17 +6,17 @@ public enum IdentificadoresPastasCompartilhadasCDTI {
 	
 	MASCARA_NOMES_DINAMICOS(12, "######"),
 	
-	TESTE_PASTA_ARQUIVOS_DEMANDA_REPRIMIDA(9, ""),
+	TESTE_PASTA_ARQUIVOS_LEITOS_URGENCIA(9, "Urgencia\\CopiaCDTI"),
 	TESTE_PASTA_RELATORIO_OFERTA_DEMANDA(9, "Oferta e Demanda\\ENTRADAS MENSAIS\\Relatorio Oferta Demanda"),
 
-	PROD_PASTA_ARQUIVOS_DEMANDA_REPRIMIDA(9, "historico demanda reprimida"),
+	PROD_PASTA_ARQUIVOS_LEITOS_URGENCIA(9, "Leitos e Urgencia"),
 	PROD_PASTA_RELATORIO_OFERTA_DEMANDA(10, "Relatorio Produção"),
 
-	TESTE(TESTE_PASTA_ARQUIVOS_DEMANDA_REPRIMIDA.getTextoIdentificador(), TESTE_PASTA_RELATORIO_OFERTA_DEMANDA.getTextoIdentificador()),
+	TESTE(TESTE_PASTA_ARQUIVOS_LEITOS_URGENCIA.getTextoIdentificador(), TESTE_PASTA_RELATORIO_OFERTA_DEMANDA.getTextoIdentificador()),
 	
-	PRODUCAO(PROD_PASTA_ARQUIVOS_DEMANDA_REPRIMIDA.getTextoIdentificador(), PROD_PASTA_RELATORIO_OFERTA_DEMANDA.getTextoIdentificador());
+	PRODUCAO(PROD_PASTA_ARQUIVOS_LEITOS_URGENCIA.getTextoIdentificador(), PROD_PASTA_RELATORIO_OFERTA_DEMANDA.getTextoIdentificador());
 	
-	private String arquivosDemandaReprimida;
+	private String pastaLeitosUrgencia;
 	private String pastaRelatorioOfertaDemanda;
 	
 	private int indice;
@@ -28,9 +28,9 @@ public enum IdentificadoresPastasCompartilhadasCDTI {
 		this.textoIdentificador = textoIdentificador;
 	}
 	
-	IdentificadoresPastasCompartilhadasCDTI(String arquivosDemandaReprimida, String pastaRelatorioOfertaDemanda)
+	IdentificadoresPastasCompartilhadasCDTI(String pastaLeitosUrgencia, String pastaRelatorioOfertaDemanda)
 	{
-		this.arquivosDemandaReprimida = arquivosDemandaReprimida;
+		this.pastaLeitosUrgencia = pastaLeitosUrgencia;
 		this.pastaRelatorioOfertaDemanda = pastaRelatorioOfertaDemanda;
 	}
 
@@ -50,12 +50,12 @@ public enum IdentificadoresPastasCompartilhadasCDTI {
 		this.indice = indice;
 	}
 
-	public String getArquivosDemandaReprimida() {
-		return arquivosDemandaReprimida;
+	public String getPastaLeitosUrgencia() {
+		return pastaLeitosUrgencia;
 	}
 
-	public void setArquivosDemandaReprimida(String arquivosDemandaReprimida) {
-		this.arquivosDemandaReprimida = arquivosDemandaReprimida;
+	public void setPastaLeitosUrgencia(String pastaLeitosUrgencia) {
+		this.pastaLeitosUrgencia = pastaLeitosUrgencia;
 	}
 
 	public String getPastaRelatorioOfertaDemanda() {

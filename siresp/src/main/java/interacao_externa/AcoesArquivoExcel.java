@@ -55,6 +55,8 @@ public class AcoesArquivoExcel {
 	//private ArrayList<CellStyle> estilosDasColunas;
 	private Map<Integer, CellStyle> estilosDasColunas;
 	
+	
+	
 	public AcoesArquivoExcel(String nomeDoArquivo, int linhaBaseFormatacao)
 	{
 		this.setNomeDoAquivo(nomeDoArquivo);
@@ -81,6 +83,19 @@ public class AcoesArquivoExcel {
             e.printStackTrace();
         }
 
+	}
+	
+	
+	public String tentarRecuperarArquivo()
+	{
+		try (FileInputStream fis = new FileInputStream(getNomeDoAquivo());
+			Workbook wb = WorkbookFactory.create(fis);
+			FileOutputStream fos = new FileOutputStream(getNomeDoAquivo())) {
+			wb.write(fos);
+		}catch(Exception e)
+		{}
+		
+		return "";
 	}
 	
 	public String getNomePlanilhaDaPosicao(int posicao)

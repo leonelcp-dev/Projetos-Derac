@@ -216,8 +216,8 @@ public enum IdentificadoresPaginaWebSIRESP {
 	
 	XPATH_RELATORIO_ACOMPANHAMENTO_REGULADO_TABELA_RESULTADOS(0, "/html/body/form/table[3]/tbody/tr/td/table[3]"),
 	
-	TEXTO_PERIODO_DIURNO(0, "Diruno"),
-	TEXTO_PERIODO_NORTURNO(0, "Norturno"),
+	TEXTO_PERIODO_DIURNO(0, "Diurno"),
+	TEXTO_PERIODO_NORTURNO(0, "Noturno"),
 	
 	MASCARA_CAMPO_DATA(0, "__-__-____");
 	

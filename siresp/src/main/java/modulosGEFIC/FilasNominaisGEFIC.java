@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
@@ -117,6 +118,12 @@ public class FilasNominaisGEFIC
     	
     	String caminhoArquivo = caminhoArquivoBaixado(LocalDate.parse(dataArquivo, DateTimeFormatter.ofPattern("dd/MM/yyyy")), ehOPM);
     	
+    	AcoesArquivoExcel arquivoExcel = new AcoesArquivoExcel(caminhoArquivo, 0);
+    	arquivoExcel.tentarRecuperarArquivo();
+//    	arquivoExcel.abrirPlanilha(0, 0);
+//    	String nomePlanilha = arquivoExcel.getNomePlanilhaDaPosicao(0);
+//    	arquivoExcel.gravarDadosEmCelula(nomePlanilha, new ArrayList<CelulaExcel>(), false, false, 0, null);
+    	
     	try (FileInputStream in = new FileInputStream(caminhoArquivo)) {
     		filaGEFIC = ExcelBinder.readSheet(in, FilaGEFIC.class, 0, ParametrosArquivoGEFICFilas.LINHA_INICIAL_ARQUIVO.getIndice() - 1, true);
         }
@@ -127,12 +134,15 @@ public class FilasNominaisGEFIC
 			
 		}
     	
-    	for(FilaGEFIC entradaNaFila : filaGEFIC)
+    	Iterator<FilaGEFIC> entradasNaFila = filaGEFIC.iterator();
+    	while(entradasNaFila.hasNext())
     	{
+    		FilaGEFIC entradaNaFila = entradasNaFila.next();
+    		
     		LocalDate dataSaidaDaFila = LocalDate.parse(entradaNaFila.getDatadesaida(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     		
     		if(dataSaidaDaFila.isBefore(inicioCompetencia) || dataSaidaDaFila.isAfter(finalCompetencia))
-    			filaGEFIC.remove(entradaNaFila);
+    			entradasNaFila.remove();
     		else
     		{
     			try {
@@ -177,12 +187,14 @@ public class FilasNominaisGEFIC
     	String pastaArquivoVazio = pastaBaseDadosGEFIC + "\\" + diretoriosCDIDR.getPastaAutomatizacao();
     	Arquivo arquivo = new Arquivo(pastaArquivoVazio, diretoriosCDIDR.getArquivoFilaNominalVazio());
     	
-    	copiarArquivoVazioParaPastaFilas(arquivo, dataDownload);
+    	String destinoArquivo = copiarArquivoVazioParaPastaFilas(arquivo, dataDownload);
+    	
+    	arquivo = new Arquivo(destinoArquivo, diretoriosCDIDR.getArquivoFilaNominalVazio());
     	
     	String nome = "Realizados.xlsx";
     	arquivo.renomear(nome);
     	
-    	AcoesArquivoExcel arquivoExcel = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), ParametrosArquivoGEFICFilasRelatorio.LINHA_INICIAL_ARQUIVO.getIndice());
+    	arquivoExcel = new AcoesArquivoExcel(arquivo.getCaminhoCompleto(), ParametrosArquivoGEFICFilasRelatorio.LINHA_INICIAL_ARQUIVO.getIndice());
     	arquivoExcel.gravarDadosEmCelula(ParametrosArquivoGEFICFilasRelatorio.NOME_PLANILHA.getDescricao(), celulas, true, false, ParametrosArquivoGEFICFilasRelatorio.LINHA_INICIAL_ARQUIVO.getIndice(), null);
     	
     	for(String estabelecimento : filaPorEstabelecimento.keySet())
@@ -202,7 +214,9 @@ public class FilasNominaisGEFIC
         	pastaArquivoVazio = pastaBaseDadosGEFIC + "\\" + diretoriosCDIDR.getPastaAutomatizacao();
         	arquivo = new Arquivo(pastaArquivoVazio, diretoriosCDIDR.getArquivoFilaNominalVazio());
         	
-        	copiarArquivoVazioParaPastaFilas(arquivo, dataDownload);
+        	destinoArquivo = copiarArquivoVazioParaPastaFilas(arquivo, dataDownload);
+        	
+        	arquivo = new Arquivo(destinoArquivo, diretoriosCDIDR.getArquivoFilaNominalVazio());
         	
         	nome = "Realizados - " + estabelecimento + ".xlsx";
         	arquivo.renomear(nome);
@@ -228,7 +242,7 @@ public class FilasNominaisGEFIC
 		
 		arquivo.CopiarArquivo(caminhoDaPasta + "\\" + arquivo.getNomeDoArquivo());
 		
-		return "";
+		return caminhoDaPasta;
 	}
 	
 	private ArrayList<CelulaExcel> criarLinhaFilaNominal(FilaGEFIC entradaNaFila, int linha)
@@ -250,9 +264,18 @@ public class FilasNominaisGEFIC
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getIndice(), entradaNaFila.getEstabelecimento(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getTipo()));
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getIndice(), entradaNaFila.getSituacao(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getTipo()));
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getIndice(), entradaNaFila.getCidade(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getTipo()));
-		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getTipo()));
-		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempomediodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getTipo()));
-		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempomaximodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getTipo()));
+		if(entradaNaFila.getTempodeEspera().equals(""))
+			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), "", "String"));
+		else
+			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getTipo()));
+		if(entradaNaFila.getTempomediodeEspera().equals(""))
+			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getIndice(), "", "String"));
+		else
+			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempomediodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getTipo()));
+		if(entradaNaFila.getTempomaximodeEspera().equals(""))
+			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getIndice(), "", "String"));
+		else
+			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempomaximodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MAXIMO_ESPERA.getTipo()));
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_OBSERVACOES.getIndice(), entradaNaFila.getObservacoes(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_OBSERVACOES.getTipo()));
 		
 		return celulas;
