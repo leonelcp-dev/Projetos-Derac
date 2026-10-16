@@ -26,6 +26,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
 
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
+
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRLeitos;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDRA;
@@ -38,6 +41,7 @@ import dadosGerais.ParametrosArquivoCensoPlanilhaOrient;
 import dadosGerais.ParametrosArquivoLeitosPlanilhaConsolidado;
 import dadosGerais.ParametrosArquivoLeitosPlanilhaMonitoramento;
 import dadosGerais.ParametrosArquivoOfertaDemanda;
+import dadosGerais.ParametrosArquivoUrgenciaPlanilhaAguardandoAgrupado;
 import dadosGerais.ParametrosArquivoLeitosPlanilhaMonitoramento;
 import interacao_externa.AcoesArquivoExcel;
 import interacao_externa.ExcelBinder;
@@ -51,6 +55,7 @@ import modelosDados.LeitoExtraCadastrado;
 import modelosDados.MonitoramentoLeitos;
 import modelosDados.NomenclaturaPadronizada;
 import modelosDados.OfertaEDemanda;
+import modelosDados.UrgenciaAguardandoAgrupado;
 import tratamentoDeArquivos.Arquivo;
 
 public class LeitosUrgencia 
@@ -99,17 +104,25 @@ public class LeitosUrgencia
 	{
 		try {
 			
+			String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);
+			
 			Reader reader = null;
 			
-			System.out.println(pastaBase);
+			System.out.println(documentos);
 			
 			if(ambiente.equals("TESTE"))
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			{
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
 			else if(ambiente.equals("PRODUCAO"))
 			{
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 			}
+			
+			Thread.sleep(5000);
 			
 			if(reader == null)
 			{
@@ -277,6 +290,13 @@ public class LeitosUrgencia
 			
 			leito.setDataExtracao(normalizarDataParaDiaMesAno(leito.getDataExtracao()));
 			
+			LocalDate dataExtracao = LocalDate.parse(leito.getDataExtracao(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			
+			if(dataExtracao.isBefore(dataInformada) || dataExtracao.isAfter(dataInformada))
+				leito.setLinhaUtilizada(true);
+			else
+				leito.setLinhaUtilizada(false);
+			
 			System.out.println(leito.getUnidade() + leito.getDataExtracao());
 			
 			if(leitosPorHospitalJaMonitorados.containsKey(leito.getUnidade() + leito.getDataExtracao()))
@@ -327,6 +347,13 @@ public class LeitosUrgencia
 		for(ConsolidadoLeitos leito : consolidadosJaMonitorados)
 		{
 			leito.setDataExtracao(normalizarDataParaDiaMesAno(leito.getDataExtracao()));
+			
+			LocalDate dataExtracao = LocalDate.parse(leito.getDataExtracao(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			
+			if(dataExtracao.isBefore(dataInformada) || dataExtracao.isAfter(dataInformada))
+				leito.setLinhaUtilizada(true);
+			else
+				leito.setLinhaUtilizada(false);
 			
 			System.out.println(leito.getDataExtracao());
 			
@@ -450,7 +477,10 @@ public class LeitosUrgencia
 				System.out.println("Não foi encontrada a planilha de cadastro dos leitos da unidade: " + entidade.getNomeSIRESP());
 		}
 		
+		removerLinhasLeitosMonitoramento(dataDeAnalise);
+				
 		preencherPlanilhaConsolidadaDosLeitos(dataDeAnalise, dadosConsolidados);
+		removerLinhasLeitosConsolidado(dataDeAnalise);
 		
 		return "";
 	}
@@ -488,6 +518,7 @@ public class LeitosUrgencia
 					
 					if(leitos.containsKey(especialidade.toUpperCase() + enfermaria.toUpperCase()))
 					{
+						leitos.get(especialidade.toUpperCase() + enfermaria.toUpperCase()).setLinhaUtilizada(true);
 						linhaExcel = leitos.get(especialidade.toUpperCase() + enfermaria.toUpperCase()).getLinhaExcel();
 					}
 					else
@@ -577,6 +608,7 @@ public class LeitosUrgencia
 					
 					if(leitos.containsKey(especialidade.toUpperCase() + enfermaria.toUpperCase()))
 					{
+						leitos.get(especialidade.toUpperCase() + enfermaria.toUpperCase()).setLinhaUtilizada(true);
 						linhaExcel = leitos.get(especialidade.toUpperCase() + enfermaria.toUpperCase()).getLinhaExcel();
 					}
 					else
@@ -632,6 +664,80 @@ public class LeitosUrgencia
 		}
 		
 		arquivoConsolidado.gravarDadosEmCelula(ParametrosArquivoLeitosPlanilhaConsolidado.NOME_PLANILHA_CONSOLIDADA.getDescricao(), celulas, true, false, ParametrosArquivoLeitosPlanilhaConsolidado.LINHA_INICIAL_ARQUIVO.getIndice(), null);
+		
+		return "";
+	}
+	
+	private String removerLinhasLeitosMonitoramento(String textoDataExtracao)
+	{
+		ArrayList<Integer> linhasExluir = new ArrayList<Integer>();
+		
+		AcoesArquivoExcel arquivoMonitoramento = new AcoesArquivoExcel(pastaBaseMonitoramentoLeitosCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoMonitoramento.abrirPlanilha(ParametrosArquivoLeitosPlanilhaMonitoramento.NOME_PLANILHA_MONITORAMENTO.getDescricao(), 0);
+		
+		for(String chave : leitosPorHospitalJaMonitorados.keySet().stream().filter(chave -> chave.contains(textoDataExtracao)).collect(Collectors.toList())) 
+		{
+			HashMap<String, MonitoramentoLeitos> leitos = leitosPorHospitalJaMonitorados.get(chave);
+			
+			for(String chaveLeito : leitos.keySet())
+			{
+				MonitoramentoLeitos leito = leitos.get(chaveLeito);
+				
+				if(!leito.isLinhaUtilizada())
+				{
+					System.out.println(leito.getUnidade() + leito.getEspecialidade());
+					linhasExluir.add(leito.getLinhaExcel());
+				}
+			}
+			
+		}
+		
+		System.out.println("Quantidade de linhas a excluir: " + linhasExluir.size());
+		
+		Collections.sort(linhasExluir, Collections.reverseOrder());
+		
+		for(Integer linha : linhasExluir)
+		{
+			System.out.println("Excluindo linha: " + linha);
+			arquivoMonitoramento.apagarLinha(ParametrosArquivoLeitosPlanilhaMonitoramento.NOME_PLANILHA_MONITORAMENTO.getDescricao(), linha);
+		}
+		
+		return "";
+	}
+	
+	private String removerLinhasLeitosConsolidado(String textoDataExtracao)
+	{
+		ArrayList<Integer> linhasExluir = new ArrayList<Integer>();
+		
+		AcoesArquivoExcel arquivoConsolidado = new AcoesArquivoExcel(pastaBaseMonitoramentoLeitosCDIDR + "\\" + diretoriosCDIDR.getArquivoConsolidadoUrgencia(), 0);
+		arquivoConsolidado.abrirPlanilha(ParametrosArquivoLeitosPlanilhaConsolidado.NOME_PLANILHA_CONSOLIDADA.getDescricao(), 0);
+		
+		for(String chave : leitosConsolidadosJaMonitorados.keySet().stream().filter(chave -> chave.contains(textoDataExtracao)).collect(Collectors.toList())) 
+		{
+			HashMap<String, ConsolidadoLeitos> leitos = leitosConsolidadosJaMonitorados.get(chave);
+			
+			for(String chaveLeito : leitos.keySet())
+			{
+				ConsolidadoLeitos leito = leitos.get(chaveLeito);
+				
+				if(!leito.isLinhaUtilizada())
+				{
+					System.out.println(leito.getEspecialidade());
+					linhasExluir.add(leito.getLinhaExcel());
+				}
+			}
+			
+		}
+		
+		System.out.println("Quantidade de linhas a excluir: " + linhasExluir.size());
+		
+		Collections.sort(linhasExluir, Collections.reverseOrder());
+		
+		for(Integer linha : linhasExluir)
+		{
+			System.out.println("Excluindo linha: " + linha);
+			arquivoConsolidado.apagarLinha(ParametrosArquivoLeitosPlanilhaConsolidado.NOME_PLANILHA_CONSOLIDADA.getDescricao(), linha);
+		}
 		
 		return "";
 	}

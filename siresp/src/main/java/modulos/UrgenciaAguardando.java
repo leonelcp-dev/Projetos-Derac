@@ -25,6 +25,9 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
 import org.openqa.selenium.WebDriver;
 
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
+
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDTI;
@@ -118,14 +121,20 @@ public class UrgenciaAguardando
 			pastaBase = JOptionPane.showInputDialog(null, "Insira o caminho completo da pasta compartilhada", "Pasta de Destino dos Arquivos", JOptionPane.QUESTION_MESSAGE).trim();
 		
     	try {
+    		
+    		String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);
 			
 			Reader reader = null;
 			
 			if(ambiente.equals("TESTE"))
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			{
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
 			else if(ambiente.equals("PRODUCAO"))
 			{
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 			}
 				

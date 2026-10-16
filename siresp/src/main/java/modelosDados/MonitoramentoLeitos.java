@@ -75,6 +75,7 @@ public class MonitoramentoLeitos {
     private String taxaDeOcupacao;
     
     private int linhaExcel;
+    private boolean linhaUtilizada;
 
 	public String getUnidade() {
 		return unidade;
@@ -274,6 +275,14 @@ public class MonitoramentoLeitos {
 
 	public void setBloqueadoAdministrativo(String bloqueadoAdministrativo) {
 		this.bloqueadoAdministrativo = bloqueadoAdministrativo;
+	}
+
+	public boolean isLinhaUtilizada() {
+		return linhaUtilizada;
+	}
+
+	public void setLinhaUtilizada(boolean linhaUtilizada) {
+		this.linhaUtilizada = linhaUtilizada;
 	}
 
 }

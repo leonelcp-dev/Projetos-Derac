@@ -90,6 +90,12 @@ public enum IdentificadoresPaginaWebGEFIC {
 	XPATH_RELATORIO_SAIDAS_DATA_INICIAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[2]"),
 	XPATH_RELATORIO_SAIDAS_DATA_FINAL(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[1]/div[2]/div/div/input[4]"),
 	
+	XPATH_ESCOLHER_LOTACAO(0, "/html/body/div[2]/div/div/div/div/div/div[1]/div[2]/div[2]/table/tbody/tr[1]/td/p"),
+	
+	ID_LOGIN_USUARIO(0, "username"),
+	ID_LOGIN_SENHA(0, "password"),
+	ID_LOGIN_BOTAO_ENTRAR(0, "kc-login"),
+	NAME_LOGIN_BOTAO_ENTRAR(0, "login"),
 	
 	ID_RELATORIO_SAIDA_PACIENTES_SELECT_ESTABELECIMENTOS(0, "select2-estabelecimento-gt-results"),
 	
@@ -104,7 +110,13 @@ public enum IdentificadoresPaginaWebGEFIC {
 	ID_RELATORIO_TRANSFERENCIA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_ENTRADA_PACIENTES_BOTAO_EXCEL(0, "excel"),
 	ID_RELATORIO_SAIDA_PACIENTES_BOTAO_EXCEL(0, "excel"),
+	ID_RELATORIO_QUANTIDADE_PACIENTES_BOTAO_EXCEL(0, "excel"),
+	ID_RELATORIO_TEMPO_MEDIO_ESPERA_BOTAO_EXCEL(0, "excel"),
 	ID_FILAS_BOTAO_EXCEL(0, "excel"),
+	
+	ID_RELATORIO_TEMPO_MEDIO_ESPERA_OPCAO_PACIENTES_NA_FILA(0, "pendente"),
+	ID_RELATORIO_TEMPO_MEDIO_ESPERA_OPCAO_POR_PROCEDIMENTO(0, "por_procedimento"),
+	
 	
 	ID_RELATORIO_SAIDA_PACIENTES_OPCAO_ANALITICO(0, "analitico"),
 	
@@ -114,11 +126,10 @@ public enum IdentificadoresPaginaWebGEFIC {
 	
 	XPATH_RELATORIO_TRANSFERENCIA_PROXIMA_PAGINA(0, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[2]/div[1]/div[3]/div[2]/ul/li[9]/a"),
 	
-	NAME_LOGIN_BOTAO_ENTRAR(0, "login"),
-	
 	TEXTO_UNIDADE_REGULACAO(0, "Regulacao"),
 	TEXTO_STATUS_REGISTRO_CANCELADO(0, "Registros cancelados"),
 	TEXTO_STATUS_PROCEDIMENTO_REALIZADO(0, "Procedimento realizado"),
+	TEXTO_STATUS_ENTREGA_REALIZADA(0, "Entrega realizada"),
 	TEXTO_STATUS_AGUARDANDO_NA_FILA(0, "Aguardando na fila"),
 	TEXTO_STATUS_TODOS(0, "Todos (aguardando, cancelados e realizados)");
 	

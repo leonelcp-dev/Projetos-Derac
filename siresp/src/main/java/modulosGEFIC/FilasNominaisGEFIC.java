@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ import javax.swing.JOptionPane;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
+
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
 
 import dadosGerais.IdentificadoresPaginaWebGEFIC;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRGEFIC;
@@ -59,14 +63,20 @@ public class FilasNominaisGEFIC
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDRGEFIC.valueOf(ambiente.toUpperCase());
 		
     	try {
+    		
+    		String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);
 			
 			Reader reader = null;
 			
 			if(ambiente.equals("TESTE"))
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			{
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
 			else if(ambiente.equals("PRODUCAO"))
 			{
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 			}
 				
@@ -104,6 +114,13 @@ public class FilasNominaisGEFIC
 	
 	public String gerarFilasNominaisPorStatus(String competencia, String dataArquivo, String status, boolean ehOPM)
 	{
+		String pastaTipoFila;
+		
+		if(ehOPM)
+			pastaTipoFila = "OPM";
+		else
+			pastaTipoFila = "ELETIVAS";
+		
 		LocalDate inicioCompetencia = LocalDate.parse("01/" + competencia, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		LocalDate finalCompetencia = inicioCompetencia.with(TemporalAdjusters.lastDayOfMonth());
 		
@@ -187,7 +204,7 @@ public class FilasNominaisGEFIC
     	String pastaArquivoVazio = pastaBaseDadosGEFIC + "\\" + diretoriosCDIDR.getPastaAutomatizacao();
     	Arquivo arquivo = new Arquivo(pastaArquivoVazio, diretoriosCDIDR.getArquivoFilaNominalVazio());
     	
-    	String destinoArquivo = copiarArquivoVazioParaPastaFilas(arquivo, dataDownload);
+    	String destinoArquivo = copiarArquivoVazioParaPastaFilas(arquivo, dataDownload, pastaTipoFila);
     	
     	arquivo = new Arquivo(destinoArquivo, diretoriosCDIDR.getArquivoFilaNominalVazio());
     	
@@ -214,7 +231,7 @@ public class FilasNominaisGEFIC
         	pastaArquivoVazio = pastaBaseDadosGEFIC + "\\" + diretoriosCDIDR.getPastaAutomatizacao();
         	arquivo = new Arquivo(pastaArquivoVazio, diretoriosCDIDR.getArquivoFilaNominalVazio());
         	
-        	destinoArquivo = copiarArquivoVazioParaPastaFilas(arquivo, dataDownload);
+        	destinoArquivo = copiarArquivoVazioParaPastaFilas(arquivo, dataDownload, pastaTipoFila);
         	
         	arquivo = new Arquivo(destinoArquivo, diretoriosCDIDR.getArquivoFilaNominalVazio());
         	
@@ -228,7 +245,7 @@ public class FilasNominaisGEFIC
 		return "";
 	}
 	
-	private String copiarArquivoVazioParaPastaFilas(Arquivo arquivo, LocalDate data)
+	private String copiarArquivoVazioParaPastaFilas(Arquivo arquivo, LocalDate data, String pastaTipoArquivo)
 	{
 		String caminhoDaPasta = pastaBaseDadosGEFIC + "\\" + diretoriosCDIDR.getRelatoriosFechamento();
 		caminhoDaPasta = caminhoDaPasta + "\\" + data.getYear();
@@ -238,6 +255,9 @@ public class FilasNominaisGEFIC
 		pasta = new Pasta(caminhoDaPasta, true);
 		
 		caminhoDaPasta = caminhoDaPasta + "\\" + data.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		pasta = new Pasta(caminhoDaPasta, true);
+		
+		caminhoDaPasta = caminhoDaPasta + "\\" + pastaTipoArquivo;
 		pasta = new Pasta(caminhoDaPasta, true);
 		
 		arquivo.CopiarArquivo(caminhoDaPasta + "\\" + arquivo.getNomeDoArquivo());
@@ -264,10 +284,28 @@ public class FilasNominaisGEFIC
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getIndice(), entradaNaFila.getEstabelecimento(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_ESTABELECIMENTO.getTipo()));
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getIndice(), entradaNaFila.getSituacao(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_SITUACAO.getTipo()));
 		celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getIndice(), entradaNaFila.getCidade(), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_CIDADE.getTipo()));
-		if(entradaNaFila.getTempodeEspera().equals(""))
-			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), "", "String"));
+		
+		if(entradaNaFila.getSituacao().equals(IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador().toUpperCase()))
+		{
+			if(entradaNaFila.getDatadesaida().equals("") || entradaNaFila.getDataindicacao().equals(""))
+				celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), "", "String"));
+			else
+			{
+				LocalDate dataIndicacao = LocalDate.parse(entradaNaFila.getDataindicacao(), DateTimeFormatter.ofPattern(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_INDICACAO.getFormato()));
+				LocalDate dataSaida = LocalDate.parse(entradaNaFila.getDatadesaida(), DateTimeFormatter.ofPattern(ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_DATA_SAIDA.getFormato()));
+				
+				int tempoDeEspera = (int)ChronoUnit.DAYS.between(dataIndicacao, dataSaida);
+				celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), tempoDeEspera, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getTipo()));
+			}
+		}
 		else
-			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getTipo()));
+		{
+			if(entradaNaFila.getTempodeEspera().equals(""))
+				celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), "", "String"));
+			else
+				celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getIndice(), Integer.parseInt(entradaNaFila.getTempodeEspera()), ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_ESPERA.getTipo()));
+		}
+		
 		if(entradaNaFila.getTempomediodeEspera().equals(""))
 			celulas.add(new CelulaExcel(linha, ParametrosArquivoGEFICFilasRelatorio.INDICE_COLUNA_TEMPO_MEDIO_ESPERA.getIndice(), "", "String"));
 		else
@@ -288,7 +326,7 @@ public class FilasNominaisGEFIC
 		nomeArquivo = data.getYear() + "\\" + meses.getMeses().get(data.getMonthValue() - 1).getMesNumero() + " - " + Utils.primeiraMaiuscula(meses.getMeses().get(data.getMonthValue() - 1).getMesDescricao()) + " de " + data.getYear() + "\\" + data.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 		
 		if(ehOPM)
-			nomeArquivo += "\\" + ParametrosArquivoGEFICFilas.NOME_ARQUIVO_FILA_OPM.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), data.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).replace(ParametrosArquivoGEFICFilas.MASCARA_STATUS.getDescricao(), IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador());
+			nomeArquivo += "\\" + ParametrosArquivoGEFICFilas.NOME_ARQUIVO_FILA_OPM.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), data.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).replace(ParametrosArquivoGEFICFilas.MASCARA_STATUS.getDescricao(), IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_ENTREGA_REALIZADA.getTextoIdentificador());
 		else
 			nomeArquivo += "\\" + ParametrosArquivoGEFICFilas.NOME_ARQUIVO_FILA_GERAL.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), data.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).replace(ParametrosArquivoGEFICFilas.MASCARA_STATUS.getDescricao(), IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador());
 		

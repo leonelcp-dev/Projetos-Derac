@@ -251,7 +251,6 @@ public class InteracaoComSIRESP
         	{
         		String dataString = data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         		System.out.println(dataString);
-        	    
         		
         		urgenciaFinalizado.obterAgrupamentoFinalizadoUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);
         		urgenciaFichasAssumidas.obterProducaoReguladorUrgencia(driver, ambiente, dataString, pastaBase, pastaDownloads);

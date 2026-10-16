@@ -25,6 +25,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
 
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
+
 import dadosGerais.CorrelacaoArquivosDemandaReprimida;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDRA;
@@ -132,13 +135,21 @@ public class DemandaReprimida {
 		
 		try {
 			
+			String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);			
+			
 			Reader reader = null;
 			
+			System.out.println(documentos);
+			
 			if(ambiente.equals("TESTE"))
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			{
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
 			else if(ambiente.equals("PRODUCAO"))
 			{
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 			}
 			

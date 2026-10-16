@@ -33,6 +33,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
+
 import dadosGerais.CorrelacaoArquivosOfertaDemanda;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDR;
@@ -129,8 +132,10 @@ public class OfertaDemandaDeAcessoR1 {
 	public OfertaDemandaDeAcessoR1(String pastaBase, String ambiente)
 	{
 		diretoriosCDIDR = IdentificadoresPastasCompartilhadasCDIDR.valueOf(ambiente);
-		pastaBaseAmbulatorialCDIDR = pastaBase;
+		this.pastaBase = pastaBase;
+		this.pastaDownloads = pastaBase + "\\Downloads";
 	}
+	
 	
 	public OfertaDemandaDeAcessoR1()
 	{
@@ -139,6 +144,10 @@ public class OfertaDemandaDeAcessoR1 {
 	
 	public String calcularOfertaEDemanda(WebDriver driver, String competenciaInicial, String competenciaFinal, boolean testeNovasSolicitacoes, boolean executarNovasSolicitacoesCDR, boolean executarNovasSolicitacoesRegulada, boolean consolidarNovasSolicitacoesRegulada, boolean executarDemandaReprimida, boolean preencherProdutividade, boolean preencherOfertasParaDERAC, boolean preencherNomenclatura, boolean preencherBloqueio, boolean preencherRecepcao, String ambiente)
 	{			
+		System.out.println("Versão POI: " +
+			    org.apache.poi.Version.getVersion()
+			);
+
 		formatoDataPaginaWeb = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		formatoDataArquivo = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 				
@@ -165,13 +174,21 @@ public class OfertaDemandaDeAcessoR1 {
 		
 		try {
 			
+			String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);
+			
 			Reader reader = null;
 			
+			System.out.println(documentos);
+			
 			if(ambiente.equals("TESTE"))
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			{
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
 			else if(ambiente.equals("PRODUCAO"))
 			{
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 			}
 				
@@ -675,6 +692,10 @@ public class OfertaDemandaDeAcessoR1 {
 		copiarRelatorioProducaoParaCDRA();
 		copiarRelatorioProducaoParaCDTI();
 		
+		for (String handle : driver.getWindowHandles()) {
+			driver.switchTo().window(handle);
+			driver.close();
+		}
 		JOptionPane.showMessageDialog(null, "Processamento concluído com sucesso!");
 		
 		return "";	

@@ -50,7 +50,8 @@ public class ConsolidacaoLeitos {
 		}
 		else if(args.length == 3)
 		{
-			
+			LeitosUrgencia leitosUrgencia = new LeitosUrgencia(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			leitosUrgencia.consolidarDadosDeLeitos(args[0], false);
 		}
 			
 	}

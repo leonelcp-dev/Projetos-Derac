@@ -72,6 +72,7 @@ public class ConsolidadoLeitos {
     private String taxaDeOcupacao;
     
     private int linhaExcel;
+    private boolean linhaUtilizada;
 
 
 	public String getDataExtracao() {
@@ -264,6 +265,14 @@ public class ConsolidadoLeitos {
 
 	public void setBloqueadoAdministrativo(String bloqueadoAdministrativo) {
 		this.bloqueadoAdministrativo = bloqueadoAdministrativo;
+	}
+
+	public boolean isLinhaUtilizada() {
+		return linhaUtilizada;
+	}
+
+	public void setLinhaUtilizada(boolean linhaUtilizada) {
+		this.linhaUtilizada = linhaUtilizada;
 	}
 
 }

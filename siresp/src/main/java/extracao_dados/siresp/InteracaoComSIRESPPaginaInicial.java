@@ -27,6 +27,9 @@ import org.openqa.selenium.bidi.network.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
+
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPaginaWebSIRESPInicio;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRUrgencia;
@@ -79,10 +82,11 @@ public class InteracaoComSIRESPPaginaInicial
 		HashMap<String, String> mapaDeAcessos = new HashMap<String, String>();
     	
     	try {
-			
+    		String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);
+    		
 			Reader reader = null;
 			
-			reader = new InputStreamReader(new FileInputStream("C:\\Users\\" + nomeUsuario + "\\Documents\\SIRESP\\parametros_acesso.csv"), StandardCharsets.ISO_8859_1);
+			reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_acesso.csv"), StandardCharsets.ISO_8859_1);
 				
 			CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(';').setQuote('"').setHeader().setSkipHeaderRecord(true).setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL).build();
 			
@@ -329,7 +333,14 @@ public class InteracaoComSIRESPPaginaInicial
         }
         else if(escolha == 8)	
         {
-        	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1();
+        	LocalDate hoje = LocalDate.now();
+        	
+        	
+        	
+        	String pastaBase = "C:\\Users\\" + nomeUsuario;
+        	String pastaDownloads = "C:\\Users\\" + nomeUsuario + "\\Downloads";
+        	
+        	OfertaDemandaDeAcessoR1 ofertaDemanda = new OfertaDemandaDeAcessoR1(pastaBase, ambiente);
         	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", false, false, false, false, false, false, true, false, false, false, ambiente);
         	//ofertaDemanda.calcularOfertaEDemanda(driver, "05/2026", "05/2026", true, true, true, true, true, false, false, false, false, false, ambiente);
         	

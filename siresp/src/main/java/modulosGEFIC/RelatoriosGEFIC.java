@@ -16,6 +16,9 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.DuplicateHeaderMode;
 import org.openqa.selenium.WebDriver;
 
+import com.sun.jna.platform.win32.Shell32Util;
+import com.sun.jna.platform.win32.ShlObj;
+
 import dadosGerais.IdentificadoresPaginaWebGEFIC;
 import dadosGerais.IdentificadoresPaginaWebSIRESP;
 import dadosGerais.IdentificadoresPastasCompartilhadasCDIDRGEFIC;
@@ -55,13 +58,19 @@ public class RelatoriosGEFIC
 		
     	try {
 			
+    		String documentos = Shell32Util.getFolderPath(ShlObj.CSIDL_MYDOCUMENTS);
+    		
 			Reader reader = null;
 			
 			if(ambiente.equals("TESTE"))
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			{
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+			}
 			else if(ambiente.equals("PRODUCAO"))
 			{
-				reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				reader = new InputStreamReader(new FileInputStream(documentos + "\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
+				//reader = new InputStreamReader(new FileInputStream(pastaBase + "\\Documents\\SIRESP\\parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 				//reader = new InputStreamReader(new FileInputStream("parametros_pasta.csv"), StandardCharsets.ISO_8859_1);
 			}
 				
@@ -116,7 +125,12 @@ public class RelatoriosGEFIC
 		if(separarPorStatus)
 		{
 			listaStatus.add(IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_AGUARDANDO_NA_FILA.getTextoIdentificador());
-			listaStatus.add(IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador());
+			
+			if(ehOPM)
+				listaStatus.add(IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_ENTREGA_REALIZADA.getTextoIdentificador());
+			else
+				listaStatus.add(IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador());
+			
 			listaStatus.add(IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_REGISTRO_CANCELADO.getTextoIdentificador());
 		}
 		else
@@ -166,6 +180,118 @@ public class RelatoriosGEFIC
 				e.printStackTrace();
 			}
 			
+		}
+		
+		return "";
+	}
+	
+	public String baixarQuantidadeDePacientesPorServico(WebDriver driver, boolean ehOPM, LocalDate data)
+	{
+		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
+		ArrayList<String> opcoes = new ArrayList<String>();
+		
+		String dataFormatada = data.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+		
+		if(ehOPM)
+		{
+			opcoes.add("Quantidade de pacientes por serviço OPM");
+		}
+		else
+		{
+			opcoes.add("Quantidade de pacientes por serviço");
+		}
+		
+		paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_MENU_PRINCIPAL.getTextoIdentificador(), opcoes);
+		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
+		while(paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_AGUARDANDO.getTextoIdentificador()));
+		
+		Arquivo arquivoBaixado = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_QUANTIDADE_PACIENTES_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICFilas.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
+		//paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_BOTAO_EXCEL.getTextoIdentificador(), "id");
+		
+		String nomeArquivo = "";
+		if(ehOPM)
+		{
+			nomeArquivo = ParametrosArquivoGEFICFilas.NOME_ARQUIVO_PACIENTE_POR_ESPECIALIDADE_OPM.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), dataFormatada);
+			arquivoBaixado.renomear(nomeArquivo);
+		}
+		else
+		{
+			nomeArquivo = ParametrosArquivoGEFICFilas.NOME_ARQUIVO_PACIENTE_POR_ESPECIALIDADE.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), dataFormatada);
+			arquivoBaixado.renomear(nomeArquivo);				
+		}
+		
+		moverParaPastaFilas(arquivoBaixado, data);
+		
+		//while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		while(paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_AGUARDANDO.getTextoIdentificador()));
+		
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
+	
+	public String baixarTempoMedioDeEspera(WebDriver driver, boolean ehOPM, LocalDate data)
+	{
+		AcoesGeraisPaginaWeb paginaWeb = new AcoesGeraisPaginaWeb();
+		ArrayList<String> opcoes = new ArrayList<String>();
+		
+		String dataFormatada = data.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+		
+		if(ehOPM)
+		{
+			opcoes.add("Tempo médio de espera OPM");
+		}
+		else
+		{
+			opcoes.add("Tempo médio de espera");
+		}
+		
+		paginaWeb.clicarMenuULPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_MENU_PRINCIPAL.getTextoIdentificador(), opcoes);
+		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
+		paginaWeb.clicarRadioInputPeloId(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_TEMPO_MEDIO_ESPERA_OPCAO_PACIENTES_NA_FILA.getTextoIdentificador());
+		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
+		paginaWeb.clicarRadioInputPeloId(driver, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_TEMPO_MEDIO_ESPERA_OPCAO_POR_PROCEDIMENTO.getTextoIdentificador());
+		
+		while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		
+		while(paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_AGUARDANDO.getTextoIdentificador()));
+		
+		Arquivo arquivoBaixado = baixarArquivos(driver, paginaWeb, IdentificadoresPaginaWebGEFIC.ID_RELATORIO_TEMPO_MEDIO_ESPERA_BOTAO_EXCEL.getTextoIdentificador(), ParametrosArquivoGEFICFilas.EXTENSAO_ARQUIVO_RELATORIO_BAIXADO.getDescricao());
+		//paginaWeb.clicarBotaoSubmit(driver, IdentificadoresPaginaWebGEFIC.ID_FILAS_BOTAO_EXCEL.getTextoIdentificador(), "id");
+		
+		String nomeArquivo = "";
+		if(ehOPM)
+		{
+			nomeArquivo = ParametrosArquivoGEFICFilas.NOME_ARQUIVO_TEMPO_ESPERA_POR_PROCEDIMENTO_OPM.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), dataFormatada);
+			arquivoBaixado.renomear(nomeArquivo);
+		}
+		else
+		{
+			nomeArquivo = ParametrosArquivoGEFICFilas.NOME_ARQUIVO_TEMPO_ESPERA_POR_PROCEDIMENTO.getDescricao().replace(ParametrosArquivoGEFICFilas.MASCARA_DATA_DOWNLOAD.getDescricao(), dataFormatada);
+			arquivoBaixado.renomear(nomeArquivo);				
+		}
+		
+		moverParaPastaFilas(arquivoBaixado, data);
+		
+		//while(paginaWeb.elementoEstaVisivelPeloXPATH(driver, IdentificadoresPaginaWebGEFIC.XPATH_AGUARDANDO.getTextoIdentificador()));
+		while(paginaWeb.elementoEstaVisivelPeloClassName(driver, IdentificadoresPaginaWebGEFIC.CLASS_NAME_AGUARDANDO.getTextoIdentificador()));
+		
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return "";

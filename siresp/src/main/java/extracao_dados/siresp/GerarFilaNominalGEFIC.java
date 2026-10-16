@@ -30,6 +30,7 @@ public class GerarFilaNominalGEFIC {
     {
 		FilasNominaisGEFIC filaNominalGEFIC = new FilasNominaisGEFIC("C:\\Users\\PMC514991-2", "TESTE", false);
 		
-		filaNominalGEFIC.gerarFilasNominaisPorStatus("09/2026", "02/10/2026", IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador(), false);
+		filaNominalGEFIC.gerarFilasNominaisPorStatus("09/2026", "06/10/2026", IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_PROCEDIMENTO_REALIZADO.getTextoIdentificador(), false);
+		filaNominalGEFIC.gerarFilasNominaisPorStatus("09/2026", "06/10/2026", IdentificadoresPaginaWebGEFIC.TEXTO_STATUS_ENTREGA_REALIZADA.getTextoIdentificador(), true);
 	}
 }

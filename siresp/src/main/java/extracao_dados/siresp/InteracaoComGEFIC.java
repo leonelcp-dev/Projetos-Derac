@@ -163,7 +163,13 @@ public class InteracaoComGEFIC
         	RelatoriosGEFIC relatorioGEFIC = new RelatoriosGEFIC(pastaBase, pastaDownloads, ambiente);
         	
         	relatorioGEFIC.baixarFilaNominalCompleta(driver, true, false, LocalDate.now());
+        	relatorioGEFIC.baixarFilaNominalCompleta(driver, true, true, LocalDate.now());
         	
+        	relatorioGEFIC.baixarQuantidadeDePacientesPorServico(driver, false, LocalDate.now());
+        	relatorioGEFIC.baixarQuantidadeDePacientesPorServico(driver, true, LocalDate.now());
+        	
+        	relatorioGEFIC.baixarTempoMedioDeEspera(driver, false, LocalDate.now());
+        	relatorioGEFIC.baixarTempoMedioDeEspera(driver, true, LocalDate.now());
         }
        
         

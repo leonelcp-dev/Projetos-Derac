@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import modelosDados.ExcelColumn;
 
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.util.IOUtils;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -105,6 +106,8 @@ public class ExcelBinder {
 			// (Opcional) limite total de bytes descompactados
 			ZipSecureFile.setMaxEntrySize(500 * 1024 * 1024); // 500 MB
 			ZipSecureFile.setMaxTextSize(200 * 1024 * 1024);  // 200 MB
+			
+			IOUtils.setByteArrayMaxOverride(500 * 1024 * 1024);
     	
         try (Workbook wb = new XSSFWorkbook(in)) {
             Sheet sheet = (sheetName != null && !sheetName.isBlank())

@@ -19,7 +19,7 @@ public enum ParametrosArquivoGEFICFilasRelatorio {
 	INDICE_COLUNA_DATA_INDICACAO(8, 8, "Data indicação", "Date", "dd/MM/yyyy"),
 	INDICE_COLUNA_DATA_INSERCAO(9, 9, "Data de inserção", "Date", "dd/MM/yyyy"),
 	INDICE_COLUNA_DATA_EXECUCAO(10, 10, "Data de execução", "Date", "dd/MM/yyyy"),
-	INDICE_COLUNA_DATA_SAIDA(11, 11, "Data de saída", "Date mes/ano", "dd/MM/yyyy"),
+	INDICE_COLUNA_DATA_SAIDA(11, 11, "Data de saída", "Date", "dd/MM/yyyy"),
 	INDICE_COLUNA_ESTABELECIMENTO(12, 12, "Estabelecimento", "String", ""),
 	INDICE_COLUNA_SITUACAO(13, 13, "Situação", "String", ""),
 	INDICE_COLUNA_CIDADE(14, 14, "Cidade", "String", ""),
